@@ -1,8 +1,8 @@
 ---
-name: Custom issue template
-about: Describe this issue template's purpose here.
-title: ''
-labels: ''
+name: feature template
+about: 새로운 기능 개발을 위한 이슈를 생성합니다.
+title: "[Feature]"
+labels: 'feature'
 assignees: ''
 
 ---
@@ -17,4 +17,3 @@ assignees: ''
 - [ ] 코드에 오류가 없음
 - [ ] 테스트 코드 작성/수행 완료
 - [ ] 팀 내 코드 스타일 가이드 준수
-- [ ] 이슈 연결 여부
