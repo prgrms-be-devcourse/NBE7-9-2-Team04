@@ -1,16 +1,30 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: #?? ??
-    username: #?? ??
-    password: #?? ??
+  profiles:
+    active: dev
 
+  output:
+    ansi:
+      enabled: always
+
+  datasource:
+    hikari:
+      auto-commit: false
   jpa:
-    hibernate:
-      ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
 
 logging:
   level:
@@ -22,3 +36,8 @@ logging:
 
 springdoc:
   default-produces-media-type: application/json
+
+custom:
+  jwt:
+    expireSeconds: "#{30 * 60}"
+    secretPattern: abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890
