@@ -1,8 +1,8 @@
 ---
-name: feature template
-about: 새로운 기능 개발을 위한 이슈를 생성합니다.
-title: "[Feature]"
-labels: feature
+name: issue template
+about: 작업을 위한 이슈를 생성합니다.
+title: ''
+labels: ''
 assignees: ''
 
 ---
