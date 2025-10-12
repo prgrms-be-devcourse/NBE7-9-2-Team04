@@ -1,14 +1,16 @@
 spring:
-  profiles:
-    active: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url:
+    username:
+    password:
+    hikari:
+      auto-commit: false
 
   output:
     ansi:
       enabled: always
 
-  datasource:
-    hikari:
-      auto-commit: false
   jpa:
     properties:
       hibernate:
