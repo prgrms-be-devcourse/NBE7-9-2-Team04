@@ -1,7 +1,13 @@
 package com.backend.api.resume.service;
 
+import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.response.ResumeCreateResponse;
+import com.backend.api.user.service.UserService;
+import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
+import com.backend.domain.user.entity.User;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +19,36 @@ public class ResumeService {
 
     private final ResumeRepository resumeRepository;
 
-    public ResumeCreateResponse createResume(Long userId) {
+    private final UserService userService;
 
+    @Transactional
+    public ResumeCreateResponse createResume(Long userId, ResumeCreateRequest request) {
+        validateResumeNotExists(userId);
+
+        User user = userService.getId(userId);
+
+        Resume resume = Resume.builder()
+                .user(user)
+                .skill(request.skill())
+                .activity(request.activity())
+                .career(request.career())
+                .certification(request.certification())
+                .content(request.content())
+                .portfolioUrl(request.portfolioUrl())
+                .build();
+
+        resumeRepository.save(resume);
+
+        return ResumeCreateResponse.from(resume, user);
+    }
+
+    private Boolean existsByUserId(Long userId) {
+        return resumeRepository.existsByUserId(userId);
+    }
+
+    private void validateResumeNotExists(Long userId) {
+        if (existsByUserId(userId)) {
+            throw new ErrorException(ErrorCode.DUPLICATE_RESUME);
+        }
     }
 }

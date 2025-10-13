@@ -32,5 +32,5 @@ public class Resume extends BaseEntity {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User users;  // 이력서 소유자
+    private User user;  // 이력서 소유자
 }

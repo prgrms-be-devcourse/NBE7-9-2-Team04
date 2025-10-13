@@ -1,6 +1,7 @@
 package com.backend.api.resume.dto.response;
 
-import com.backend.api.resume.dto.request.ResumeCreateRequest;
+import com.backend.domain.resume.entity.Resume;
+import com.backend.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record ResumeCreateResponse(
@@ -21,16 +22,16 @@ public record ResumeCreateResponse(
         @Schema(description = "포트폴리오 URL", example = "http://portfolio.example.com")
         String portfolioUrl
 ) {
-    public static ResumeCreateResponse from(ResumeCreateRequest request, Long resumeId, Long userId) {
+    public static ResumeCreateResponse from(Resume resume, User user) {
         return new ResumeCreateResponse(
-                resumeId,
-                userId,
-                request.content(),
-                request.skill(),
-                request.activity(),
-                request.certification(),
-                request.career(),
-                request.portfolioUrl()
+                resume.getId(),
+                user.getId(),
+                resume.getContent(),
+                resume.getSkill(),
+                resume.getActivity(),
+                resume.getCertification(),
+                resume.getCareer(),
+                resume.getPortfolioUrl()
         );
     }
 }
