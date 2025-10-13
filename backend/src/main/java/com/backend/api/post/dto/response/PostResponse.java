@@ -4,6 +4,10 @@ import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostStatus;
 
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
+
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -24,7 +28,11 @@ public record PostResponse(
 
         String nickName = Optional.ofNullable(post.getUsers())
                 .map(user -> user.getNickname())
-                .orElseThrow(() -> new IllegalStateException("게시글의 작성자 정보가 누락되었습니다."));
+                .filter(name -> !name.isEmpty()) // 닉네임이 비어있는 문자열("")인 경우도
+                .orElseThrow(() ->
+                        new ErrorException(ErrorCode.NOT_FOUND_NICKNAME)
+                );
+
 
         return new PostResponse(
                 post.getId(),
