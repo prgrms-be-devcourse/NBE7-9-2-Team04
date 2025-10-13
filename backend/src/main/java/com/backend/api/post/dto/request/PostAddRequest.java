@@ -1,4 +1,4 @@
-package com.backend.domain.post.dto.request;
+package com.backend.api.post.dto.request;
 
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.PostStatus;

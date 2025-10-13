@@ -1,4 +1,4 @@
-package com.backend.domain.user.dto.request;
+package com.backend.api.user.dto.request;
 
 import com.backend.domain.user.entity.Users;
 import jakarta.validation.constraints.Email;
