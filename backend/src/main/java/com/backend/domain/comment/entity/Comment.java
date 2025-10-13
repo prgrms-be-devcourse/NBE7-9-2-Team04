@@ -18,7 +18,6 @@ public class Comment extends BaseEntity {
     private String content;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "postId")
-    @JsonIgnore
     private Post post;
     @ManyToOne(fetch = FetchType.LAZY)
     private Users author;
