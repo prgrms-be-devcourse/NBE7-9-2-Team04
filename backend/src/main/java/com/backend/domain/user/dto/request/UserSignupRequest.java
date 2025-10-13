@@ -4,7 +4,7 @@ import com.backend.domain.user.entity.Users;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public record UserSignupRequestDto(
+public record UserSignupRequest(
         @Email
         @NotBlank
         String email,
@@ -26,7 +26,7 @@ public record UserSignupRequestDto(
 
         String image
 ) {
-    public UserSignupRequestDto(Users users){
+    public UserSignupRequest(Users users){
         this(
                 users.getEmail(),
                 users.getPassword(),

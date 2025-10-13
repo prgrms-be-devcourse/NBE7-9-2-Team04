@@ -4,7 +4,7 @@ import com.backend.domain.user.entity.Users;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public record UserLoginRequestDto(
+public record UserLoginRequest(
 
         @Email
         @NotBlank
@@ -13,7 +13,7 @@ public record UserLoginRequestDto(
         @NotBlank
         String password
 ) {
-    public UserLoginRequestDto(Users users){
+    public UserLoginRequest(Users users){
         this(
                 users.getEmail(),
                 users.getPassword()
