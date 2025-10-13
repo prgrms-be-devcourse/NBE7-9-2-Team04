@@ -19,15 +19,6 @@ import java.time.LocalDateTime;
 
 public class Post extends BaseEntity {
 
-    public enum PostStatus {
-        ING, // 진행중
-        CLOSED // 마감
-    }
-
-    public enum PinStatus {
-        PINNED, // 상단 고정
-        NOT_PINNED  // 상단 고정X
-    }
 
     @NotNull
     private String title; // 제목
