@@ -37,7 +37,11 @@ logging:
 
 
 springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: method
   default-produces-media-type: application/json
+  default-consumes-media-type: application/json
 
 custom:
   jwt:
