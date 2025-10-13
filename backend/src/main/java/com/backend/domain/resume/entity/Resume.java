@@ -30,7 +30,7 @@ public class Resume extends BaseEntity {
     private String portfolioUrl; // 포트폴리오 URL
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Users users;  // 이력서 소유자
 }
