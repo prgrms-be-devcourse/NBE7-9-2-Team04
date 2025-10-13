@@ -1,12 +1,7 @@
 package com.backend.domain.user.entity;
 
-import com.backend.domain.user.dto.request.UserSignupRequest;
 import com.backend.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Builder
-@AllArgsConstructor
-public class Users extends BaseEntity {
+@Table(name = "users")
+public class User extends BaseEntity {
 
     @Column(length = 100, nullable = false, unique = true)
     private String email;
@@ -44,22 +39,28 @@ public class Users extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
-    public Users(UserSignupRequest request, String encodedPassword) {
-        this.email = request.email();
-        this.password = encodedPassword;
-        this.name = request.name();
-        this.nickname = request.nickname();
-        this.age = request.age();
-        this.github = request.github();
-        this.image = request.image();
-        this.role = Role.USER; //기본 권한은 USER로 세팅
+    public User(String email,
+                String password,
+                String name,
+                String nickname,
+                int age,
+                String github,
+                String image,
+                Role role)
+    {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.nickname = nickname;
+        this.age = age;
+        this.github = github;
+        this.image = image;
+        this.role = role;
     }
 
 
     public enum Role {
         USER, ADMIN
     }
-    
-    
 
 }

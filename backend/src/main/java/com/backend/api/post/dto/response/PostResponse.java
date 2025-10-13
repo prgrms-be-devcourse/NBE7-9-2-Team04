@@ -3,8 +3,10 @@ package com.backend.api.post.dto.response;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostStatus;
+
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
+
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -30,6 +32,7 @@ public record PostResponse(
                 .orElseThrow(() ->
                         new ErrorException(ErrorCode.NOT_FOUND_NICKNAME)
                 );
+
 
         return new PostResponse(
                 post.getId(),

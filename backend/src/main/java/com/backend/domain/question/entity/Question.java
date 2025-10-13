@@ -7,14 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="questions")
 @Getter
 @NoArgsConstructor
-public class Questions extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long questionId;
+public class Question extends BaseEntity {
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -29,9 +24,8 @@ public class Questions extends BaseEntity {
     private Integer score = 0; // 기본값 0
 
     @Builder
-    public Questions(String title, String content) {
+    public Question(String title, String content) {
         this.title = title;
         this.content = content;
     }
-
 }

@@ -1,6 +1,6 @@
 package com.backend.domain.post.entity;
 
-import com.backend.domain.user.entity.Users;
+import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -38,5 +38,5 @@ public class Post extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false) // userId와 매핑
-    private Users users;  // 게시글 작성자 ID
+    private User users;  // 게시글 작성자 ID
 }
