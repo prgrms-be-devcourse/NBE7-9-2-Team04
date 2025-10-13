@@ -1,4 +1,4 @@
-package com.backend.domain.user.dto.response;
+package com.backend.api.user.dto.response;
 
 import com.backend.domain.user.entity.Users;
 

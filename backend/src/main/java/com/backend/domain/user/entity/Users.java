@@ -1,6 +1,6 @@
 package com.backend.domain.user.entity;
 
-import com.backend.domain.user.dto.request.UserSignupRequest;
+import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
