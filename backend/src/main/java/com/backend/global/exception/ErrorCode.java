@@ -8,7 +8,17 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
     UNKNOWN_ERROR(HttpStatus.UNAUTHORIZED, "알 수 없는 에러"),
-    NOT_FOUND_NICKNAME(HttpStatus.NOT_FOUND,"작성자를 찾을 수 없습니다.");
+    NOT_FOUND_NICKNAME(HttpStatus.NOT_FOUND,"작성자를 찾을 수 없습니다."),
+
+
+
+    //사용자 관련
+    NOT_FOUND_EMAIL(HttpStatus.NOT_FOUND, "이메일이 존재하지 않습니다"),
+    NOT_FOUND_USER(HttpStatus.NOT_FOUND, "사용자가 존재하지 않습니다"),
+    WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다"),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
+
+    ;
 
 
     private final HttpStatus httpStatus;
