@@ -36,18 +36,18 @@ public record UserResponse(
         @Schema(description = "수정일", example = "2025-10-13T10:20:00")
         LocalDateTime modifyDate
 ) {
-    public UserResponse(User users) {
-        this(
-                users.getId(),
-                users.getEmail(),
-                users.getName(),
-                users.getNickname(),
-                users.getAge(),
-                users.getGithub(),
-                users.getImage(),
-                users.getRole().name(),
-                users.getCreateDate(),
-                users.getModifyDate()
+    public static UserResponse from(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getNickname(),
+                user.getAge(),
+                user.getGithub(),
+                user.getImage(),
+                user.getRole().name(),
+                user.getCreateDate(),
+                user.getModifyDate()
         );
     }
 }
