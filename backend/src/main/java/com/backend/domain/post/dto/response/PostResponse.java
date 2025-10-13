@@ -3,6 +3,8 @@ package com.backend.domain.post.dto.response;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostStatus;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -22,9 +24,11 @@ public record PostResponse(
 
     public static PostResponse from(Post post) {
 
-        String nickName = Optional.ofNullable(post.getUsers())
-                .map(user -> user.getNickname())
-                .orElseThrow(() -> new IllegalStateException("게시글의 작성자 정보가 누락되었습니다."));
+            String nickName = Optional.ofNullable(post.getUsers())
+                    .map(user -> user.getNickname())
+                    .orElseThrow(() ->
+                            new ErrorException("게시글의 작성자 정보가 누락되었습니다.", ErrorCode.UNKNOWN_ERROR)
+                    );
 
         return new PostResponse(
                 post.getId(),
