@@ -1,4 +1,4 @@
-package com.backend.domain.post.dto.response;
+package com.backend.api.post.dto.response;
 
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
@@ -24,11 +24,12 @@ public record PostResponse(
 
     public static PostResponse from(Post post) {
 
-            String nickName = Optional.ofNullable(post.getUsers())
-                    .map(user -> user.getNickname())
-                    .orElseThrow(() ->
-                            new ErrorException("게시글의 작성자 정보가 누락되었습니다.", ErrorCode.UNKNOWN_ERROR)
-                    );
+        String nickName = Optional.ofNullable(post.getUsers())
+                .map(user -> user.getNickname())
+                .filter(name -> !name.isEmpty()) // 닉네임이 비어있는 문자열("")인 경우도
+                .orElseThrow(() ->
+                        new ErrorException(ErrorCode.NOT_FOUND_NICKNAME)
+                );
 
         return new PostResponse(
                 post.getId(),
