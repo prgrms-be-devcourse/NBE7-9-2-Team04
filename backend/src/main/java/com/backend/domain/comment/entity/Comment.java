@@ -1,8 +1,8 @@
 package com.backend.domain.comment.entity;
 
-import com.backend.domain.user.entity.Users;
+import com.backend.domain.post.entity.Post;
+import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -20,9 +20,9 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "postId")
     private Post post;
     @ManyToOne(fetch = FetchType.LAZY)
-    private Users author;
+    private User author;
 
-    public Comment(Users author, String content, Post post) {
+    public Comment(User author, String content, Post post) {
         this.author = author;
         this.content = content;
         this.post = post;

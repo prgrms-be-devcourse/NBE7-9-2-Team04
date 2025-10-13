@@ -1,8 +1,9 @@
 package com.backend.api.comment.dto;
 
-import java.time.LocalDateTime;
 import com.backend.domain.comment.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDateTime;
 
 public record CommentResponse(
         @Schema(description = "댓글 ID", example = "1")
@@ -27,7 +28,7 @@ public record CommentResponse(
                 comment.getModifyDate(),
                 comment.getContent(),
                 comment.getAuthor().getId(),
-                comment.getAuthor().getNickName(),
+                comment.getAuthor().getNickname(),
                 comment.getPost().getId()
         );
     }
