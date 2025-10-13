@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import com.backend.domain.comment.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record CommentResponseDto(
+public record CommentResponse(
         @Schema(description = "댓글 ID", example = "1")
         Long id,
         @Schema(description = "작성일", example = "2025-10-13T11:00:00")
@@ -20,7 +20,7 @@ public record CommentResponseDto(
         @Schema(description = "게시글 ID", example = "1")
         Long postId
 ) {
-    public CommentResponseDto(Comment comment) {
+    public CommentResponse(Comment comment) {
         this(
                 comment.getId(),
                 comment.getCreateDate(),
