@@ -1,5 +1,6 @@
 package com.backend.domain.user.entity;
 
+import com.backend.domain.user.dto.request.UserSignupRequest;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,9 +44,22 @@ public class Users extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
+    public Users(UserSignupRequest request, String encodedPassword) {
+        this.email = request.email();
+        this.password = encodedPassword;
+        this.name = request.name();
+        this.nickname = request.nickname();
+        this.age = request.age();
+        this.github = request.github();
+        this.image = request.image();
+        this.role = Role.USER; //기본 권한은 USER로 세팅
+    }
+
 
     public enum Role {
         USER, ADMIN
     }
+    
+    
 
 }
