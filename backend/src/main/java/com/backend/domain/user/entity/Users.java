@@ -1,7 +1,10 @@
 package com.backend.domain.user.entity;
 
 import com.backend.global.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,4 +43,5 @@ public class Users extends BaseEntity {
     public enum Role {
         USER, ADMIN
     }
+
 }
