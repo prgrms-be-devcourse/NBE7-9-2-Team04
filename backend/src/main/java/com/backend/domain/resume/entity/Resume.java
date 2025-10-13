@@ -16,22 +16,16 @@ import lombok.*;
 @Entity
 public class Resume extends BaseEntity {
 
-    @NotNull
     private String content;  // 이력서 내용
 
-    @NotNull
     private String skill;   // 기술 스택
 
-    @NotNull
     private String activity;  // 대외 활동
 
-    @NotNull
     private String certification;  // 자격증
 
-    @NotNull
     private String career;  // 경력 사항
 
-    @NotNull
     private String portfolio_url; // 포트폴리오 URL
 
     @NotNull
