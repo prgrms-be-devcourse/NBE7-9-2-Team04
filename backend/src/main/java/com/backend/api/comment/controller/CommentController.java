@@ -55,8 +55,6 @@ public class CommentController {
     ) {
         User currentUser = rq.getCurrentUser();  // rq 추가 필요
 
-        // NOTE: commentService.updateComment(currentUser, commentId, newContent) 메서드가 필요하며,
-        // 이 메서드 내에서 '해당 댓글 ID 존재 여부 확인', '현재 사용자가 댓글 작성자인지 확인(권한 체크)', '댓글 내용 업데이트' 로직을 처리해야 합니다.
         Comment updatedComment = commentService.updateComment(
                 currentUser,
                 commentId,
