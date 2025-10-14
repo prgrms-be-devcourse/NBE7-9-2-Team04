@@ -2,6 +2,7 @@ package com.backend.api.user.controller;
 
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -96,7 +97,7 @@ public class UserControllerTest {
                     .nickname("testnick")
                     .age(27)
                     .github("https://github.com/test")
-                    .role(User.Role.USER)
+                    .role(Role.USER)
                     .build());
 
 
