@@ -2,6 +2,7 @@ package com.backend.api.resume.controller;
 
 
 import com.backend.api.resume.dto.request.ResumeCreateRequest;
+import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.domain.resume.repository.ResumeRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
@@ -161,6 +162,118 @@ class ResumeControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").value("이미 등록된 이력서가 있습니다."))
+                    .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("이력서 수정 API")
+    class t2 {
+        @Test
+        @DisplayName("정상 작동")
+        void success() throws Exception {
+            //given
+            ResumeUpdateRequest request = new ResumeUpdateRequest(
+                    "수정된 이력서 내용입니다.",
+                    "Java, Spring Boot, mysql",
+                    "수정된 대외 활동 내용입니다.",
+                    "없음",
+                    "수정된 경력 사항 내용입니다.",
+                    "http://portfolio.example2.com"
+            );
+            Long userId = 1L;
+            Long resumeId = 1L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    put("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("updateResume"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("이력서가 수정되었습니다."))
+                    .andExpect(jsonPath("$.data.userId").value(1))
+                    .andExpect(jsonPath("$.data.content").value("수정된 이력서 내용입니다."));
+        }
+
+        @Test
+        @DisplayName("이력서가 존재하지 않을 때")
+        void fail1() throws Exception {
+            //given
+            ResumeUpdateRequest request = new ResumeUpdateRequest(
+                    "수정된 이력서 내용입니다.",
+                    "Java, Spring Boot, mysql",
+                    "수정된 대외 활동 내용입니다.",
+                    "없음",
+                    "수정된 경력 사항 내용입니다.",
+                    "http://portfolio.example2.com"
+            );
+            Long userId = 1L;
+            Long resumeId = 999L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    put("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("updateResume"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("이력서를 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("작성자 불일치")
+        void fail2() throws Exception {
+            //given
+            User user2 = User.builder()
+                    .email("test@naver.com")
+                    .age(20)
+                    .github("https://github.com/test")
+                    .name("test")
+                    .password("test1234")
+                    .image(null)
+                    .role(User.Role.USER)
+                    .nickname("testnick")
+                    .build();
+            userRepository.save(user2);
+
+            ResumeUpdateRequest request = new ResumeUpdateRequest(
+                    "수정된 이력서 내용입니다.",
+                    "Java, Spring Boot, mysql",
+                    "수정된 대외 활동 내용입니다.",
+                    "없음",
+                    "수정된 경력 사항 내용입니다.",
+                    "http://portfolio.example2.com"
+            );
+            Long userId = 2L;
+            Long resumeId = 1L;
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    put("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("updateResume"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("유저가 유효하지 않습니다."))
                     .andDo(print());
         }
     }
