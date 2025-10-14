@@ -1,4 +1,76 @@
 package com.backend.api.post.service;
 
+import com.backend.api.post.dto.request.PostAddRequest;
+import com.backend.api.post.dto.request.PostUpdateRequest;
+import com.backend.api.post.dto.response.PostResponse;
+import com.backend.domain.post.entity.Post;
+import com.backend.domain.post.repository.PostRepository;
+import com.backend.domain.user.entity.User;
+import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
 public class PostService {
+
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+
+    @Transactional
+    public PostResponse createPost(PostAddRequest request, Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        Post post = Post.builder()
+                .title(request.title())
+                .content(request.content())
+                .deadline(request.deadline())
+                .status(request.status())
+                .pinStatus(request.pinStatus())
+                .users(user)
+                .build();
+
+        Post savedPost = postRepository.save(post);
+
+        return PostResponse.from(savedPost);
+    }
+
+    public PostResponse getPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_POST));
+
+        return PostResponse.from(post);
+    }
+
+    @Transactional
+    public PostResponse updatePost(Long postId, PostUpdateRequest request, Long userId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_POST));
+
+        if (!post.getUsers().getId().equals(userId)) {
+            throw new ErrorException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+        post.updatePost(request.title(), request.content(), request.deadline(), request.status(), request.pinStatus());
+
+        return PostResponse.from(post);
+    }
+
+    @Transactional
+    public void deletePost(Long postId, Long userId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_POST));
+
+        if (!post.getUsers().getId().equals(userId)) {
+            throw new ErrorException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        postRepository.delete(post);
+    }
 }
