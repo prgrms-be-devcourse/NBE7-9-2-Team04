@@ -1,6 +1,8 @@
 package com.backend.domain.question.entity;
 
 import com.backend.global.entity.BaseEntity;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,5 +29,47 @@ public class Question extends BaseEntity {
     public Question(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void setApproved(Boolean isApproved) {
+        this.isApproved = isApproved;
+    }
+
+    public void setScore(Integer score) {
+        if(score < 0) {
+            throw new ErrorException(ErrorCode.INVALID_QUESTION_SCORE);
+        }
+        this.score = score;
+    }
+
+    public void updateUserQuestion(String title, String content) {
+        validateTitleAndContent(title, content);
+
+        this.title = title;
+        this.content = content;
+    }
+
+    public void updateAdminQuestion(String title, String content, Boolean isApproved, Integer score) {
+        validateTitleAndContent(title, content);
+
+        this.title = title;
+        this.content = content;
+
+        if(isApproved != null) {
+            this.isApproved = isApproved;
+        }
+
+        if(score != null) {
+            setScore(score);
+        }
+    }
+
+    private void validateTitleAndContent(String title, String content) {
+        if (title == null || title.isBlank()) {
+            throw new ErrorException(ErrorCode.QUESTION_TITLE_NOT_BLANK);
+        }
+        if (content == null || content.isBlank()) {
+            throw new ErrorException(ErrorCode.QUESTION_CONTENT_NOT_BLANK);
+        }
     }
 }

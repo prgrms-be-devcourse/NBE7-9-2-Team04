@@ -1,5 +1,6 @@
 package com.backend.domain.resume.entity;
 
+import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -33,4 +34,13 @@ public class Resume extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;  // 이력서 소유자
+
+    public void update(ResumeUpdateRequest request) {
+        this.skill = request.skill();
+        this.activity = request.activity();
+        this.career = request.career();
+        this.certification = request.certification();
+        this.content = request.content();
+        this.portfolioUrl = request.portfolioUrl();
+    }
 }

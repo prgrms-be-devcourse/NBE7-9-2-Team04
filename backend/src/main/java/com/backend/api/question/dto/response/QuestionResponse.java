@@ -1,5 +1,6 @@
 package com.backend.api.question.dto.response;
 
+import com.backend.domain.question.entity.Question;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -25,9 +26,22 @@ public record QuestionResponse(
         List<Long> categoryIds,
 
         @Schema(description = "작성일", example = "2025-10-13T11:00:00")
-        LocalDateTime createdAt,
+        LocalDateTime createdDate,
 
         @Schema(description = "수정일", example = "2025-10-13T12:00:00")
-        LocalDateTime modifiedAt
+        LocalDateTime modifiedDate
 ) {
+
+    public static QuestionResponse from(Question question) {
+        return new QuestionResponse(
+                question.getId(),
+                question.getTitle(),
+                question.getContent(),
+                question.getIsApproved(),
+                question.getScore(),
+                null,
+                question.getCreateDate(),
+                question.getModifyDate()
+        );
+    }
 }
