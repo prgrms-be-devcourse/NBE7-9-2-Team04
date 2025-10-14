@@ -72,7 +72,7 @@ public class CommentController {
 
     @PatchMapping("/{postId}/comments/{commentId}")
     @Operation(summary = "댓글 수정")
-    public ApiResponse<CommentResponse> updateComment(
+    public ResponseEntity<ApiResponse<CommentResponse>> updateComment(
             @PathVariable Long commentId,
             @RequestBody @Valid CommentCreateRequest reqBody
     ) {
@@ -88,11 +88,13 @@ public class CommentController {
                 reqBody.content()
         );
 
-        return new ApiResponse<>(
+        ApiResponse<CommentResponse> responseBody = new ApiResponse<>(
                 HttpStatus.OK,
                 "%d번 댓글이 성공적으로 수정되었습니다.".formatted(updatedComment.getId()),
                 new CommentResponse(updatedComment)
         );
+
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
 }
