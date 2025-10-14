@@ -1,6 +1,6 @@
 package com.backend.domain.resume.entity;
 
-import com.backend.domain.user.entity.Users;
+import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -32,5 +32,5 @@ public class Resume extends BaseEntity {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private Users users;  // 이력서 소유자
+    private User user;  // 이력서 소유자
 }

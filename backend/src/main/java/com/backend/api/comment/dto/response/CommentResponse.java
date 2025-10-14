@@ -1,8 +1,9 @@
 package com.backend.api.comment.dto.response;
 
-import java.time.LocalDateTime;
 import com.backend.domain.comment.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDateTime;
 
 public record CommentResponse(
         @Schema(description = "댓글 ID", example = "1")
