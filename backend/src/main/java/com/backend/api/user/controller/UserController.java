@@ -46,9 +46,4 @@ public class UserController {
         );
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserMyPageResponse> detailInformation(@PathVariable int userId) {
-        return ResponseEntity.ok(userService.getInformation(userId));
-    }
-
 }
