@@ -12,10 +12,12 @@ import com.backend.domain.post.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -190,11 +192,13 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.data.content").value(content)) // 내용이 수정되었는지 확인
                 .andExpect(jsonPath("$.data.authorId").value(expectedAuthorId)); // 작성자 ID가 유지되는지 확인
 
+        commentRepository.flush();
+
         // DB 확인: 실제로 수정된 내용이 반영되었는지 최종 검증
         Optional<Comment> optionalComment = commentRepository.findById(targetCommentId);
         assertThat(optionalComment).isPresent();
         Comment updatedComment = optionalComment.get();
-        assertThat(updatedComment.getContent()).isEqualTo(content);
+        assertThat(updatedComment.getContent()).isEqualTo(content); // DB에서 변경내용 확인
         assertThat(updatedComment.getPost().getId()).isEqualTo(targetPostId); // DB에서 Post ID 확인
         assertThat(updatedComment.getAuthor().getId()).isEqualTo(expectedAuthorId); // DB에서 Author ID 확인
         assertThat(updatedComment.getModifyDate()).isAfter(updatedComment.getCreateDate()); // 수정일이 생성일 이후인지 확인
