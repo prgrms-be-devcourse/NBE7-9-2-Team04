@@ -40,7 +40,7 @@ public class UserService {
 
     public User login(UserLoginRequest request){
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_EMAIL));
 
         if(!passwordEncoder.matches(request.password(), user.getPassword())){
             throw new ErrorException(ErrorCode.WRONG_PASSWORD);

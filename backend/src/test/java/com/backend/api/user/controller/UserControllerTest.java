@@ -183,7 +183,58 @@ public class UserControllerTest {
                     .andDo(print());;
         }
 
+        @Test
+        @DisplayName("이메일 불일치")
+        void fail1() throws Exception {
+            UserLoginRequest request = new UserLoginRequest(
+                    "wrong@naver.com",
+                    "test1234"
+            );
+
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/users/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            resultActions
+                    .andExpect(handler().handlerType(UserController.class))
+                    .andExpect(handler().methodName("login"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("이메일이 존재하지 않습니다."))
+                    .andDo(print());;
+        }
+
+        @Test
+        @DisplayName("비밀번호 불일치")
+        void fail2() throws Exception {
+            UserLoginRequest request = new UserLoginRequest(
+                    "test@naver.com",
+                    "wrong1234"
+            );
+
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/users/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            User user = userRepository.findByEmail(request.email()).orElseThrow();
+
+
+            resultActions
+                    .andExpect(handler().handlerType(UserController.class))
+                    .andExpect(handler().methodName("login"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+                    .andExpect(jsonPath("$.message").value("비밀번호가 일치하지 않습니다."))
+                    .andDo(print());;
+        }
+
     }
+
+
 
     @Test
     @DisplayName("로그아웃")
