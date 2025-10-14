@@ -3,6 +3,8 @@ package com.backend.api.user.service;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,4 +33,8 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User getId(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+    }
 }
