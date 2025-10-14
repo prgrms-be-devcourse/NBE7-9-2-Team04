@@ -2,6 +2,7 @@ package com.backend.api.user.service;
 
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
@@ -32,7 +33,7 @@ public class UserService {
                 .age(request.age())
                 .github(request.github())
                 .image(request.image())
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
 
         return userRepository.save(user);
