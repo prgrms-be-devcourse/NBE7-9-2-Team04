@@ -1,6 +1,5 @@
 package com.backend.global.security;
 
-import com.backend.api.user.service.CustomUserDetailsService;
 import com.backend.domain.user.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

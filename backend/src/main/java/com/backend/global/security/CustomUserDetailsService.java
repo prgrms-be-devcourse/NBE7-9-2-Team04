@@ -1,4 +1,4 @@
-package com.backend.api.user.service;
+package com.backend.global.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
