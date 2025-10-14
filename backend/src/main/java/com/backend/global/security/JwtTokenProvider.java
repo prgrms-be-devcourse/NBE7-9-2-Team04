@@ -6,6 +6,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ import java.util.Date;
 //JWT 핵심 유틸 클래스
 @Component
 @RequiredArgsConstructor
+@Getter
 public class JwtTokenProvider {
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -109,6 +111,14 @@ public class JwtTokenProvider {
         }
 
         return true;
+    }
+
+    public long getAccessTokenExpireTime() {
+        return ACCESS_TOKEN_EXPIRE_TIME / 1000;
+    }
+
+    public long getRefreshTokenExpireTime() {
+        return REFRESH_TOKEN_EXPIRE_TIME / 1000;
     }
 
 }

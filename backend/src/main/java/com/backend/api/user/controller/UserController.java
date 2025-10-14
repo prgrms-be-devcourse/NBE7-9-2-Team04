@@ -7,6 +7,7 @@ import com.backend.api.user.service.UserService;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
+import com.backend.global.security.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,20 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider
     private final Rq rq;
 
     @PostMapping("/login")
     @Operation(summary = "사용자 로그인")
     public ApiResponse<UserResponse> login(@RequestBody UserLoginRequest request){
+
         User user = userService.login(request);
+
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail(), user.getRole());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail(), user.getRole());
+
+        rq.setCookie("accessToken", accessToken, (int) (jwtTokenProvider.getA));
+
 
 
 
