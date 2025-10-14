@@ -77,6 +77,7 @@ public class ResumeService {
         }
     }
 
+    @Transactional
     public void deleteResume(@Valid Long userId, @Valid Long resumeId) {
         User user = userService.getUser(userId);
 
