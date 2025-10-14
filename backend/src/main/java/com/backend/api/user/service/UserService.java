@@ -51,9 +51,9 @@ public class UserService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
     }
 
-    public UserMyPageResponse getInformation(int userId){
-        User users = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+    public UserMyPageResponse getInformation(Long userId){
+        User users = getUser(userId);
+
         return UserMyPageResponse.fromEntity(users);
     }
 }

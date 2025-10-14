@@ -20,7 +20,7 @@ public class UserMyPageController {
     private final UserService userService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserMyPageResponse> detailInformation(@PathVariable int userId) {
+    public ResponseEntity<UserMyPageResponse> detailInformation(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getInformation(userId));
     }
 }
