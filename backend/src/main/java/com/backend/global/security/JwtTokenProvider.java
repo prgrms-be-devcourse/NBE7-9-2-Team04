@@ -113,6 +113,7 @@ public class JwtTokenProvider {
         return true;
     }
 
+    //jwt는 생성 시 밀리초, 쿠키는 만료 시 초 사용하므로 1000나눠서 넘겨준다
     public long getAccessTokenExpireTime() {
         return ACCESS_TOKEN_EXPIRE_TIME / 1000;
     }
