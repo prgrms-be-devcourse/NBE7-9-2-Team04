@@ -312,4 +312,95 @@ class ResumeControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("이력서 삭제 API")
+    class t3 {
+        @Test
+        @DisplayName("정상 작동")
+        void success() throws Exception {
+            // given
+            Long userId = 2L;
+            Long resumeId = 1L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    delete("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("deleteResume"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("이력서가 삭제되었습니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("이력서가 존재하지 않을 때")
+        void fail1() throws Exception {
+            // given
+            Long userId = 2L;
+            Long resumeId = 999L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    delete("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("deleteResume"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("이력서를 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("작성자 불일치")
+        void fail2() throws Exception {
+            // given
+            Long userId = 1L;
+            Long resumeId = 1L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    delete("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("deleteResume"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.status").value("FORBIDDEN"))
+                    .andExpect(jsonPath("$.message").value("이력서 수정 권한이 없습니다."))
+                    .andDo(print());
+        }
+        @Test
+        @DisplayName("유저가 존재하지 않을 때")
+        void fail4() throws Exception {
+            // given
+            Long userId = 999L;
+            Long resumeId = 1L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    delete("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("deleteResume"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+    }
+
 }

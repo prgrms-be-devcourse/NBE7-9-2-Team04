@@ -10,6 +10,7 @@ import com.backend.domain.resume.repository.ResumeRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,5 +75,15 @@ public class ResumeService {
         if (!resume.getUser().equals(user)) {
             throw new ErrorException(ErrorCode.INVALID_USER);
         }
+    }
+
+    @Transactional
+    public void deleteResume(@Valid Long userId, @Valid Long resumeId) {
+        User user = userService.getUser(userId);
+
+        Resume resume = getResume(resumeId);
+        validateResumeAuthor(resume, user);
+
+        resumeRepository.delete(resume);
     }
 }
