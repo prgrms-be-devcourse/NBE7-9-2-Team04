@@ -3,6 +3,7 @@ package com.backend.api.resume.controller;
 
 import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.request.ResumeUpdateRequest;
+import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
@@ -41,6 +42,7 @@ class ResumeControllerTest {
     private UserRepository userRepository;
 
     @BeforeAll
+    @Transactional
     void setUp() {
         User user = User.builder()
                 .email("test@naver.com")
@@ -52,7 +54,31 @@ class ResumeControllerTest {
                 .role(User.Role.USER)
                 .nickname("testnick")
                 .build();
+
+        User user2 = User.builder()
+                .email("test2@naver.com")
+                .age(20)
+                .github("https://github.com/test")
+                .name("test")
+                .password("test1234")
+                .image(null)
+                .role(User.Role.USER)
+                .nickname("testnick")
+                .build();
         userRepository.save(user);
+        userRepository.save(user2);
+
+        Resume resume = Resume.builder()
+                .content("이력서 내용입니다.")
+                .skill("Java, Spring Boot")
+                .activity("대외 활동 내용입니다.")
+                .certification("없음")
+                .career("경력 사항 내용입니다.")
+                .portfolioUrl("http://portfolio.example.com")
+                .user(user2)
+                .build();
+
+        resumeRepository.save(resume);
 
     }
 
@@ -181,7 +207,9 @@ class ResumeControllerTest {
                     "수정된 경력 사항 내용입니다.",
                     "http://portfolio.example2.com"
             );
-            Long userId = 1L;
+
+            Long userId = 2L;
+
             Long resumeId = 1L;
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -197,7 +225,7 @@ class ResumeControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("이력서가 수정되었습니다."))
-                    .andExpect(jsonPath("$.data.userId").value(1))
+                    .andExpect(jsonPath("$.data.userId").value(2))
                     .andExpect(jsonPath("$.data.content").value("수정된 이력서 내용입니다."));
         }
 
@@ -234,20 +262,9 @@ class ResumeControllerTest {
 
         @Test
         @DisplayName("작성자 불일치")
+        @Transactional
         void fail2() throws Exception {
             //given
-            User user2 = User.builder()
-                    .email("test@naver.com")
-                    .age(20)
-                    .github("https://github.com/test")
-                    .name("test")
-                    .password("test1234")
-                    .image(null)
-                    .role(User.Role.USER)
-                    .nickname("testnick")
-                    .build();
-            userRepository.save(user2);
-
             ResumeUpdateRequest request = new ResumeUpdateRequest(
                     "수정된 이력서 내용입니다.",
                     "Java, Spring Boot, mysql",
@@ -256,7 +273,18 @@ class ResumeControllerTest {
                     "수정된 경력 사항 내용입니다.",
                     "http://portfolio.example2.com"
             );
-            Long userId = 2L;
+            Long userId = 1L;
+            User user = userRepository.findById(userId).orElseThrow();
+            Resume resume = Resume.builder()
+                    .content("이력서 내용입니다.")
+                    .skill("Java, Spring Boot")
+                    .activity("대외 활동 내용입니다.")
+                    .certification("없음")
+                    .career("경력 사항 내용입니다.")
+                    .portfolioUrl("http://portfolio.example.com")
+                    .user(user)
+                    .build();
+            resumeRepository.save(resume);
             Long resumeId = 1L;
 
             // when
@@ -271,9 +299,9 @@ class ResumeControllerTest {
             resultActions
                     .andExpect(handler().handlerType(ResumeController.class))
                     .andExpect(handler().methodName("updateResume"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("유저가 유효하지 않습니다."))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.status").value("FORBIDDEN"))
+                    .andExpect(jsonPath("$.message").value("이력서 수정 권한이 없습니다."))
                     .andDo(print());
         }
     }
