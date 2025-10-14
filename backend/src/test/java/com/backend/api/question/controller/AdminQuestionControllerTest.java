@@ -341,4 +341,89 @@ public class AdminQuestionControllerTest {
                     .andDo(print());
         }
     }
+
+    @Nested
+    @DisplayName("관리자 질문 조회 API")
+    class t5 {
+
+        @Test
+        @DisplayName("관리자 질문 목록 조회 성공 - 승인 여부 관계없이 전체 반환")
+        void success() throws Exception {
+            Question approved = questionRepository.save(
+                    Question.builder()
+                            .title("승인 질문")
+                            .content("승인된 질문 내용")
+                            .build()
+            );
+            approved.setApproved(true);
+
+            Question unapproved = questionRepository.save(
+                    Question.builder()
+                            .title("미승인 질문")
+                            .content("미승인 질문 내용")
+                            .build()
+            );
+            unapproved.setApproved(false);
+
+            mockMvc.perform(get("/api/admin/questions")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("관리자 질문 목록 조회 성공"))
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(2))
+                    .andExpect(jsonPath("$.data[0].title").value("승인 질문"))
+                    .andExpect(jsonPath("$.data[1].title").value("미승인 질문"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("관리자 질문 목록 조회 실패 - 데이터 없음")
+        void fail1() throws Exception {
+            mockMvc.perform(get("/api/admin/questions")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("질문이 존재하지 않습니다."))
+                    .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("관리자 질문 상세 조회 API")
+    class t6 {
+
+        @Test
+        @DisplayName("관리자 질문 상세 조회 성공 - 승인 여부 관계없이 조회 가능")
+        void success() throws Exception {
+            Question question = questionRepository.save(
+                    Question.builder()
+                            .title("관리자용 상세 조회 질문")
+                            .content("관리자는 승인 여부 관계없이 조회 가능")
+                            .build()
+            );
+            question.setApproved(false);
+
+            mockMvc.perform(get("/api/admin/questions/{questionId}", question.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("관리자 질문 상세 조회 성공"))
+                    .andExpect(jsonPath("$.data.id").value(question.getId()))
+                    .andExpect(jsonPath("$.data.title").value("관리자용 상세 조회 질문"))
+                    .andExpect(jsonPath("$.data.content").value("관리자는 승인 여부 관계없이 조회 가능"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("관리자 질문 상세 조회 실패 - 존재하지 않는 ID")
+        void fail1() throws Exception {
+            mockMvc.perform(get("/api/admin/questions/{questionId}", 999L)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+    }
 }
