@@ -42,4 +42,15 @@ public class ResumeController {
         ResumeUpdateResponse response = resumeService.updateResume(userId, resumeId, request);
         return ApiResponse.ok("이력서가 수정되었습니다.", response);
     }
+
+    @DeleteMapping("/{userId}/{resumeId}")
+    @Operation(summary = "이력서 삭제", description = "사용자의 이력서를 삭제합니다.")
+    public ApiResponse<Void> deleteResume(
+            @Parameter(description = "사용자 ID", example = "1")
+            @Valid @PathVariable Long userId,
+            @Parameter(description = "이력서 ID", example = "1")
+            @Valid @PathVariable Long resumeId) {
+        resumeService.deleteResume(userId, resumeId);
+        return ApiResponse.ok("이력서가 삭제되었습니다.", null);
+    }
 }
