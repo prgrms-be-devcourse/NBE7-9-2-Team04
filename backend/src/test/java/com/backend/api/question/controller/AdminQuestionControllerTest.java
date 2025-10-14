@@ -1,0 +1,128 @@
+package com.backend.api.question.controller;
+
+import com.backend.api.question.dto.request.AdminQuestionAddRequest;
+import com.backend.domain.question.repository.QuestionRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
+@Transactional
+@ActiveProfiles("test")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class AdminQuestionControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private QuestionRepository questionRepository;
+
+    @Nested
+    @DisplayName("관리자용 질문 생성 API")
+    class t1 {
+
+        @Test
+        @DisplayName("질문 생성 성공")
+        void success() throws Exception {
+            AdminQuestionAddRequest request = new AdminQuestionAddRequest(
+                    "Spring Boot란?",
+                    "Spring Boot의 핵심 개념과 장점을 설명해주세요.",
+                    null, // 카테고리 미구현으로 null 처리
+                    true,
+                    5
+
+            );
+
+            mockMvc.perform(post("/api/admin/questions")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.status").value("CREATED"))
+                    .andExpect(jsonPath("$.message").value("질문이 성공적으로 등록되었습니다."))
+                    .andExpect(jsonPath("$.data.title").value("Spring Boot란?"))
+                    .andExpect(jsonPath("$.data.content").value("Spring Boot의 핵심 개념과 장점을 설명해주세요."))
+                    .andExpect(jsonPath("$.data.score").value(5))
+                    .andExpect(jsonPath("$.data.isApproved").value(true))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 생성 실패 - 제목 누락")
+        void fail_missingTitle() throws Exception {
+            AdminQuestionAddRequest request = new AdminQuestionAddRequest(
+                    "", // 제목 누락
+                    "내용은 있습니다.",
+                    null,
+                    true,
+                    0
+            );
+
+            mockMvc.perform(post("/api/admin/questions")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("질문 제목은 필수입니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 생성 실패 - 내용 누락")
+        void fail_missingContent() throws Exception {
+            AdminQuestionAddRequest request = new AdminQuestionAddRequest(
+                    "Spring Boot란?",
+                    "", //내용 누락
+                    null,
+                    true,
+                    0
+            );
+
+            mockMvc.perform(post("/api/admin/questions")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("질문 내용은 필수입니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 생성 실패 - 점수가 음수")
+        void fail_negativeScore() throws Exception {
+            AdminQuestionAddRequest request = new AdminQuestionAddRequest(
+                    "Spring Boot란?",
+                    "Spring Boot의 핵심 개념과 장점을 설명해주세요.",
+                    null,
+                    true,
+                    -3 // 점수가 음수일때
+            );
+
+            mockMvc.perform(post("/api/admin/questions")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("점수는 0 이상이어야 합니다."))
+                    .andDo(print());
+        }
+    }
+}
