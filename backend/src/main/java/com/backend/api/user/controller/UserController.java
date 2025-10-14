@@ -5,6 +5,7 @@ import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.UserResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.user.entity.User;
+import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,11 +19,15 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final Rq rq;
 
     @PostMapping("/login")
     @Operation(summary = "사용자 로그인")
     public ApiResponse<UserResponse> login(@RequestBody UserLoginRequest request){
         User user = userService.login(request);
+
+
+
         return ApiResponse.ok(
                 "%d번 회원의 로그인을 성공했습니다.".formatted(user.getId()),
                 UserResponse.from(user));
