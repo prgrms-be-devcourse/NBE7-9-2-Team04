@@ -1,4 +1,4 @@
-package com.backend.global.jwt;
+package com.backend.global.security;
 
 //@Component
 //@RequiredArgsConstructor
