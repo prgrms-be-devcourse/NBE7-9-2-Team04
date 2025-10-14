@@ -2,11 +2,14 @@ package com.backend.api.user.controller;
 
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
+import com.backend.api.user.dto.response.TokenResponse;
 import com.backend.api.user.dto.response.UserResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import com.backend.global.security.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -58,6 +61,25 @@ public class UserController {
                 UserResponse.from(user)
         );
     }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "토큰 재발급")
+    public ApiResponse<Void> refresh(){
+
+        String refreshToken = rq.getCookieValue("refreshToken");
+
+        if(refreshToken == null){
+            throw new ErrorException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+
+        TokenResponse newTokens = userService.createAccessTokenFromRefresh(refreshToken);
+
+        rq.setCookie("accessToken", newTokens.accessToken(), (int) (jwtTokenProvider.getAccessTokenExpireTime()));
+        rq.setCookie("refreshToken", refreshToken, (int) (jwtTokenProvider.getRefreshTokenExpireTime()));
+
+        return ApiResponse.ok("새로운 토큰이 발급되었습니다",  null);
+    }
+
 
 
 }

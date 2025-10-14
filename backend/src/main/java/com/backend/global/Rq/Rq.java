@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 @Component
 @RequiredArgsConstructor
 public class Rq {
@@ -51,5 +53,15 @@ public class Rq {
 
     public void deleteCookie(String name) {
         setCookie(name, "", 0);
+    }
+
+    public String getCookieValue(String name) {
+        if (request.getCookies() == null) return null;
+
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> cookie.getName().equals(name))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
     }
 }

@@ -65,6 +65,7 @@ public class UserService {
             throw new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
+        //refreshToken으로부터 id 추출
         Long userId = jwtTokenProvider.getIdFromToken(refreshToken);
         if(userId == null){
             throw new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
@@ -73,6 +74,8 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
 
+
+        //새로운 토큰 발급
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
 

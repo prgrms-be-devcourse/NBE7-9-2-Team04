@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST,"/api/v1/users/login", "/api/v1/users/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/v1/users/login", "/api/v1/users/signup","/api/v1/users/refresh").permitAll()
                         .anyRequest().authenticated()
 
 

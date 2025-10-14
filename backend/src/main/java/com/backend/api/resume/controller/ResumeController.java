@@ -27,4 +27,5 @@ public class ResumeController {
         ResumeCreateResponse response = resumeService.createResume(userId, request);
         return ApiResponse.ok("이력서가 생성되었습니다.", response);
     }
+
 }
