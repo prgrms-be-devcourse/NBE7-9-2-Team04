@@ -3,10 +3,10 @@ package com.backend.api.post.service;
 import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
 import com.backend.api.post.dto.response.PostResponse;
+import com.backend.api.user.service.UserService;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
-import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Transactional
     public PostResponse createPost(PostAddRequest request, Long userId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.getUser(userId);
 
         Post post = Post.builder()
                 .title(request.title())
