@@ -1,25 +1,21 @@
 package com.backend.api.question.controller;
 
 import com.backend.api.question.dto.request.QuestionAddRequest;
+import com.backend.api.question.dto.request.QuestionUpdateRequest;
+import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-
-import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,6 +34,20 @@ class QuestionControllerTest {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+    private Question savedQuestion;
+
+    @BeforeEach
+    void setUp() {
+        questionRepository.deleteAll();
+
+        Question question = Question.builder()
+                .title("기존 제목")
+                .content("기존 내용")
+                .build();
+
+        savedQuestion = questionRepository.save(question);
+    }
 
     @Nested
     @DisplayName("질문 생성 API")
@@ -66,14 +76,12 @@ class QuestionControllerTest {
         @Test
         @DisplayName("질문 생성 실패 - 제목 누락")
         void fail1() throws Exception {
-            // given
             QuestionAddRequest request = new QuestionAddRequest(
                     "", // 제목 누락
                     "내용입니다.",
                     null
             );
 
-            // when & then
             mockMvc.perform(post("/api/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -86,15 +94,96 @@ class QuestionControllerTest {
         @Test
         @DisplayName("질문 생성 실패 - 내용 누락")
         void fail2() throws Exception {
-            // given
             QuestionAddRequest request = new QuestionAddRequest(
                     "Spring Boot란?",
                     "",
                     null
             );
 
-            // when & then
             mockMvc.perform(post("/api/questions")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("질문 내용은 필수입니다."))
+                    .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("질문 수정 API")
+    class t2 {
+
+        @Test
+        @DisplayName("질문 수정 성공")
+        void success() throws Exception {
+            Long questionId = savedQuestion.getId();
+            QuestionUpdateRequest request = new QuestionUpdateRequest(
+                    "수정된 제목",
+                    "수정된 내용",
+                    null // 카테고리 미구현으로 null 처리
+            );
+
+            mockMvc.perform(put("/api/questions/{questionId}", questionId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("질문이 수정되었습니다."))
+                    .andExpect(jsonPath("$.data.title").value("수정된 제목"))
+                    .andExpect(jsonPath("$.data.content").value("수정된 내용"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 수정 실패 - 존재하지 않는 ID")
+        void fail1() throws Exception {
+            Long questionId = 999L;
+            QuestionUpdateRequest request = new QuestionUpdateRequest(
+                    "수정된 제목",
+                    "수정된 내용",
+                    null // 카테고리 미구현으로 null 처리
+            );
+
+            mockMvc.perform(put("/api/questions/{questionId}", questionId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 수정 실패 - 제목 누락")
+        void fail2() throws Exception {
+            Long questionId = savedQuestion.getId();
+            QuestionUpdateRequest request = new QuestionUpdateRequest(
+                    "",
+                    "내용만 있습니다.",
+                    null // 카테고리 미구현으로 null 처리
+            );
+
+            mockMvc.perform(put("/api/questions/{questionId}", questionId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("질문 제목은 필수입니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 수정 실패 - 내용 누락")
+        void fail3() throws Exception {
+            Long questionId = savedQuestion.getId();
+            QuestionUpdateRequest request = new QuestionUpdateRequest(
+                    "제목만 있습니다.",
+                    "",
+                    null // 카테고리 미구현으로 null 처리
+            );
+
+            mockMvc.perform(put("/api/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
