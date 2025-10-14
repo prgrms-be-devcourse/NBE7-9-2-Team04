@@ -1,12 +1,29 @@
 package com.backend.global.security;
 
+import com.backend.domain.user.entity.User;
+import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-//인증 객체 생성용
-//JWT로부터 추출한 이메일을 인증 객체로 바꿔준다.
-//이후 추가 예정
+
+//DB에서 사용자 정보 로드
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_EMAIL));
+
+        return new CustomUserDetails(user);
+    }
 }

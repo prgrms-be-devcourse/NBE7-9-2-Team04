@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 
-//User를 Spring Security 인증 객체로 변환
+//User를 Security 인증 객체로 변환
 @Getter
 public class CustomUserDetails implements UserDetails {
 

@@ -8,18 +8,22 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-
+//JWT 핵심 유틸 클래스
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    private final CustomUserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
+
     @Value("${custom.jwt.secretPattern}")
     private String secretPattern;
 
@@ -83,12 +87,13 @@ public class JwtTokenProvider {
         return Role.valueOf(role.toString());
     }
 
-//    public Authentication getAuthentication(String token) { 추후 수정 예정
-//        String email = getEmailFromToken(token);
-//        UserDetails user = userDetailsService.loadUserByUserName(email);
-//        return new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
-//
-//    }
+    //토큰을 Security 인증 객체로 변환
+    public Authentication getAuthentication(String token) {
+        String email = getEmailFromToken(token);
+        UserDetails user = customUserDetailsService.loadUserByUsername(email);
+        return new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
+
+    }
 
     //유효성 검사
     public boolean validateToken(String token) {
