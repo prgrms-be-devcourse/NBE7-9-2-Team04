@@ -3,6 +3,7 @@ package com.backend.api.comment.service;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.Post;
+import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -17,9 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final PostRepository postRepository;
 
     @Transactional
-    public Comment writeComment(User user, Post post, String content) {
+    public Comment writeComment(User user, Long postId, String content) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+
         Comment comment = Comment.builder()
                 .content(content)
                 .author(user)

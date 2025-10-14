@@ -3,18 +3,16 @@ package com.backend.api.comment.controller;
 import com.backend.api.comment.dto.request.CommentCreateRequest;
 import com.backend.api.comment.dto.response.CommentResponse;
 import com.backend.api.comment.service.CommentService;
-import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
-import com.backend.domain.post.entity.Post;
 import com.backend.domain.user.entity.User;
 import com.backend.global.dto.response.ApiResponse;
-import com.backend.global.exception.ErrorCode;
-import com.backend.global.exception.ErrorException;
+import com.backend.global.entity.BaseEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,27 +22,52 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
 
     private final CommentService commentService;
-    private final PostService postService;
+
+    private User createTemporaryUser() {
+        User user = User.builder()
+                .email("temp_user1@example.com")
+                .password("hashed_temp_pw")
+                .name("임시 사용자")
+                .nickname("user1")
+                .age(30)
+                .github("https://github.com/temp1")
+                .role(User.Role.USER)
+                .build();
+        try {
+            // BaseEntity 클래스에서 protected id 필드에 접근
+            java.lang.reflect.Field idField = BaseEntity.class.getDeclaredField("id");
+            idField.setAccessible(true); // private/protected 필드에 접근 가능하게 설정
+            idField.set(user, 1L);      // id 필드에 1L 값 강제 주입
+            idField.setAccessible(false);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            System.err.println("임시 사용자 ID 설정 중 오류 발생: " + e.getMessage());
+            // 실제 애플리케이션에서는 ErrorException을 던지거나 로그를 남겨야 합니다.
+        }
+
+        return user;
+    }
 
     @PostMapping("/{postId}/comments")
     @Operation(summary = "댓글 작성")
-    public ApiResponse<CommentResponse> createItem(
+    public ResponseEntity<ApiResponse<CommentResponse>> createComment(
             @PathVariable Long postId,
             @RequestBody @Valid CommentCreateRequest reqBody
     ) {
 
-        User currentUser = rq.getCurrentUser(); // rq 추가 필요
+        // rq 추가 전 임시 로직
+        User currentUser = createTemporaryUser();
 
-        Post post = postService.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND)); // postService.findById() 추가 필요
+        // User currentUser = rq.getCurrentUser(); // rq 추가 후에 사용할 로직
 
-        Comment newComment = commentService.writeComment(currentUser, post, reqBody.content());
+        Comment newComment = commentService.writeComment(currentUser, postId, reqBody.content());
 
-        return new ApiResponse<>(
+        ApiResponse<CommentResponse> responseBody = new ApiResponse<>(
                 HttpStatus.CREATED,
                 "%d번 댓글이 생성되었습니다.".formatted(newComment.getId()),
                 new CommentResponse(newComment)
         );
+
+        return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{postId}/comments/{commentId}")
@@ -53,7 +76,11 @@ public class CommentController {
             @PathVariable Long commentId,
             @RequestBody @Valid CommentCreateRequest reqBody
     ) {
-        User currentUser = rq.getCurrentUser();  // rq 추가 필요
+
+        // rq 추가 전 임시 로직
+        User currentUser = createTemporaryUser();
+
+        // User currentUser = rq.getCurrentUser(); // rq 추가 후에 사용할 로직
 
         Comment updatedComment = commentService.updateComment(
                 currentUser,
