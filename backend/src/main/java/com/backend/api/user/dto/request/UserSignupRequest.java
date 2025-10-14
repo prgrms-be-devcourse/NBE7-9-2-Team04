@@ -26,7 +26,7 @@ public record UserSignupRequest(
         @Schema(description = "사용자 닉네임", example = "spring_dev")
         String nickname,
 
-        @NotNull(message = "나이는 필수입니다.")
+        @NotBlank(message = "나이는 필수입니다.")
         @Min(value = 1, message = "나이는 1 이상입니다.")
         @Schema(description = "사용자 나이", example = "25")
         Integer age,
