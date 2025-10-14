@@ -53,7 +53,7 @@ public class UserService {
 
     public UserMyPageResponse getInformation(int userId){
         User users = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다. userId=" + userId));
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
         return UserMyPageResponse.fromEntity(users);
     }
 }
