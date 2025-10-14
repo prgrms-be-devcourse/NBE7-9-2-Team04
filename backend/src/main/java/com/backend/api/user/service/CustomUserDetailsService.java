@@ -8,5 +8,5 @@ import org.springframework.stereotype.Service;
 //이후 추가 예정
 @Service
 @RequiredArgsConstructor
-public class UserDetailsService {
+public class CustomUserDetailsService {
 }

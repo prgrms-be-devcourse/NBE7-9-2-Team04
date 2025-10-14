@@ -1,6 +1,6 @@
 package com.backend.global.security;
 
-import com.backend.api.user.service.UserDetailsService;
+import com.backend.api.user.service.CustomUserDetailsService;
 import com.backend.domain.user.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -20,7 +20,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
     @Value("${custom.jwt.secretPattern}")
     private String secretPattern;
 
