@@ -2,6 +2,7 @@ package com.backend.api.user.service;
 
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
+import com.backend.api.user.dto.response.TokenResponse;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
@@ -57,5 +58,24 @@ public class UserService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
     }
 
-    public Tokens
+    public TokenResponse createAccessTokenFromRefresh(String refreshToken) {
+
+        //refreshToken 유효성 검사
+        if(!jwtTokenProvider.validateToken(refreshToken)){
+            throw new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        Long userId = jwtTokenProvider.getIdFromToken(refreshToken);
+        if(userId == null){
+            throw new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
+
+        return new TokenResponse(newAccessToken, newRefreshToken);
+    }
 }
