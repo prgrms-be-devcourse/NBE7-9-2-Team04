@@ -1,6 +1,8 @@
 package com.backend.domain.question.entity;
 
 import com.backend.global.entity.BaseEntity;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,5 +29,16 @@ public class Question extends BaseEntity {
     public Question(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void setApproved(Boolean isApproved) {
+        this.isApproved = isApproved;
+    }
+
+    public void setScore(Integer score) {
+        if(score < 0) {
+            throw new ErrorException(ErrorCode.INVALID_QUESTION_SCORE);
+        }
+        this.score = score;
     }
 }
