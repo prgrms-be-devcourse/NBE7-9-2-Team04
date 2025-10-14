@@ -55,9 +55,9 @@ class QuestionControllerTest {
             mockMvc.perform(post("/api/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.status").value("CREATED"))
-                    .andExpect(jsonPath("$.message").value("질문이 성공적으로 등록되었습니다."))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("질문이 생성되었습니다."))
                     .andExpect(jsonPath("$.data.title").value("Spring Boot란?"))
                     .andExpect(jsonPath("$.data.content").value("Spring Boot의 핵심 개념과 장점을 설명해주세요."))
                     .andDo(print());
