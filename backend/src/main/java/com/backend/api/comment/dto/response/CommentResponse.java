@@ -1,4 +1,4 @@
-package com.backend.api.comment.dto;
+package com.backend.api.comment.dto.response;
 
 import java.time.LocalDateTime;
 import com.backend.domain.comment.entity.Comment;
@@ -27,7 +27,7 @@ public record CommentResponse(
                 comment.getModifyDate(),
                 comment.getContent(),
                 comment.getAuthor().getId(),
-                comment.getAuthor().getNickName(),
+                comment.getAuthor().getNickname(),
                 comment.getPost().getId()
         );
     }
