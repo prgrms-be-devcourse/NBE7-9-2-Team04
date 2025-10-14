@@ -226,7 +226,13 @@ class ResumeControllerTest {
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("이력서가 수정되었습니다."))
                     .andExpect(jsonPath("$.data.userId").value(2))
-                    .andExpect(jsonPath("$.data.content").value("수정된 이력서 내용입니다."));
+                    .andExpect(jsonPath("$.data.content").value("수정된 이력서 내용입니다."))
+                    .andExpect(jsonPath("$.data.skill").value("Java, Spring Boot, mysql"))
+                    .andExpect(jsonPath("$.data.activity").value("수정된 대외 활동 내용입니다."))
+                    .andExpect(jsonPath("$.data.certification").value("없음"))
+                    .andExpect(jsonPath("$.data.career").value("수정된 경력 사항 내용입니다."))
+                    .andExpect(jsonPath("$.data.portfolioUrl").value("http://portfolio.example2.com"))
+                    .andDo(print());
         }
 
         @Test
