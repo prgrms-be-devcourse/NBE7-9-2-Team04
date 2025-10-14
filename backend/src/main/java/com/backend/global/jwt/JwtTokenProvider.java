@@ -10,16 +10,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${secretPattern}")
+    @Value("${custom.jwt.secretPattern}")
     private String secretPattern;
 
-    @Value("${jwt.access-token.expire-time}")
+    @Value("${custom.jwt.access-token.expire-time}")
     private long ACCESS_TOKEN_EXPIRE_TIME;
 
-    @Value("${jwt.refresh-token.expire-time}")
+    @Value("${custom.jwt.refresh-token.expire-time}")
     private long REFRESH_TOKEN_EXPIRE_TIME;
 
-    private JwtParser jwtParser;
+    private Key key;
 
     @PostConstruct
     void init() {
