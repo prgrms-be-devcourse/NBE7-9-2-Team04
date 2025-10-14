@@ -29,8 +29,8 @@ public class UserController {
 
         User user = userService.login(request);
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail(), user.getRole());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail(), user.getRole());
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
 
         rq.setCookie("accessToken", accessToken, (int) (jwtTokenProvider.getAccessTokenExpireTime()));
         rq.setCookie("refreshToken", refreshToken, (int) (jwtTokenProvider.getRefreshTokenExpireTime()));

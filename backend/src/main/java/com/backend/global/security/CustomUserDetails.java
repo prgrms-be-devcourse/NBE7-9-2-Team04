@@ -25,6 +25,10 @@ public class CustomUserDetails implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
+
+    //아직은 사용하지 않지만 이후 보안 정책 추가하거나
+    //사용자 계정 상태 관리 시 필요
+    //추후 필요 없으면 삭제 예정
     @Override
     public String getPassword() {
         return user.getPassword();

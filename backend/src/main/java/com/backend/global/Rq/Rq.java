@@ -1,6 +1,8 @@
 package com.backend.global.Rq;
 
 import com.backend.domain.user.entity.User;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import com.backend.global.security.CustomUserDetails;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +25,8 @@ public class Rq {
 
         //인증 객체 존재 및 principal이 CustomUserDetail일때
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails details)) {
-            throw new IllegalStateException("로그인된 사용자가 없습니다.");
-        } //예외 처리 수정 필요
+            throw new ErrorException(ErrorCode.UNAUTHORIZED_USER);
+        }
 
         return details.getUser();
     }

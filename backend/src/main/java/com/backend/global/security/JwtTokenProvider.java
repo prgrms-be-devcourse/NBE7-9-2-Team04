@@ -44,27 +44,28 @@ public class JwtTokenProvider {
 
 
     //토큰 공통 생성 로직
-    public String generateToken(String email, Role role, long expireTime) {
+    public String generateToken(Long id, String email, Role role, long expireTime) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expireTime); //만료시간 설정
 
         return Jwts.builder()
-                .subject(email)
+                .subject(email) // Subject에 email 저장
                 .issuedAt(now)
                 .expiration(expiryDate)
+                .claim("userId", id) // ID는 별도 클레임으로 저장. 만약 수정 필요하면 수정 예정
                 .claim("role", role.name())
                 .signWith(key)
                 .compact();
     }
 
     //AccessToken 생성 (Role 포함)
-    public String generateAccessToken(String email, Role role) {
-        return generateToken(email, role, ACCESS_TOKEN_EXPIRE_TIME);
+    public String generateAccessToken(Long id, String email, Role role) {
+        return generateToken(id, email, role, ACCESS_TOKEN_EXPIRE_TIME);
     }
 
     //RefreshToken 생성 (Role 포함)
-    public String generateRefreshToken(String email, Role role) {
-         return generateToken(email, role, REFRESH_TOKEN_EXPIRE_TIME);
+    public String generateRefreshToken(Long id, String email, Role role) {
+         return generateToken(id, email, role, REFRESH_TOKEN_EXPIRE_TIME);
     }
 
     //claims 파싱
@@ -82,6 +83,12 @@ public class JwtTokenProvider {
 
     public String getEmailFromToken(String token) {
         return parseClaims(token).getSubject();
+    }
+
+    public Long getIdFromToken(String token) {
+        Object id = parseClaims(token).get("userId");
+        if (id == null) return null;
+        return Long.valueOf(id.toString());
     }
 
     public Role getRoleFromToken(String token){
