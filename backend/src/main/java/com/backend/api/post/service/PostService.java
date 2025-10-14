@@ -42,7 +42,7 @@ public class PostService {
 
     public PostResponse getPost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_POST));
+                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
         return PostResponse.from(post);
     }
@@ -51,10 +51,10 @@ public class PostService {
     public PostResponse updatePost(Long postId, PostUpdateRequest request, Long userId) {
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_POST));
+                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
         if (!post.getUsers().getId().equals(userId)) {
-            throw new ErrorException(ErrorCode.FORBIDDEN_ACCESS);
+            throw new ErrorException(ErrorCode.FORBIDDEN);
         }
         post.updatePost(request.title(), request.content(), request.deadline(), request.status(), request.pinStatus());
 
@@ -65,10 +65,10 @@ public class PostService {
     public void deletePost(Long postId, Long userId) {
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_POST));
+                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
         if (!post.getUsers().getId().equals(userId)) {
-            throw new ErrorException(ErrorCode.FORBIDDEN_ACCESS);
+            throw new ErrorException(ErrorCode.FORBIDDEN);
         }
 
         postRepository.delete(post);
