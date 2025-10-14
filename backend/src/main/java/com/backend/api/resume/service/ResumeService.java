@@ -1,7 +1,9 @@
 package com.backend.api.resume.service;
 
 import com.backend.api.resume.dto.request.ResumeCreateRequest;
+import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.api.resume.dto.response.ResumeCreateResponse;
+import com.backend.api.resume.dto.response.ResumeUpdateResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
@@ -25,7 +27,7 @@ public class ResumeService {
     public ResumeCreateResponse createResume(Long userId, ResumeCreateRequest request) {
         validateResumeNotExists(userId);
 
-        User user = userService.getId(userId);
+        User user = userService.getUser(userId);
 
         Resume resume = Resume.builder()
                 .user(user)
@@ -42,13 +44,35 @@ public class ResumeService {
         return ResumeCreateResponse.from(resume, user);
     }
 
-    private Boolean existsByUserId(Long userId) {
+    private Boolean hasResume(Long userId) {
         return resumeRepository.existsByUserId(userId);
     }
 
     private void validateResumeNotExists(Long userId) {
-        if (existsByUserId(userId)) {
+        if (hasResume(userId)) {
             throw new ErrorException(ErrorCode.DUPLICATE_RESUME);
+        }
+    }
+
+    @Transactional
+    public ResumeUpdateResponse updateResume(Long userId, Long resumeId, ResumeUpdateRequest request) {
+        User user = userService.getUser(userId);
+
+        Resume resume = getResume(resumeId);
+        validateResumeAuthor(resume, user);
+        resume.update(request);
+
+        return ResumeUpdateResponse.from(resume, user);
+    }
+
+    public Resume getResume(Long resumeId) {
+        return resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_RESUME));
+    }
+
+    private void validateResumeAuthor(Resume resume, User user) {
+        if (!resume.getUser().equals(user)) {
+            throw new ErrorException(ErrorCode.INVALID_USER);
         }
     }
 }
