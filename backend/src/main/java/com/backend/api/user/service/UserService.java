@@ -19,6 +19,10 @@ public class UserService {
 
     public User signUp(UserSignupRequest request) {
 
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new ErrorException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
         String encodedPassword = passwordEncoder.encode(request.password());
         User user = User.builder()
                 .email(request.email())

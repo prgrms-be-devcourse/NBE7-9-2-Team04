@@ -2,10 +2,7 @@ package com.backend.api.user.dto.request;
 
 import com.backend.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 
 public record UserSignupRequest(
         @Email(message = "올바른 이메일 형식이 아닙니다.")
@@ -29,7 +26,7 @@ public record UserSignupRequest(
         @Schema(description = "사용자 닉네임", example = "spring_dev")
         String nickname,
 
-        @NotBlank(message = "나이는 필수입니다.")
+        @NotNull(message = "나이는 필수입니다.")
         @Min(value = 1, message = "나이는 1 이상입니다.")
         @Schema(description = "사용자 나이", example = "25")
         Integer age,
