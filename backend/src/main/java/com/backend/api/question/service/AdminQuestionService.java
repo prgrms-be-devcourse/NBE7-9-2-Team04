@@ -1,12 +1,16 @@
 package com.backend.api.question.service;
 
 import com.backend.api.question.dto.request.AdminQuestionAddRequest;
+import com.backend.api.question.dto.request.AdminQuestionUpdateRequest;
+import com.backend.api.question.dto.request.QuestionAddRequest;
+import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,19 +23,6 @@ public class AdminQuestionService {
 
     @Transactional
     public QuestionResponse addQuestion(AdminQuestionAddRequest request) {
-
-        if(request.title() == null || request.title().isBlank()) {
-            throw new ErrorException(ErrorCode.QUESTION_TITLE_NOT_BLANK);
-        }
-
-        if(request.content() == null || request.content().isBlank()) {
-            throw new ErrorException(ErrorCode.QUESTION_CONTENT_NOT_BLANK);
-        }
-
-        if (request.score() != null && request.score() < 0) {
-            throw new ErrorException(ErrorCode.INVALID_QUESTION_SCORE);
-        }
-
 
         Question question = Question.builder()
                 .title(request.title())
@@ -48,5 +39,40 @@ public class AdminQuestionService {
 
         Question saved = questionRepository.save(question);
         return QuestionResponse.from(saved);
+    }
+
+    @Transactional
+    public QuestionResponse updateQuestion(Long questionId, @Valid AdminQuestionUpdateRequest request) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+
+        question.updateAdminQuestion(
+                request.title(),
+                request.content(),
+                request.isApproved(),
+                request.score()
+        );
+
+        return QuestionResponse.from(question);
+    }
+
+    @Transactional
+    public QuestionResponse approveQuestion(Long questionId, boolean isApproved) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+
+        question.setApproved(isApproved);
+
+        return QuestionResponse.from(question);
+    }
+
+    @Transactional
+    public QuestionResponse setQuestionScore(Long questionId, Integer score) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+
+        question.setScore(score);
+
+        return QuestionResponse.from(question);
     }
 }

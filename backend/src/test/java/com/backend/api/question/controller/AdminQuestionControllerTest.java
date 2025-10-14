@@ -4,13 +4,11 @@ import com.backend.api.question.dto.request.AdminQuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionApproveRequest;
 import com.backend.api.question.dto.request.QuestionScoreRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
+import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,6 +36,20 @@ public class AdminQuestionControllerTest {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+    private Question savedQuestion;
+
+    @BeforeEach
+    void setUp() {
+        questionRepository.deleteAll();
+
+        Question question = Question.builder()
+                .title("기존 제목")
+                .content("기존 내용")
+                .build();
+
+        savedQuestion = questionRepository.save(question);
+    }
 
     @Nested
     @DisplayName("관리자용 질문 생성 API")
@@ -70,7 +82,7 @@ public class AdminQuestionControllerTest {
 
         @Test
         @DisplayName("질문 생성 실패 - 제목 누락")
-        void fail_missingTitle() throws Exception {
+        void fail1() throws Exception {
             AdminQuestionAddRequest request = new AdminQuestionAddRequest(
                     "", // 제목 누락
                     "내용은 있습니다.",
@@ -90,7 +102,7 @@ public class AdminQuestionControllerTest {
 
         @Test
         @DisplayName("질문 생성 실패 - 내용 누락")
-        void fail_missingContent() throws Exception {
+        void fail2() throws Exception {
             AdminQuestionAddRequest request = new AdminQuestionAddRequest(
                     "Spring Boot란?",
                     "", //내용 누락
@@ -110,7 +122,7 @@ public class AdminQuestionControllerTest {
 
         @Test
         @DisplayName("질문 생성 실패 - 점수가 음수")
-        void fail_negativeScore() throws Exception {
+        void fail3() throws Exception {
             AdminQuestionAddRequest request = new AdminQuestionAddRequest(
                     "Spring Boot란?",
                     "Spring Boot의 핵심 개념과 장점을 설명해주세요.",
@@ -136,7 +148,7 @@ public class AdminQuestionControllerTest {
         @Test
         @DisplayName("질문 수정 성공")
         void success() throws Exception {
-            Long questionId = 1L;
+            Long questionId = savedQuestion.getId();
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "관리자 수정 제목",
                     "관리자 수정 내용",
@@ -156,7 +168,7 @@ public class AdminQuestionControllerTest {
 
         @Test
         @DisplayName("질문 수정 실패 - 존재하지 않는 ID")
-        void fail_notFound() throws Exception {
+        void fail1() throws Exception {
             Long questionId = 999L;
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "수정 제목",
@@ -169,14 +181,14 @@ public class AdminQuestionControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("존재하지 않는 질문입니다."))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
                     .andDo(print());
         }
 
         @Test
         @DisplayName("질문 수정 실패 - 제목 누락")
-        void fail_emptyTitle() throws Exception {
-            Long questionId = 1L;
+        void fail2() throws Exception {
+            Long questionId = savedQuestion.getId();
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "",
                     "내용만 있습니다.",
@@ -194,8 +206,8 @@ public class AdminQuestionControllerTest {
 
         @Test
         @DisplayName("질문 수정 실패 - 내용 누락")
-        void fail_emptyContent() throws Exception {
-            Long questionId = 1L;
+        void fail3() throws Exception {
+            Long questionId = savedQuestion.getId();
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "제목만 있습니다.",
                     "",
@@ -218,8 +230,8 @@ public class AdminQuestionControllerTest {
 
         @Test
         @DisplayName("질문 승인 성공")
-        void success() throws Exception {
-            Long questionId = 1L;
+        void approve() throws Exception {
+            Long questionId = savedQuestion.getId();
             QuestionApproveRequest request = new QuestionApproveRequest(true);
 
             mockMvc.perform(patch("/api/admin/questions/{questionId}/approve", questionId)
@@ -227,14 +239,30 @@ public class AdminQuestionControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("질문 승인 상태가 변경되었습니다."))
+                    .andExpect(jsonPath("$.message").value("질문이 승인 처리되었습니다."))
                     .andExpect(jsonPath("$.data.isApproved").value(true))
                     .andDo(print());
         }
 
         @Test
+        @DisplayName("질문 비승인 성공")
+        void disapprove() throws Exception {
+            Long questionId = savedQuestion.getId();
+            QuestionApproveRequest request = new QuestionApproveRequest(false);
+
+            mockMvc.perform(patch("/api/admin/questions/{questionId}/approve", questionId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("질문이 비승인 처리되었습니다."))
+                    .andExpect(jsonPath("$.data.isApproved").value(false))
+                    .andDo(print());
+        }
+
+        @Test
         @DisplayName("질문 승인 실패 - 존재하지 않는 질문 ID")
-        void fail_notFound() throws Exception {
+        void fail1() throws Exception {
             Long questionId = 999L;
             QuestionApproveRequest request = new QuestionApproveRequest(true);
 
@@ -243,14 +271,14 @@ public class AdminQuestionControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("존재하지 않는 질문입니다."))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
                     .andDo(print());
         }
 
         @Test
         @DisplayName("질문 승인 실패 - 잘못된 요청 값(null)")
-        void fail_invalidValue() throws Exception {
-            Long questionId = 1L;
+        void fail2() throws Exception {
+            Long questionId = savedQuestion.getId();
             QuestionApproveRequest request = new QuestionApproveRequest(null);
 
             mockMvc.perform(patch("/api/admin/questions/{questionId}/approve", questionId)
@@ -270,7 +298,7 @@ public class AdminQuestionControllerTest {
         @Test
         @DisplayName("질문 점수 수정 성공")
         void success() throws Exception {
-            Long questionId = 1L;
+            Long questionId = savedQuestion.getId();
             QuestionScoreRequest request = new QuestionScoreRequest(20);
 
             mockMvc.perform(patch("/api/admin/questions/{questionId}/score", questionId)
@@ -285,8 +313,8 @@ public class AdminQuestionControllerTest {
 
         @Test
         @DisplayName("질문 점수 수정 실패 - 음수 점수")
-        void fail_negativeScore() throws Exception {
-            Long questionId = 1L;
+        void fail1() throws Exception {
+            Long questionId = savedQuestion.getId();
             QuestionScoreRequest request = new QuestionScoreRequest(-5);
 
             mockMvc.perform(patch("/api/admin/questions/{questionId}/score", questionId)
@@ -300,7 +328,7 @@ public class AdminQuestionControllerTest {
 
         @Test
         @DisplayName("질문 점수 수정 실패 - 존재하지 않는 ID")
-        void fail_notFound() throws Exception {
+        void fail2() throws Exception {
             Long questionId = 999L;
             QuestionScoreRequest request = new QuestionScoreRequest(5);
 
@@ -309,7 +337,7 @@ public class AdminQuestionControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("존재하지 않는 질문입니다."))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
                     .andDo(print());
         }
     }

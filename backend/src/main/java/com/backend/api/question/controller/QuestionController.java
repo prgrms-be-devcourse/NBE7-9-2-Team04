@@ -1,6 +1,7 @@
 package com.backend.api.question.controller;
 
 import com.backend.api.question.dto.request.QuestionAddRequest;
+import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.api.question.service.QuestionService;
 import com.backend.global.dto.response.ApiResponse;
@@ -9,10 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/questions")
@@ -28,5 +26,14 @@ public class QuestionController {
             @Valid @RequestBody QuestionAddRequest request) {
         QuestionResponse response = questionService.addQuestion(request);
         return ResponseEntity.ok(ApiResponse.ok("질문이 생성되었습니다.",response));
+    }
+
+    @PutMapping("/{questionId}")
+    @Operation(summary = "질문 수정", description = "사용자가 질문을 수정합니다.")
+    public ResponseEntity<ApiResponse<QuestionResponse>> updateQuestion(
+            @PathVariable Long questionId,
+            @Valid @RequestBody QuestionUpdateRequest request) {
+        QuestionResponse response = questionService.updateQuestion(questionId,request);
+        return ResponseEntity.ok(ApiResponse.ok("질문이 수정되었습니다.",response));
     }
 }

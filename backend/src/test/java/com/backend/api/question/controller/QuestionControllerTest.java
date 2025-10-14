@@ -2,13 +2,11 @@ package com.backend.api.question.controller;
 
 import com.backend.api.question.dto.request.QuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
+import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +34,20 @@ class QuestionControllerTest {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+    private Question savedQuestion;
+
+    @BeforeEach
+    void setUp() {
+        questionRepository.deleteAll();
+
+        Question question = Question.builder()
+                .title("기존 제목")
+                .content("기존 내용")
+                .build();
+
+        savedQuestion = questionRepository.save(question);
+    }
 
     @Nested
     @DisplayName("질문 생성 API")
@@ -105,7 +117,7 @@ class QuestionControllerTest {
         @Test
         @DisplayName("질문 수정 성공")
         void success() throws Exception {
-            Long questionId = 1L;
+            Long questionId = savedQuestion.getId();
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "수정된 제목",
                     "수정된 내용",
@@ -125,7 +137,7 @@ class QuestionControllerTest {
 
         @Test
         @DisplayName("질문 수정 실패 - 존재하지 않는 ID")
-        void fail_notFound() throws Exception {
+        void fail1() throws Exception {
             Long questionId = 999L;
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "수정된 제목",
@@ -138,14 +150,14 @@ class QuestionControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("존재하지 않는 질문입니다."))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
                     .andDo(print());
         }
 
         @Test
         @DisplayName("질문 수정 실패 - 제목 누락")
-        void fail_emptyTitle() throws Exception {
-            Long questionId = 1L;
+        void fail2() throws Exception {
+            Long questionId = savedQuestion.getId();
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "",
                     "내용만 있습니다.",
@@ -163,8 +175,8 @@ class QuestionControllerTest {
 
         @Test
         @DisplayName("질문 수정 실패 - 내용 누락")
-        void fail_emptyContent() throws Exception {
-            Long questionId = 1L;
+        void fail3() throws Exception {
+            Long questionId = savedQuestion.getId();
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "제목만 있습니다.",
                     "",

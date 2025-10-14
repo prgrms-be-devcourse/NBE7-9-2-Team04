@@ -1,7 +1,6 @@
 package com.backend.api.question.controller;
 
-import com.backend.api.question.dto.request.AdminQuestionAddRequest;
-import com.backend.api.question.dto.request.QuestionAddRequest;
+import com.backend.api.question.dto.request.*;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.api.question.service.AdminQuestionService;
 import com.backend.api.question.service.QuestionService;
@@ -11,10 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/questions")
@@ -29,5 +25,35 @@ public class AdminQuestionController {
             @Valid @RequestBody AdminQuestionAddRequest request) {
         QuestionResponse response = adminQuestionService.addQuestion(request);
         return ResponseEntity.ok(ApiResponse.ok("질문이 생성되었습니다.", response));
+    }
+
+    @PutMapping("/{questionId}")
+    @Operation(summary = "질문 수정 (관리자)", description = "관리자가 기존 질문을 수정합니다.")
+    public ResponseEntity<ApiResponse<QuestionResponse>> updateQuestion(
+            @PathVariable Long questionId,
+            @Valid @RequestBody AdminQuestionUpdateRequest request) {
+        QuestionResponse response = adminQuestionService.updateQuestion(questionId, request);
+        return ResponseEntity.ok(ApiResponse.ok("질문이 수정되었습니다.", response));
+    }
+
+    @PatchMapping("/{questionId}/approve")
+    @Operation(summary = "질문 승인/비승인 처리 (관리자)", description = "관리자가 질문의 승인 상태를 변경합니다.")
+    public ResponseEntity<ApiResponse<QuestionResponse>> approveQuestion(
+            @PathVariable Long questionId,
+            @RequestBody @Valid QuestionApproveRequest request) {
+        QuestionResponse response = adminQuestionService.approveQuestion(questionId, request.isApproved());
+        String message = request.isApproved()
+                ? "질문이 승인 처리되었습니다."
+                : "질문이 비승인 처리되었습니다.";
+        return ResponseEntity.ok(ApiResponse.ok(message, response));
+    }
+
+    @PatchMapping("/{questionId}/score")
+    @Operation(summary = "질문 점수 수정 (관리자)", description = "관리자가 질문의 점수를 수정합니다.")
+    public ResponseEntity<ApiResponse<QuestionResponse>> setQuestionScore(
+            @PathVariable Long questionId,
+            @RequestBody @Valid QuestionScoreRequest request) {
+        QuestionResponse response = adminQuestionService.setQuestionScore(questionId, request.score());
+        return ResponseEntity.ok(ApiResponse.ok("질문 점수가 수정되었습니다.", response));
     }
 }

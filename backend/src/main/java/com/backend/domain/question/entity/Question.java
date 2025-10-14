@@ -41,4 +41,35 @@ public class Question extends BaseEntity {
         }
         this.score = score;
     }
+
+    public void updateUserQuestion(String title, String content) {
+        validateTitleAndContent(title, content);
+
+        this.title = title;
+        this.content = content;
+    }
+
+    public void updateAdminQuestion(String title, String content, Boolean isApproved, Integer score) {
+        validateTitleAndContent(title, content);
+
+        this.title = title;
+        this.content = content;
+
+        if(isApproved != null) {
+            this.isApproved = isApproved;
+        }
+
+        if(score != null) {
+            setScore(score);
+        }
+    }
+
+    private void validateTitleAndContent(String title, String content) {
+        if (title == null || title.isBlank()) {
+            throw new ErrorException(ErrorCode.QUESTION_TITLE_NOT_BLANK);
+        }
+        if (content == null || content.isBlank()) {
+            throw new ErrorException(ErrorCode.QUESTION_CONTENT_NOT_BLANK);
+        }
+    }
 }
