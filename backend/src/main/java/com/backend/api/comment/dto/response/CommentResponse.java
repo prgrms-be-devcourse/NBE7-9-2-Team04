@@ -1,4 +1,4 @@
-package com.backend.api.comment.dto;
+package com.backend.api.comment.dto.response;
 
 import com.backend.domain.comment.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -2,6 +2,7 @@ package com.backend.api.user.controller;
 
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
+import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.dto.response.UserResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.user.entity.User;
@@ -9,6 +10,7 @@ import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,6 +45,5 @@ public class UserController {
                 UserResponse.from(user)
         );
     }
-
 
 }

@@ -13,6 +13,14 @@ public record ApiResponse<T>(
         return new ApiResponse<>(HttpStatus.OK, message, data);
     }
 
+    public static <T> ApiResponse<T> created( String message, T data) {
+        return new ApiResponse<>(HttpStatus.CREATED, message, data);
+    }
+
+    public static <T> ApiResponse<T> noContent( String message) {
+        return new ApiResponse<>(HttpStatus.NO_CONTENT, message, null);
+    }
+
     public static ApiResponse<?> fail(ErrorException errorException) {
         ErrorCode errorCode = errorException.getErrorCode();
         return new ApiResponse<>(
