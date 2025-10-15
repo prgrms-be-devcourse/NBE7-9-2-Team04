@@ -39,4 +39,12 @@ public class Post extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false) // userId와 매핑
     private User users;  // 게시글 작성자 ID
+
+    public void updatePost(String title, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus) {
+        this.title = title;
+        this.content = content;
+        this.deadline = deadline;
+        this.status = status;
+        this.pinStatus = pinStatus;
+    }
 }

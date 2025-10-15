@@ -24,11 +24,13 @@ public enum ErrorCode {
     INVALID_QUESTION_SCORE(HttpStatus.BAD_REQUEST, "질문 점수는 음수일 수 없습니다."),
     QUESTION_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 질문입니다."),
     ALREADY_APPROVED_QUESTION(HttpStatus.BAD_REQUEST, "이미 승인된 질문입니다."),
+    QUESTION_NOT_APPROVED(HttpStatus.FORBIDDEN, "승인되지 않은 질문입니다."),
 
     // resume
     DUPLICATE_RESUME(HttpStatus.BAD_REQUEST, "이미 등록된 이력서가 있습니다."),
     NOT_FOUND_RESUME(HttpStatus.NOT_FOUND, "이력서를 찾을 수 없습니다."),
     INVALID_USER(HttpStatus.FORBIDDEN, "이력서 수정 권한이 없습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String message;
