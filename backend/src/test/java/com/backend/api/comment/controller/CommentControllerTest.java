@@ -236,7 +236,7 @@ public class CommentControllerTest {
     }
 
     @Test
-    @DisplayName("댓글 수정 - 다른 작성자의 댓글 수정")
+    @DisplayName("댓글 수정 - 다른 작성자의 댓글 수정 시도")
     void t3() throws Exception {
         long targetPostId = 1;
         long targetCommentId = 2;
@@ -268,8 +268,6 @@ public class CommentControllerTest {
         long targetPostId = 1;
         long targetCommentId = 1;
 
-        User author = userRepository.findById(1L).get();
-
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/posts/%d/comments/%d".formatted(targetPostId, targetCommentId))
@@ -288,10 +286,31 @@ public class CommentControllerTest {
         Comment comment = commentRepository.findById(targetCommentId).orElse(null);
         assertThat(comment).isNull();
     }
+    
+    @Test
+    @DisplayName("댓글 삭제 - 다른 사용자의 댓글 삭제 시도")
+    void t5() throws Exception {
+        long targetPostId = 1;
+        long targetCommentId = 2;
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/%d/comments/%d".formatted(targetPostId, targetCommentId))
+                )
+                .andDo(print());
+
+        // 필수 검증
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("deleteComment"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value("FORBIDDEN"))
+                .andExpect(jsonPath("$.message").value("권한이 없는 사용자입니다."));
+    }
 
     @Test
     @DisplayName("댓글 조회")
-    void t5() throws Exception {
+    void t6() throws Exception {
 
         long targetPostId = 1;
 
