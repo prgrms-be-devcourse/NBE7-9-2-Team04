@@ -61,7 +61,7 @@ class QuestionControllerTest {
                     null // 카테고리 미구현으로 null 처리
             );
 
-            mockMvc.perform(post("/api/questions")
+            mockMvc.perform(post("/api/v1/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -81,7 +81,7 @@ class QuestionControllerTest {
                     null
             );
 
-            mockMvc.perform(post("/api/questions")
+            mockMvc.perform(post("/api/v1/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -99,7 +99,7 @@ class QuestionControllerTest {
                     null
             );
 
-            mockMvc.perform(post("/api/questions")
+            mockMvc.perform(post("/api/v1/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -123,7 +123,7 @@ class QuestionControllerTest {
                     null // 카테고리 미구현으로 null 처리
             );
 
-            mockMvc.perform(put("/api/questions/{questionId}", questionId)
+            mockMvc.perform(put("/api/v1/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -144,7 +144,7 @@ class QuestionControllerTest {
                     null // 카테고리 미구현으로 null 처리
             );
 
-            mockMvc.perform(put("/api/questions/{questionId}", questionId)
+            mockMvc.perform(put("/api/v1/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
@@ -163,7 +163,7 @@ class QuestionControllerTest {
                     null // 카테고리 미구현으로 null 처리
             );
 
-            mockMvc.perform(put("/api/questions/{questionId}", questionId)
+            mockMvc.perform(put("/api/v1/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -182,7 +182,7 @@ class QuestionControllerTest {
                     null // 카테고리 미구현으로 null 처리
             );
 
-            mockMvc.perform(put("/api/questions/{questionId}", questionId)
+            mockMvc.perform(put("/api/v1/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -217,7 +217,7 @@ class QuestionControllerTest {
             unapprovedQuestion.setApproved(false);
 
             // when & then
-            mockMvc.perform(get("/api/questions")
+            mockMvc.perform(get("/api/v1/questions")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
@@ -231,7 +231,7 @@ class QuestionControllerTest {
         @DisplayName("질문 목록 조회 실패 - 데이터 없음")
         void fail1() throws Exception {
             // when & then
-            mockMvc.perform(get("/api/questions")
+            mockMvc.perform(get("/api/v1/questions")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
@@ -255,7 +255,7 @@ class QuestionControllerTest {
             );
             question.setApproved(true);
 
-            mockMvc.perform(get("/api/questions/{questionId}", question.getId())
+            mockMvc.perform(get("/api/v1/questions/{questionId}", question.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
@@ -271,7 +271,7 @@ class QuestionControllerTest {
         void fail1() throws Exception {
             Long invalidId = 999L;
 
-            mockMvc.perform(get("/api/questions/{questionId}", invalidId)
+            mockMvc.perform(get("/api/v1/questions/{questionId}", invalidId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
@@ -290,7 +290,7 @@ class QuestionControllerTest {
             );
             question.setApproved(false);
 
-            mockMvc.perform(get("/api/questions/{questionId}", question.getId())
+            mockMvc.perform(get("/api/v1/questions/{questionId}", question.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.status").value("FORBIDDEN"))

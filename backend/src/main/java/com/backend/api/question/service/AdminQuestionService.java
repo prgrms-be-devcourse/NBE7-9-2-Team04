@@ -2,8 +2,6 @@ package com.backend.api.question.service;
 
 import com.backend.api.question.dto.request.AdminQuestionAddRequest;
 import com.backend.api.question.dto.request.AdminQuestionUpdateRequest;
-import com.backend.api.question.dto.request.QuestionAddRequest;
-import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
@@ -97,5 +95,13 @@ public class AdminQuestionService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
 
         return QuestionResponse.from(question);
+    }
+
+    @Transactional
+    public void deleteQuestion(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+
+        questionRepository.delete(question);
     }
 }
