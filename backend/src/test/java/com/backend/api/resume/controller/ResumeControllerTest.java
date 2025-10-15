@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc(addFilters = false)  // security filter disable
 @Transactional
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -112,8 +112,8 @@ class ResumeControllerTest {
             resultActions
                     .andExpect(handler().handlerType(ResumeController.class))
                     .andExpect(handler().methodName("createResume"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.status").value("CREATED"))
                     .andExpect(jsonPath("$.message").value("이력서가 생성되었습니다."))
                     .andExpect(jsonPath("$.data.userId").value(1))
                     .andExpect(jsonPath("$.data.content").value("이력서 내용입니다."))
@@ -332,8 +332,8 @@ class ResumeControllerTest {
             resultActions
                     .andExpect(handler().handlerType(ResumeController.class))
                     .andExpect(handler().methodName("deleteResume"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(status().isNoContent())
+                    .andExpect(jsonPath("$.status").value("NO_CONTENT"))
                     .andExpect(jsonPath("$.message").value("이력서가 삭제되었습니다."))
                     .andDo(print());
         }
