@@ -6,6 +6,7 @@ import com.backend.api.comment.service.CommentService;
 import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.post.entity.Post;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.global.dto.response.ApiResponse;
 import com.backend.global.entity.BaseEntity;
@@ -36,7 +37,7 @@ public class CommentController {
                 .nickname("user1")
                 .age(30)
                 .github("https://github.com/temp1")
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
         try {
             // BaseEntity 클래스에서 protected id 필드에 접근
