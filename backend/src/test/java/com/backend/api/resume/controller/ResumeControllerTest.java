@@ -1,22 +1,25 @@
 package com.backend.api.resume.controller;
 
 
+import com.backend.api.global.JwtTest;
 import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
-import com.backend.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -27,8 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)  // security filter disable
 @Transactional
 @ActiveProfiles("test")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ResumeControllerTest {
+@WithMockUser(username = "test@naver.com")
+class ResumeControllerTest extends JwtTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,14 +42,21 @@ class ResumeControllerTest {
     @Autowired
     private ResumeRepository resumeRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
     @BeforeAll
-    @Transactional
     void setUp() {
+        Resume resume = Resume.builder()
+                .content("이력서 내용입니다.")
+                .skill("Java, Spring Boot")
+                .activity("대외 활동 내용입니다.")
+                .certification("없음")
+                .career("경력 사항 내용입니다.")
+                .portfolioUrl("http://portfolio.example.com")
+                .user(mockUser)
+                .build();
+        resumeRepository.save(resume);
+
         User user = User.builder()
-                .email("test@naver.com")
+                .email("test2@naver.com")
                 .age(27)
                 .github("https://github.com/test")
                 .name("test")
@@ -56,33 +66,19 @@ class ResumeControllerTest {
                 .nickname("testnick")
                 .build();
 
-        User user2 = User.builder()
-                .email("test2@naver.com")
-                .age(20)
-                .github("https://github.com/test")
-                .name("test")
-                .password("test1234")
-                .image(null)
-                .role(Role.USER)
-                .nickname("testnick")
-                .build();
-        userRepository.save(user);
-        userRepository.save(user2);
 
-        Resume resume = Resume.builder()
+        mockUser = userRepository.save(user);
+        Resume resume2 = Resume.builder()
                 .content("이력서 내용입니다.")
                 .skill("Java, Spring Boot")
                 .activity("대외 활동 내용입니다.")
                 .certification("없음")
                 .career("경력 사항 내용입니다.")
                 .portfolioUrl("http://portfolio.example.com")
-                .user(user2)
+                .user(user)
                 .build();
-
-        resumeRepository.save(resume);
-
+        resumeRepository.save(resume2);
     }
-
 
     @Nested
     @DisplayName("이력서 생성 API")
@@ -92,6 +88,7 @@ class ResumeControllerTest {
         @DisplayName("정상 작동")
         void success() throws Exception {
             // given
+            resumeRepository.deleteAll();
             ResumeCreateRequest request = new ResumeCreateRequest(
                     "이력서 내용입니다.",
                     "Java, Spring Boot",
@@ -100,10 +97,10 @@ class ResumeControllerTest {
                     "경력 사항 내용입니다.",
                     "http://portfolio.example.com"
             );
-            Long userId = 1L;
+
             // when
             ResultActions resultActions = mockMvc.perform(
-                    post("/api/v1/users/resumes/%d".formatted(userId))
+                    post("/api/v1/users/resumes")
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -115,7 +112,7 @@ class ResumeControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.status").value("CREATED"))
                     .andExpect(jsonPath("$.message").value("이력서가 생성되었습니다."))
-                    .andExpect(jsonPath("$.data.userId").value(1))
+                    .andExpect(jsonPath("$.data.userId").value(mockUser.getId()))
                     .andExpect(jsonPath("$.data.content").value("이력서 내용입니다."))
                     .andExpect(jsonPath("$.data.skill").value("Java, Spring Boot"))
                     .andExpect(jsonPath("$.data.activity").value("대외 활동 내용입니다."))
@@ -126,9 +123,10 @@ class ResumeControllerTest {
         }
 
         @Test
-        @DisplayName("userId가 존재하지 않을 떄")
+        @DisplayName("로그인 안 된 상태에서 요청할 때")
         void fail1() throws Exception {
             // given
+            SecurityContextHolder.clearContext();
             ResumeCreateRequest request = new ResumeCreateRequest(
                     "이력서 내용입니다.",
                     "Java, Spring Boot",
@@ -137,10 +135,10 @@ class ResumeControllerTest {
                     "경력 사항 내용입니다.",
                     "http://portfolio.example.com"
             );
-            Long userId = 999L;
             // when
             ResultActions resultActions = mockMvc.perform(
-                    post("/api/v1/users/resumes/%d".formatted(userId))
+                    post("/api/v1/users/resumes")
+
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -149,9 +147,9 @@ class ResumeControllerTest {
             resultActions
                     .andExpect(handler().handlerType(ResumeController.class))
                     .andExpect(handler().methodName("createResume"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+                    .andExpect(jsonPath("$.message").value("로그인된 사용자가 없습니다."))
                     .andDo(print());
         }
 
@@ -167,17 +165,16 @@ class ResumeControllerTest {
                     "경력 사항 내용입니다.",
                     "http://portfolio.example.com"
             );
-            Long userId = 1L;
             // when
             mockMvc.perform(
-                    post("/api/v1/users/resumes/%d".formatted(userId))
+                    post("/api/v1/users/resumes")
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
             );
 
             ResultActions resultActions = mockMvc.perform(
-                    post("/api/v1/users/resumes/%d".formatted(userId))
+                    post("/api/v1/users/resumes")
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -209,12 +206,10 @@ class ResumeControllerTest {
                     "http://portfolio.example2.com"
             );
 
-            Long userId = 2L;
-
-            Long resumeId = 1L;
+            Long resumeId = 2L;
             // when
             ResultActions resultActions = mockMvc.perform(
-                    put("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                    put("/api/v1/users/resumes/%d" .formatted(resumeId))
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -226,7 +221,7 @@ class ResumeControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("이력서가 수정되었습니다."))
-                    .andExpect(jsonPath("$.data.userId").value(2))
+                    .andExpect(jsonPath("$.data.userId").value(mockUser.getId()))
                     .andExpect(jsonPath("$.data.content").value("수정된 이력서 내용입니다."))
                     .andExpect(jsonPath("$.data.skill").value("Java, Spring Boot, mysql"))
                     .andExpect(jsonPath("$.data.activity").value("수정된 대외 활동 내용입니다."))
@@ -248,11 +243,10 @@ class ResumeControllerTest {
                     "수정된 경력 사항 내용입니다.",
                     "http://portfolio.example2.com"
             );
-            Long userId = 1L;
             Long resumeId = 999L;
             // when
             ResultActions resultActions = mockMvc.perform(
-                    put("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                    put("/api/v1/users/resumes/%d" .formatted(resumeId))
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -280,23 +274,12 @@ class ResumeControllerTest {
                     "수정된 경력 사항 내용입니다.",
                     "http://portfolio.example2.com"
             );
-            Long userId = 1L;
-            User user = userRepository.findById(userId).orElseThrow();
-            Resume resume = Resume.builder()
-                    .content("이력서 내용입니다.")
-                    .skill("Java, Spring Boot")
-                    .activity("대외 활동 내용입니다.")
-                    .certification("없음")
-                    .career("경력 사항 내용입니다.")
-                    .portfolioUrl("http://portfolio.example.com")
-                    .user(user)
-                    .build();
-            resumeRepository.save(resume);
+
             Long resumeId = 1L;
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    put("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                    put("/api/v1/users/resumes/%d" .formatted(resumeId))
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -320,11 +303,10 @@ class ResumeControllerTest {
         @DisplayName("정상 작동")
         void success() throws Exception {
             // given
-            Long userId = 2L;
-            Long resumeId = 1L;
+            Long resumeId = 2L;
             // when
             ResultActions resultActions = mockMvc.perform(
-                    delete("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                    delete("/api/v1/users/resumes/%d" .formatted( resumeId))
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -342,11 +324,10 @@ class ResumeControllerTest {
         @DisplayName("이력서가 존재하지 않을 때")
         void fail1() throws Exception {
             // given
-            Long userId = 2L;
             Long resumeId = 999L;
             // when
             ResultActions resultActions = mockMvc.perform(
-                    delete("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                    delete("/api/v1/users/resumes/%d" .formatted( resumeId))
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -364,11 +345,10 @@ class ResumeControllerTest {
         @DisplayName("작성자 불일치")
         void fail2() throws Exception {
             // given
-            Long userId = 1L;
             Long resumeId = 1L;
             // when
             ResultActions resultActions = mockMvc.perform(
-                    delete("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                    delete("/api/v1/users/resumes/%d" .formatted(resumeId))
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -385,11 +365,11 @@ class ResumeControllerTest {
         @DisplayName("유저가 존재하지 않을 때")
         void fail4() throws Exception {
             // given
-            Long userId = 999L;
             Long resumeId = 1L;
+            userRepository.deleteAll();
             // when
             ResultActions resultActions = mockMvc.perform(
-                    delete("/api/v1/users/resumes/%d/%d" .formatted(userId, resumeId))
+                    delete("/api/v1/users/resumes/%d" .formatted( resumeId))
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -410,11 +390,11 @@ class ResumeControllerTest {
         @Test
         @DisplayName("정상 작동")
         void success() throws Exception {
-            // given
-            Long userId = 2L;
+            //given
+
             // when
             ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/users/resumes/%d" .formatted(userId))
+                    get("/api/v1/users/resumes")
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -425,7 +405,7 @@ class ResumeControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("이력서를 조회했습니다."))
-                    .andExpect(jsonPath("$.data.userId").value(2))
+                    .andExpect(jsonPath("$.data.userId").value(mockUser.getId()))
                     .andExpect(jsonPath("$.data.content").value("이력서 내용입니다."))
                     .andExpect(jsonPath("$.data.skill").value("Java, Spring Boot"))
                     .andExpect(jsonPath("$.data.activity").value("대외 활동 내용입니다."))
@@ -439,10 +419,10 @@ class ResumeControllerTest {
         @DisplayName("이력서가 존재하지 않을 때")
         void fail1() throws Exception {
             // given
-            Long userId = 1L;
+            resumeRepository.deleteAll();
             // when
             ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/users/resumes/%d" .formatted(userId))
+                    get("/api/v1/users/resumes")
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -453,27 +433,6 @@ class ResumeControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
                     .andExpect(jsonPath("$.message").value("이력서를 찾을 수 없습니다."))
-                    .andDo(print());
-        }
-
-        @Test
-        @DisplayName("유저가 존재하지 않을 때")
-        void fail2() throws Exception {
-            // given
-            Long userId = 999L;
-            // when
-            ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/users/resumes/%d" .formatted(userId))
-                            .accept(MediaType.APPLICATION_JSON)
-                            .contentType(MediaType.APPLICATION_JSON)
-            );
-            // then
-            resultActions
-                    .andExpect(handler().handlerType(ResumeController.class))
-                    .andExpect(handler().methodName("getResume"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
                     .andDo(print());
         }
 
