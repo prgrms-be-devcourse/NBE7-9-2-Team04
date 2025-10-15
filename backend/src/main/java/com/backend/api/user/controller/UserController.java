@@ -75,8 +75,9 @@ public class UserController {
         TokenResponse newTokens = userService.createAccessTokenFromRefresh(refreshToken);
 
         rq.setCookie("accessToken", newTokens.accessToken(), (int) (jwtTokenProvider.getAccessTokenExpireTime()));
+        rq.setCookie("refreshToken", newTokens.refreshToken(), (int) (jwtTokenProvider.getRefreshTokenExpireTime()));
 
-        return ApiResponse.ok("새로운 토큰이 발급되었습니다",  null);
+        return ApiResponse.ok("새로운 토큰이 발급되었습니다.",  null);
     }
 
 }
