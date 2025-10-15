@@ -4,21 +4,21 @@ package com.backend.api.comment.controller;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.PostStatus;
-import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.repository.PostRepository;
-import jakarta.servlet.http.Cookie;
+import com.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CommentControllerTest {
@@ -110,6 +110,18 @@ public class CommentControllerTest {
         commentRepository.save(comment1);
         commentRepository.save(comment2);
         commentRepository.save(comment3);
+    }
+
+    @BeforeEach
+    void setupAuth() {
+        User user = userRepository.findById(1L).get();
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @Test
