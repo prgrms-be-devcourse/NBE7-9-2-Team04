@@ -19,12 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PostService postService;
+    private final PostService postRepository;
 
     @Transactional
     public Comment writeComment(User user, Long postId, String content) {
 
-        Post post = postService.findById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
         Comment comment = Comment.builder()
