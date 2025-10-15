@@ -29,7 +29,7 @@ public class ResumeController {
             @Valid @PathVariable Long userId,
             @RequestBody ResumeCreateRequest request) {
         ResumeCreateResponse response = resumeService.createResume(userId, request);
-        return ApiResponse.ok("이력서가 생성되었습니다.", response);
+        return ApiResponse.created("이력서가 생성되었습니다.", response);
     }
 
     @PutMapping("/{userId}/{resumeId}")
@@ -52,7 +52,7 @@ public class ResumeController {
             @Parameter(description = "이력서 ID", example = "1")
             @Valid @PathVariable Long resumeId) {
         resumeService.deleteResume(userId, resumeId);
-        return ApiResponse.ok("이력서가 삭제되었습니다.", null);
+        return ApiResponse.noContent("이력서가 삭제되었습니다.");
     }
 
     @GetMapping("/{userId}")
