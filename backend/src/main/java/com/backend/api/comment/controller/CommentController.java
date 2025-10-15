@@ -6,8 +6,8 @@ import com.backend.api.comment.service.CommentService;
 import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.post.entity.Post;
-import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
+import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import com.backend.global.entity.BaseEntity;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,30 +28,7 @@ public class CommentController {
 
     private final CommentService commentService;
     private final PostService postService;
-
-    private User createTemporaryUser() {
-        User user = User.builder()
-                .email("temp_user1@example.com")
-                .password("hashed_temp_pw")
-                .name("임시 사용자")
-                .nickname("user1")
-                .age(30)
-                .github("https://github.com/temp1")
-                .role(Role.USER)
-                .build();
-        try {
-            // BaseEntity 클래스에서 protected id 필드에 접근
-            java.lang.reflect.Field idField = BaseEntity.class.getDeclaredField("id");
-            idField.setAccessible(true); // private/protected 필드에 접근 가능하게 설정
-            idField.set(user, 1L);      // id 필드에 1L 값 강제 주입
-            idField.setAccessible(false);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            System.err.println("임시 사용자 ID 설정 중 오류 발생: " + e.getMessage());
-            // 실제 애플리케이션에서는 ErrorException을 던지거나 로그를 남겨야 합니다.
-        }
-
-        return user;
-    }
+    private final Rq rq;
 
     @PostMapping("/{postId}/comments")
     @Operation(summary = "댓글 작성")
@@ -60,10 +37,7 @@ public class CommentController {
             @RequestBody @Valid CommentCreateRequest reqBody
     ) {
 
-        // rq 추가 전 임시 로직
-        User currentUser = createTemporaryUser();
-
-        // User currentUser = rq.getCurrentUser(); // rq 추가 후에 사용할 로직
+        User currentUser = rq.getUser();
 
         Comment newComment = commentService.writeComment(currentUser, postId, reqBody.content());
 
@@ -80,10 +54,7 @@ public class CommentController {
             @RequestBody @Valid CommentCreateRequest reqBody
     ) {
 
-        // rq 추가 전 임시 로직
-        User currentUser = createTemporaryUser();
-
-        // User currentUser = rq.getCurrentUser(); // rq 추가 후에 사용할 로직
+        User currentUser = rq.getUser();
 
         Comment updatedComment = commentService.updateComment(
                 currentUser,
@@ -102,10 +73,8 @@ public class CommentController {
     public ApiResponse<Void> deleteComment(
             @PathVariable Long commentId
     ) {
-        // rq 추가 전 임시 로직
-        User currentUser = createTemporaryUser();
 
-        // User currentUser = rq.getCurrentUser(); // rq 추가 후에 사용할 로직
+        User currentUser = rq.getUser();
 
         commentService.deleteComment(currentUser, commentId);
 
