@@ -5,6 +5,7 @@ import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.resume.entity.Resume;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.domain.comment.entity.Comment;
@@ -61,7 +62,7 @@ public class CommentControllerTest {
                 .age(20)
                 .github("abc123")
                 .image(null)
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
 
         User generalUser2 = User.builder()
@@ -72,7 +73,7 @@ public class CommentControllerTest {
                 .age(25)
                 .github("abc1233")
                 .image(null)
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
 
         userRepository.save(generalUser);
