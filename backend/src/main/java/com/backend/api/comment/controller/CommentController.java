@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/posts")
@@ -92,6 +94,48 @@ public class CommentController {
                 HttpStatus.OK,
                 "%d번 댓글이 성공적으로 수정되었습니다.".formatted(updatedComment.getId()),
                 new CommentResponse(updatedComment)
+        );
+
+        // return new ResponseEntity<>(responseBody, HttpStatus.OK);
+        return ApiResponse.ok(message, new CommentResponse(updatedComment));
+    }
+
+    @DeleteMapping("/{postId}/comments/{commentId}")
+    @Operation(summary = "댓글 삭제")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
+            @PathVariable Long commentId
+    ) {
+        // rq 추가 전 임시 로직
+        User currentUser = createTemporaryUser();
+
+        // User currentUser = rq.getCurrentUser(); // rq 추가 후에 사용할 로직
+
+        commentService.deleteComment(currentUser, commentId);
+
+        ApiResponse<Void> responseBody = new ApiResponse<>(
+                HttpStatus.OK,
+                "%d번 댓글이 성공적으로 삭제되었습니다.".formatted(commentId),
+                null
+        );
+
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
+    }
+
+    @GetMapping("/{postId}/comments") // 👈 이 부분이 댓글 목록 조회 엔드포인트입니다.
+    @Operation(summary = "댓글 목록 조회")
+    public ResponseEntity<ApiResponse<List<CommentResponse>>> getComments(
+            @PathVariable Long postId
+    ) {
+
+        List<CommentResponse> commentList = commentService.getCommentList(postId)
+                .stream()
+                .map(CommentResponse::new)
+                .toList();
+
+        ApiResponse<List<CommentResponse>> responseBody = new ApiResponse<>(
+                HttpStatus.OK,
+                "%d번 게시글의 댓글 목록 조회 성공".formatted(postId),
+                commentList
         );
 
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
