@@ -1,22 +1,24 @@
 package com.backend.api.comment.controller;
 
 
-import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.PinStatus;
-import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostStatus;
-import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.backend.domain.comment.entity.Comment;
+import com.backend.domain.post.entity.Post;
+import com.backend.domain.post.repository.PostRepository;
+import com.backend.global.security.CustomUserDetails;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,15 +29,16 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CommentControllerTest {
 
     @Autowired
@@ -47,58 +50,87 @@ public class CommentControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User testAuthor; // Controller의 임시 사용자(ID 1L) 역할
-    private User testOtherUser; // 권한 없음 테스트에 사용
-    private Post testPost1; // 댓글이 달릴 게시글
-    private Comment testComment1; // 수정/권한 테스트 대상 댓글 (testAuthor가 작성)
+    @BeforeAll
+    @Transactional
+    void setUp() {
 
-    // 헬퍼 메서드: Post 객체 생성
-    private Post createPost(User author, String title) {
-        return Post.builder()
-                .title(title)
+        User generalUser = User.builder()
+                .email("general@user.com")
+                .password("asdf1234!")
+                .name("홍길동")
+                .nickname("gildong")
+                .age(20)
+                .github("abc123")
+                .image(null)
+                .role(Role.USER)
+                .build();
+
+        User generalUser2 = User.builder()
+                .email("general2@user.com")
+                .password("asdf1234!")
+                .name("홍길똥")
+                .nickname("gilddong")
+                .age(25)
+                .github("abc1233")
+                .image(null)
+                .role(Role.USER)
+                .build();
+
+        userRepository.save(generalUser);
+        userRepository.save(generalUser2);
+
+        Post post1 = Post.builder()
+                .title("제목")
                 .content("내용")
-                .users(author) // Post 엔티티 필드명 'users'
                 .deadline(LocalDateTime.now().plusDays(7))
                 .status(PostStatus.ING)
                 .pinStatus(PinStatus.NOT_PINNED)
+                .users(userRepository.findById(1L).orElseThrow())
                 .build();
-    }
+        postRepository.save(post1);
 
-    // 헬퍼 메서드: Comment 객체 생성
-    private Comment createComment(Post post, User author, String content) {
-        return Comment.builder()
-                .content(content)
-                .author(author)
-                .post(post)
+        Comment comment1 = Comment.builder()
+                .content("1번 댓글")
+                .author(userRepository.findById(1L).orElseThrow())
+                .post(post1)
                 .build();
+
+        Comment comment2 = Comment.builder()
+                .content("2번 댓글")
+                .author(userRepository.findById(1L).orElseThrow())
+                .post(post1)
+                .build();
+
+        Comment comment3 = Comment.builder()
+                .content("3번 댓글")
+                .author(userRepository.findById(1L).orElseThrow())
+                .post(post1)
+                .build();
+
+        commentRepository.save(comment1);
+        commentRepository.save(comment2);
+        commentRepository.save(comment3);
     }
 
     @BeforeEach
-    void setupTestData() {
-        // 1. 사용자 생성 및 저장 (Controller의 임시 사용자 역할을 대신함)
-        testAuthor = userRepository.save(User.builder()
-                .email("test1@test.com").password("pw").name("작성자1").nickname("user1").age(20).role(Role.USER)
-                .github("").build());
+    void setupAuth() {
+        User user = userRepository.findById(1L).get();
+        CustomUserDetails userDetails = new CustomUserDetails(user);
 
-        // 2. 다른 사용자 생성 및 저장 (권한 없음 테스트용)
-        testOtherUser = userRepository.save(User.builder()
-                .email("test2@test.com").password("pw").name("작성자2").nickname("user2").age(30).role(Role.USER)
-                .github("").build());
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
 
-        // 3. 게시글 생성 및 저장
-        testPost1 = postRepository.save(createPost(testAuthor, "테스트 게시글 1"));
-
-        // 4. 댓글 생성 및 저장 (수정/삭제 테스트용)
-        testComment1 = commentRepository.save(createComment(testPost1, testAuthor, "초기 댓글 내용 1"));
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-
     @Test
-    @DisplayName("댓글 생성 - 게시글에 생성 성공")
+    @DisplayName("댓글 생성 - 1번 게시글에 생성")
     void t1() throws Exception {
 
-        long targetPostId = testPost1.getId(); // 동적으로 생성된 게시글 ID 사용
+        long targetPostId = 1; // 동적으로 생성된 게시글 ID 사용
         String content = "새로운 댓글";
+        User author = userRepository.findById(1L).get();
 
         // DB에 댓글 생성 전 개수
         long initialCommentCount = commentRepository.count();
@@ -131,7 +163,7 @@ public class CommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("createComment"))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CREATED"))
                 .andExpect(jsonPath("$.message").value("%d번 댓글이 생성되었습니다.".formatted(createdCommentId)))
                 .andExpect(jsonPath("$.data.id").value(createdCommentId))
@@ -145,13 +177,13 @@ public class CommentControllerTest {
 
 
     @Test
-    @DisplayName("댓글 수정 - 자신의 댓글 수정 성공")
+    @DisplayName("댓글 수정 - 자신의 댓글 수정")
     void t2() throws Exception {
-        long targetPostId = testPost1.getId(); // 동적으로 생성된 게시글 ID 사용
-        long targetCommentId = testComment1.getId(); // 동적으로 생성된 댓글 ID 사용
-        String content = "댓글 내용 수정"; // 수정할 내용
-        long expectedAuthorId = testAuthor.getId(); // 예상 작성자 ID
-        String expectedAuthorNickname = testAuthor.getNickname(); // 예상 작성자 닉네임
+        long targetPostId = 1; // 동적으로 생성된 게시글 ID 사용
+        long targetCommentId = 1; // 동적으로 생성된 댓글 ID 사용
+        String content = "수정한 댓글"; // 수정할 내용
+        long expectedAuthorId = 1; // 예상 작성자 ID
+        String expectedAuthorNickname = "gildong"; // 예상 작성자 닉네임
 
         // 초기 modifyDate 값 캡처 (수정되기 전의 시간)
         LocalDateTime initialModifyDate = commentRepository.findById(targetCommentId)
@@ -179,7 +211,7 @@ public class CommentControllerTest {
                 .andExpect(handler().methodName("updateComment")) // PATCH에 맞는 메서드 이름
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("OK"))
-                .andExpect(jsonPath("$.message").value("%d번 댓글이 성공적으로 수정되었습니다.".formatted(targetCommentId)))
+                .andExpect(jsonPath("$.message").value("%d번 댓글이 수정되었습니다.".formatted(targetCommentId)))
                 .andExpect(jsonPath("$.data.id").value(targetCommentId))
                 .andExpect(jsonPath("$.data.createDate").exists())
                 .andExpect(jsonPath("$.data.modifyDate").exists())
@@ -201,6 +233,96 @@ public class CommentControllerTest {
         assertThat(updatedComment.getAuthor().getId()).isEqualTo(expectedAuthorId); // DB에서 Author ID 확인
         assertThat(updatedComment.getModifyDate()).isAfter(updatedComment.getCreateDate()); // 수정일이 생성일 이후인지 확인
         assertThat(updatedComment.getModifyDate()).isAfter(initialModifyDate); // 수정 날짜가 초기 날짜보다 이후인지 확인
+    }
+
+    /* 현재 컨트롤러에서 임시 유저로 고정시켜서 보류
+    @Test
+    @DisplayName("댓글 수정 - 다른 작성자의 댓글 수정")
+    void t3() throws Exception {
+        long targetPostId = 1;
+        long targetCommentId = 1;
+        String content = "댓글 내용 수정";
+
+        User author = userRepository.findById(2L).get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/api/v1/posts/%d/comments/%d".formatted(targetPostId, targetCommentId))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "content": "%s"
+                                        }
+                                        """.formatted(content))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("modifyItem"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value("FORBIDDEN"))
+                .andExpect(jsonPath("$.msg").value("댓글 수정 권한이 없습니다."));
+    }
+    */
+
+    @Test
+    @DisplayName("댓글 삭제 - 1번 글의 1번 댓글 삭제")
+    void t4() throws Exception {
+        long targetPostId = 1;
+        long targetCommentId = 1;
+
+        User author = userRepository.findById(1L).get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/%d/comments/%d".formatted(targetPostId, targetCommentId))
+                )
+                .andDo(print());
+
+        // 필수 검증
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("deleteComment"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("%d번 댓글이 삭제되었습니다.".formatted(targetCommentId)));
+
+        // 선택적 검증
+        Comment comment = commentRepository.findById(targetCommentId).orElse(null);
+        assertThat(comment).isNull();
+    }
+
+    @Test
+    @DisplayName("댓글 조회")
+    void t5() throws Exception {
+
+        long targetPostId = 1;
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/posts/%d/comments".formatted(targetPostId))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("getComments"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("%d번 게시글의 댓글 목록 조회 성공".formatted(targetPostId)));
+
+        resultActions
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$.data[*].id", containsInRelativeOrder(3, 1)))
+                .andExpect(jsonPath("$.data[0].id").value(3))
+                .andExpect(jsonPath("$.data[0].createDate").exists())
+                .andExpect(jsonPath("$.data[0].modifyDate").exists())
+                .andExpect(jsonPath("$.data[0].content").value("3번 댓글"))
+                .andExpect(jsonPath("$.data[0].authorId").value(1))
+                .andExpect(jsonPath("$.data[0].authorNickName").value("gildong"))
+                .andExpect(jsonPath("$.data[0].postId").value(1));
+
     }
 
 }

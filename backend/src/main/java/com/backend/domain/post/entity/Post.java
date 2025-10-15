@@ -42,7 +42,7 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false) // userId와 매핑
     private User users;  // 게시글 작성자 ID
 
-    @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Comment> comments;
 
     public void updatePost(String title, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus) {

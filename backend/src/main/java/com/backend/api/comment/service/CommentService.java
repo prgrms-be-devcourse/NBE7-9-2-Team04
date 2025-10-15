@@ -1,6 +1,5 @@
 package com.backend.api.comment.service;
 
-import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.Post;
@@ -12,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PostService postRepository;
+    private final PostRepository postRepository;
 
     @Transactional
     public Comment writeComment(User user, Long postId, String content) {
@@ -48,6 +50,22 @@ public class CommentService {
         comment.updateContent(newContent);
 
         return comment;
+    }
+
+    @Transactional
+    public void deleteComment(User user, Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.COMMENT_NOT_FOUND));
+
+        if (!comment.getAuthor().getId().equals(user.getId())) {
+            throw new ErrorException(ErrorCode.FORBIDDEN);
+        }
+
+        commentRepository.delete(comment);
+    }
+
+    public Optional<Comment> findById(Long id) {
+        return commentRepository.findById(id);
     }
 
 }
