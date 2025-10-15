@@ -49,7 +49,7 @@ public class CommentController {
 
     @PostMapping("/{postId}/comments")
     @Operation(summary = "댓글 작성")
-    public ResponseEntity<ApiResponse<CommentResponse>> createComment(
+    public ApiResponse<CommentResponse> createComment(
             @PathVariable Long postId,
             @RequestBody @Valid CommentCreateRequest reqBody
     ) {
@@ -61,18 +61,15 @@ public class CommentController {
 
         Comment newComment = commentService.writeComment(currentUser, postId, reqBody.content());
 
-        ApiResponse<CommentResponse> responseBody = new ApiResponse<>(
-                HttpStatus.CREATED,
+        return ApiResponse.created(
                 "%d번 댓글이 생성되었습니다.".formatted(newComment.getId()),
                 new CommentResponse(newComment)
         );
-
-        return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{postId}/comments/{commentId}")
     @Operation(summary = "댓글 수정")
-    public ResponseEntity<ApiResponse<CommentResponse>> updateComment(
+    public ApiResponse<CommentResponse> updateComment(
             @PathVariable Long commentId,
             @RequestBody @Valid CommentCreateRequest reqBody
     ) {
@@ -88,13 +85,10 @@ public class CommentController {
                 reqBody.content()
         );
 
-        ApiResponse<CommentResponse> responseBody = new ApiResponse<>(
-                HttpStatus.OK,
+        return ApiResponse.ok(
                 "%d번 댓글이 성공적으로 수정되었습니다.".formatted(updatedComment.getId()),
                 new CommentResponse(updatedComment)
         );
-
-        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
 }
