@@ -403,4 +403,79 @@ class ResumeControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("이력서 조회 API")
+    class t4 {
+        @Test
+        @DisplayName("정상 작동")
+        void success() throws Exception {
+            // given
+            Long userId = 2L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/users/resumes/%d" .formatted(userId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("getResume"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("이력서를 조회했습니다."))
+                    .andExpect(jsonPath("$.data.userId").value(2))
+                    .andExpect(jsonPath("$.data.content").value("이력서 내용입니다."))
+                    .andExpect(jsonPath("$.data.skill").value("Java, Spring Boot"))
+                    .andExpect(jsonPath("$.data.activity").value("대외 활동 내용입니다."))
+                    .andExpect(jsonPath("$.data.certification").value("없음"))
+                    .andExpect(jsonPath("$.data.career").value("경력 사항 내용입니다."))
+                    .andExpect(jsonPath("$.data.portfolioUrl").value("http://portfolio.example.com"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("이력서가 존재하지 않을 때")
+        void fail1() throws Exception {
+            // given
+            Long userId = 1L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/users/resumes/%d" .formatted(userId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("getResume"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("이력서를 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않을 때")
+        void fail2() throws Exception {
+            // given
+            Long userId = 999L;
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/users/resumes/%d" .formatted(userId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+            // then
+            resultActions
+                    .andExpect(handler().handlerType(ResumeController.class))
+                    .andExpect(handler().methodName("getResume"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+    }
+
 }
