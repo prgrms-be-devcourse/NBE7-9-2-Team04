@@ -4,16 +4,14 @@ package com.backend.api.comment.controller;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.PostStatus;
+import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.repository.PostRepository;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CommentControllerTest {
 
     @Autowired
@@ -49,6 +48,68 @@ public class CommentControllerTest {
     private CommentRepository commentRepository;
     @Autowired
     private UserRepository userRepository;
+
+    @BeforeAll
+    @Transactional
+    void setUp() {
+
+        User generalUser = User.builder()
+                .email("general@user.com")
+                .password("asdf1234!")
+                .name("홍길동")
+                .nickname("gildong")
+                .age(20)
+                .github("abc123")
+                .image(null)
+                .role(User.Role.USER)
+                .build();
+
+        User generalUser2 = User.builder()
+                .email("general2@user.com")
+                .password("asdf1234!")
+                .name("홍길똥")
+                .nickname("gilddong")
+                .age(25)
+                .github("abc1233")
+                .image(null)
+                .role(User.Role.USER)
+                .build();
+
+        userRepository.save(generalUser);
+        userRepository.save(generalUser2);
+
+        Post post1 = Post.builder()
+                .title("제목")
+                .content("내용")
+                .deadline(LocalDateTime.now().plusDays(7))
+                .status(PostStatus.ING)
+                .pinStatus(PinStatus.NOT_PINNED)
+                .users(userRepository.findById(1L).orElseThrow())
+                .build();
+        postRepository.save(post1);
+
+        Comment comment1 = Comment.builder()
+                .content("1번 댓글")
+                .author(userRepository.findById(1L).orElseThrow())
+                .post(post1)
+                .build();
+
+        Comment comment2 = Comment.builder()
+                .content("2번 댓글")
+                .author(userRepository.findById(1L).orElseThrow())
+                .post(post1)
+                .build();
+
+        Comment comment3 = Comment.builder()
+                .content("3번 댓글")
+                .author(userRepository.findById(1L).orElseThrow())
+                .post(post1)
+                .build();
+
+        commentRepository.save(comment1);
+        commentRepository.save(comment2);
+        commentRepository.save(comment3);
+    }
 
     @Test
     @DisplayName("댓글 생성 - 1번 게시글에 생성")
