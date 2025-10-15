@@ -1,5 +1,6 @@
 package com.backend.api.comment.service;
 
+import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.Post;
@@ -18,12 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PostRepository postRepository;
+    private final PostService postService;
 
     @Transactional
     public Comment writeComment(User user, Long postId, String content) {
 
-        Post post = postRepository.findById(postId)
+        Post post = postService.findById(postId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
         Comment comment = Comment.builder()
