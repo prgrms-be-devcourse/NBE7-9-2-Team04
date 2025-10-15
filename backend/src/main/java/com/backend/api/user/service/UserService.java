@@ -62,13 +62,13 @@ public class UserService {
     public TokenResponse createAccessTokenFromRefresh(String refreshToken) {
 
         //refreshToken 유효성 검사
-        if(!jwtTokenProvider.validateToken(refreshToken)){
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         //refreshToken으로부터 id 추출
         Long userId = jwtTokenProvider.getIdFromToken(refreshToken);
-        if(userId == null){
+        if (userId == null) {
             throw new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
@@ -81,6 +81,7 @@ public class UserService {
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
 
         return new TokenResponse(newAccessToken, newRefreshToken);
+    }
       
     public UserMyPageResponse getInformation(Long userId){
         User users = getUser(userId);

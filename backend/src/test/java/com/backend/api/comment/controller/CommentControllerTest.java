@@ -1,23 +1,21 @@
 package com.backend.api.comment.controller;
 
 
+import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.PinStatus;
+import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostStatus;
+import com.backend.domain.post.repository.PostRepository;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
-import com.backend.domain.comment.entity.Comment;
-import com.backend.domain.post.entity.Post;
-import com.backend.domain.post.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,8 +27,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -79,12 +77,12 @@ public class CommentControllerTest {
     void setupTestData() {
         // 1. 사용자 생성 및 저장 (Controller의 임시 사용자 역할을 대신함)
         testAuthor = userRepository.save(User.builder()
-                .email("test1@test.com").password("pw").name("작성자1").nickname("user1").age(20).role(User.Role.USER)
+                .email("test1@test.com").password("pw").name("작성자1").nickname("user1").age(20).role(Role.USER)
                 .github("").build());
 
         // 2. 다른 사용자 생성 및 저장 (권한 없음 테스트용)
         testOtherUser = userRepository.save(User.builder()
-                .email("test2@test.com").password("pw").name("작성자2").nickname("user2").age(30).role(User.Role.USER)
+                .email("test2@test.com").password("pw").name("작성자2").nickname("user2").age(30).role(Role.USER)
                 .github("").build());
 
         // 3. 게시글 생성 및 저장

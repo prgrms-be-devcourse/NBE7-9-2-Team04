@@ -4,6 +4,7 @@ import com.backend.api.comment.dto.request.CommentCreateRequest;
 import com.backend.api.comment.dto.response.CommentResponse;
 import com.backend.api.comment.service.CommentService;
 import com.backend.domain.comment.entity.Comment;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.global.dto.response.ApiResponse;
 import com.backend.global.entity.BaseEntity;
@@ -11,8 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,7 +30,7 @@ public class CommentController {
                 .nickname("user1")
                 .age(30)
                 .github("https://github.com/temp1")
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
         try {
             // BaseEntity 클래스에서 protected id 필드에 접근

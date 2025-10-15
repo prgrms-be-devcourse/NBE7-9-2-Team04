@@ -3,7 +3,6 @@ package com.backend.api.user.controller;
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
-import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.dto.response.UserResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.user.entity.User;
@@ -15,7 +14,6 @@ import com.backend.global.security.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -80,7 +78,5 @@ public class UserController {
 
         return ApiResponse.ok("새로운 토큰이 발급되었습니다",  null);
     }
-
-
 
 }

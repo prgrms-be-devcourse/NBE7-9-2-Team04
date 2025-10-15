@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -63,7 +63,7 @@ class ResumeControllerTest {
                 .name("test")
                 .password("test1234")
                 .image(null)
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .nickname("testnick")
                 .build();
         userRepository.save(user);
