@@ -59,8 +59,4 @@ public class User extends BaseEntity {
     }
 
 
-    public enum Role {
-        USER, ADMIN
-    }
-
 }

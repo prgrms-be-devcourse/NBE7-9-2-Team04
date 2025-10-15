@@ -3,6 +3,7 @@ package com.backend.api.resume.controller;
 import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.api.resume.dto.response.ResumeCreateResponse;
+import com.backend.api.resume.dto.response.ResumeReadResponse;
 import com.backend.api.resume.dto.response.ResumeUpdateResponse;
 import com.backend.api.resume.service.ResumeService;
 import com.backend.global.dto.response.ApiResponse;
@@ -52,5 +53,14 @@ public class ResumeController {
             @Valid @PathVariable Long resumeId) {
         resumeService.deleteResume(userId, resumeId);
         return ApiResponse.ok("이력서가 삭제되었습니다.", null);
+    }
+
+    @GetMapping("/{userId}")
+    @Operation(summary = "이력서 조회", description = "사용자의 이력서를 조회합니다.")
+    public ApiResponse<ResumeReadResponse> getResume(
+            @Parameter(description = "사용자 ID", example = "1")
+            @Valid @PathVariable Long userId) {
+        ResumeReadResponse response = resumeService.readResume(userId);
+        return ApiResponse.ok("이력서를 조회했습니다.", response);
     }
 }
