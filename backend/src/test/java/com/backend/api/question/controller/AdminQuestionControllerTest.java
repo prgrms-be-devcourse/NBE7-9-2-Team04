@@ -393,15 +393,15 @@ public class AdminQuestionControllerTest {
     }
 
     @Nested
-    @DisplayName("관리자 질문 상세 조회 API")
+    @DisplayName("관리자 질문 단건 조회 API")
     class t6 {
 
         @Test
-        @DisplayName("관리자 질문 상세 조회 성공 - 승인 여부 관계없이 조회 가능")
+        @DisplayName("관리자 질문 단건 조회 성공 - 승인 여부 관계없이 조회 가능")
         void success() throws Exception {
             Question question = questionRepository.save(
                     Question.builder()
-                            .title("관리자용 상세 조회 질문")
+                            .title("관리자용 단건 조회 질문")
                             .content("관리자는 승인 여부 관계없이 조회 가능")
                             .build()
             );
@@ -411,15 +411,15 @@ public class AdminQuestionControllerTest {
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("관리자 질문 상세 조회 성공"))
+                    .andExpect(jsonPath("$.message").value("관리자 질문 단건 조회 성공"))
                     .andExpect(jsonPath("$.data.id").value(question.getId()))
-                    .andExpect(jsonPath("$.data.title").value("관리자용 상세 조회 질문"))
+                    .andExpect(jsonPath("$.data.title").value("관리자용 단건 조회 질문"))
                     .andExpect(jsonPath("$.data.content").value("관리자는 승인 여부 관계없이 조회 가능"))
                     .andDo(print());
         }
 
         @Test
-        @DisplayName("관리자 질문 상세 조회 실패 - 존재하지 않는 ID")
+        @DisplayName("관리자 질문 단건 조회 실패 - 존재하지 않는 ID")
         void fail1() throws Exception {
             mockMvc.perform(get("/api/admin/questions/{questionId}", 999L)
                             .contentType(MediaType.APPLICATION_JSON))
