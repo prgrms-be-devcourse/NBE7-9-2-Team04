@@ -234,7 +234,9 @@ public class CommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("getComments"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("%d번 게시글의 댓글 목록 조회 성공".formatted(targetPostId)));
 
         resultActions
                 .andExpect(jsonPath("$.length()").value(3))
