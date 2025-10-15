@@ -1,5 +1,6 @@
 package com.backend.domain.post.entity;
 
+import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
