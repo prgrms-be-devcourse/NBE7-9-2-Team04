@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Optional;
 
 
 @Service
@@ -63,12 +64,8 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    public Collection<Object> getCommentList(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
-
-        return commentRepository.findByPost(post).stream()
-                .map(Comment::toResponse)
-                .toList();
+    public Optional<Comment> findById(Long id) {
+        return commentRepository.findById(id);
     }
+
 }
