@@ -429,4 +429,38 @@ public class AdminQuestionControllerTest {
                     .andDo(print());
         }
     }
+
+    @Nested
+    @DisplayName("관리자 질문 삭제 API")
+    class t7 {
+
+        @Test
+        @DisplayName("관리자 질문 삭제 성공 - 존재하는 질문 정상 삭제")
+        void success() throws Exception {
+            Question question = questionRepository.save(
+                    Question.builder()
+                            .title("관리자용 삭제 테스트 질문")
+                            .content("삭제 성공 케이스")
+                            .build()
+            );
+
+            mockMvc.perform(delete("/api/v1/admin/questions/{questionId}", question.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("관리자 질문 삭제 성공"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("관리자 질문 삭제 실패 - 존재하지 않는 ID")
+        void fail1() throws Exception {
+            mockMvc.perform(delete("/api/v1/admin/questions/{questionId}", 999L)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+    }
 }
