@@ -50,3 +50,8 @@ custom:
     refresh-token:
       expire-time: "#{72 * 60 * 60 * 1000}"       # 72시간 (3일)
     secretPattern: abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890
+
+toss:
+  payments:
+    base-url: "https://api.tosspayments.com/v1/payments"
+    secret-key: ${PAYMENT_SECRET_KEY}
