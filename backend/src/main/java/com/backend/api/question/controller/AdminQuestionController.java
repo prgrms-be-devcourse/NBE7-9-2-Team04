@@ -69,4 +69,12 @@ public class AdminQuestionController {
         QuestionResponse response = adminQuestionService.getQuestionById(questionId);
         return ApiResponse.ok("관리자 질문 단건 조회 성공", response);
     }
+
+    @DeleteMapping("/{questionId}")
+    @Operation(summary = "질문 삭제 (관리자)", description = "관리자가 질문을 삭제합니다.")
+    public ApiResponse<Void> deleteQuestion(
+            @PathVariable Long questionId) {
+        adminQuestionService.deleteQuestion(questionId);
+        return ApiResponse.ok("관리자 질문 삭제 성공", null);
+    }
 }

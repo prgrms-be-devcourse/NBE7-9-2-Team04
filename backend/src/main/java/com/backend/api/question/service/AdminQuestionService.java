@@ -96,4 +96,12 @@ public class AdminQuestionService {
 
         return QuestionResponse.from(question);
     }
+
+    @Transactional
+    public void deleteQuestion(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+
+        questionRepository.delete(question);
+    }
 }
