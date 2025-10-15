@@ -349,6 +349,8 @@ public class AdminQuestionControllerTest {
         @Test
         @DisplayName("관리자 질문 목록 조회 성공 - 승인 여부 관계없이 전체 반환")
         void success() throws Exception {
+            questionRepository.deleteAll();
+
             Question approved = questionRepository.save(
                     Question.builder()
                             .title("승인 질문")
@@ -380,11 +382,12 @@ public class AdminQuestionControllerTest {
         @Test
         @DisplayName("관리자 질문 목록 조회 실패 - 데이터 없음")
         void fail1() throws Exception {
+            questionRepository.deleteAll();
             mockMvc.perform(get("/api/admin/questions")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("질문이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
                     .andDo(print());
         }
     }

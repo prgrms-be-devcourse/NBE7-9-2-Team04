@@ -7,10 +7,12 @@ import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,32 @@ public class QuestionService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
 
         question.updateUserQuestion(request.title(), request.content());
+        return QuestionResponse.from(question);
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionResponse> getApprovedQuestions() {
+        List<Question> questions = questionRepository.findByIsApprovedTrue();
+
+        if (questions.isEmpty()) {
+            throw new ErrorException(ErrorCode.NOT_FOUND_QUESTION);
+        }
+
+        return questions.stream()
+                .map(QuestionResponse::from)
+                .toList();
+
+    }
+
+    @Transactional(readOnly = true)
+    public QuestionResponse getApprovedQuestionById(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+
+        if (!Boolean.TRUE.equals(question.getIsApproved())) {
+            throw new ErrorException(ErrorCode.QUESTION_NOT_APPROVED);
+        }
+
         return QuestionResponse.from(question);
     }
 }

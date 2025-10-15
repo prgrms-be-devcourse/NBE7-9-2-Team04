@@ -9,10 +9,12 @@ import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +74,27 @@ public class AdminQuestionService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
 
         question.setScore(score);
+
+        return QuestionResponse.from(question);
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionResponse> getAllQuestions() {
+        List<Question> questions = questionRepository.findAll();
+
+        if (questions.isEmpty()) {
+            throw new ErrorException(ErrorCode.NOT_FOUND_QUESTION);
+        }
+
+        return questions.stream()
+                .map(QuestionResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public QuestionResponse getQuestionById(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
 
         return QuestionResponse.from(question);
     }

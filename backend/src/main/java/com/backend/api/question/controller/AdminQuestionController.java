@@ -56,4 +56,19 @@ public class AdminQuestionController {
         QuestionResponse response = adminQuestionService.setQuestionScore(questionId, request.score());
         return ResponseEntity.ok(ApiResponse.ok("질문 점수가 수정되었습니다.", response));
     }
+
+    @GetMapping
+    @Operation(summary = "질문 전체 조회 (관리자)", description = "관리자가 질문 전체 조회합니다.(미승인 포함)")
+    public ResponseEntity<ApiResponse<java.util.List<QuestionResponse>>> getAllQuestions() {
+        java.util.List<QuestionResponse> questions = adminQuestionService.getAllQuestions();
+        return ResponseEntity.ok(ApiResponse.ok("관리자 질문 목록 조회 성공", questions));
+    }
+
+    @GetMapping("/{questionId}")
+    @Operation(summary = "질문 단건 조회 (관리자)", description = "관리자가 질문 ID로 단건 조회합니다.(미승인 포함)")
+    public ResponseEntity<ApiResponse<QuestionResponse>> getQuestionById(
+            @PathVariable Long questionId) {
+        QuestionResponse response = adminQuestionService.getQuestionById(questionId);
+        return ResponseEntity.ok(ApiResponse.ok("관리자 질문 단건 조회 성공", response));
+    }
 }
