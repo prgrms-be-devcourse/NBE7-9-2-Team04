@@ -3,17 +3,15 @@ package com.backend.api.question.controller;
 import com.backend.api.question.dto.request.*;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.api.question.service.AdminQuestionService;
-import com.backend.api.question.service.QuestionService;
 import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin/questions")
+@RequestMapping("/api/v1/admin/questions")
 @RequiredArgsConstructor
 @Tag(name = "Admin Questions", description = "관리자 질문 관리 API")
 public class AdminQuestionController {

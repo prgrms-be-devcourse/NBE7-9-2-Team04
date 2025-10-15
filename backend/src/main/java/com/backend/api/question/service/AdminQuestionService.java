@@ -2,8 +2,6 @@ package com.backend.api.question.service;
 
 import com.backend.api.question.dto.request.AdminQuestionAddRequest;
 import com.backend.api.question.dto.request.AdminQuestionUpdateRequest;
-import com.backend.api.question.dto.request.QuestionAddRequest;
-import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;

@@ -67,7 +67,7 @@ public class AdminQuestionControllerTest {
 
             );
 
-            mockMvc.perform(post("/api/admin/questions")
+            mockMvc.perform(post("/api/v1/admin/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -91,7 +91,7 @@ public class AdminQuestionControllerTest {
                     0
             );
 
-            mockMvc.perform(post("/api/admin/questions")
+            mockMvc.perform(post("/api/v1/admin/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -111,7 +111,7 @@ public class AdminQuestionControllerTest {
                     0
             );
 
-            mockMvc.perform(post("/api/admin/questions")
+            mockMvc.perform(post("/api/v1/admin/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -131,7 +131,7 @@ public class AdminQuestionControllerTest {
                     -3 // 점수가 음수일때
             );
 
-            mockMvc.perform(post("/api/admin/questions")
+            mockMvc.perform(post("/api/v1/admin/questions")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -155,7 +155,7 @@ public class AdminQuestionControllerTest {
                     null // 카테고리 미구현으로 null 처리
             );
 
-            mockMvc.perform(put("/api/admin/questions/{questionId}", questionId)
+            mockMvc.perform(put("/api/v1/admin/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -176,7 +176,7 @@ public class AdminQuestionControllerTest {
                     null
             );
 
-            mockMvc.perform(put("/api/admin/questions/{questionId}", questionId)
+            mockMvc.perform(put("/api/v1/admin/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
@@ -195,7 +195,7 @@ public class AdminQuestionControllerTest {
                     null
             );
 
-            mockMvc.perform(put("/api/admin/questions/{questionId}", questionId)
+            mockMvc.perform(put("/api/v1/admin/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -214,7 +214,7 @@ public class AdminQuestionControllerTest {
                     null
             );
 
-            mockMvc.perform(put("/api/admin/questions/{questionId}", questionId)
+            mockMvc.perform(put("/api/v1/admin/questions/{questionId}", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -234,7 +234,7 @@ public class AdminQuestionControllerTest {
             Long questionId = savedQuestion.getId();
             QuestionApproveRequest request = new QuestionApproveRequest(true);
 
-            mockMvc.perform(patch("/api/admin/questions/{questionId}/approve", questionId)
+            mockMvc.perform(patch("/api/v1/admin/questions/{questionId}/approve", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -250,7 +250,7 @@ public class AdminQuestionControllerTest {
             Long questionId = savedQuestion.getId();
             QuestionApproveRequest request = new QuestionApproveRequest(false);
 
-            mockMvc.perform(patch("/api/admin/questions/{questionId}/approve", questionId)
+            mockMvc.perform(patch("/api/v1/admin/questions/{questionId}/approve", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -266,7 +266,7 @@ public class AdminQuestionControllerTest {
             Long questionId = 999L;
             QuestionApproveRequest request = new QuestionApproveRequest(true);
 
-            mockMvc.perform(patch("/api/admin/questions/{questionId}/approve", questionId)
+            mockMvc.perform(patch("/api/v1/admin/questions/{questionId}/approve", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
@@ -281,7 +281,7 @@ public class AdminQuestionControllerTest {
             Long questionId = savedQuestion.getId();
             QuestionApproveRequest request = new QuestionApproveRequest(null);
 
-            mockMvc.perform(patch("/api/admin/questions/{questionId}/approve", questionId)
+            mockMvc.perform(patch("/api/v1/admin/questions/{questionId}/approve", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -301,7 +301,7 @@ public class AdminQuestionControllerTest {
             Long questionId = savedQuestion.getId();
             QuestionScoreRequest request = new QuestionScoreRequest(20);
 
-            mockMvc.perform(patch("/api/admin/questions/{questionId}/score", questionId)
+            mockMvc.perform(patch("/api/v1/admin/questions/{questionId}/score", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -317,7 +317,7 @@ public class AdminQuestionControllerTest {
             Long questionId = savedQuestion.getId();
             QuestionScoreRequest request = new QuestionScoreRequest(-5);
 
-            mockMvc.perform(patch("/api/admin/questions/{questionId}/score", questionId)
+            mockMvc.perform(patch("/api/v1/admin/questions/{questionId}/score", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -332,7 +332,7 @@ public class AdminQuestionControllerTest {
             Long questionId = 999L;
             QuestionScoreRequest request = new QuestionScoreRequest(5);
 
-            mockMvc.perform(patch("/api/admin/questions/{questionId}/score", questionId)
+            mockMvc.perform(patch("/api/v1/admin/questions/{questionId}/score", questionId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
@@ -367,7 +367,7 @@ public class AdminQuestionControllerTest {
             );
             unapproved.setApproved(false);
 
-            mockMvc.perform(get("/api/admin/questions")
+            mockMvc.perform(get("/api/v1/admin/questions")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
@@ -383,7 +383,7 @@ public class AdminQuestionControllerTest {
         @DisplayName("관리자 질문 목록 조회 실패 - 데이터 없음")
         void fail1() throws Exception {
             questionRepository.deleteAll();
-            mockMvc.perform(get("/api/admin/questions")
+            mockMvc.perform(get("/api/v1/admin/questions")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
@@ -407,12 +407,12 @@ public class AdminQuestionControllerTest {
             );
             question.setApproved(false);
 
-            mockMvc.perform(get("/api/admin/questions/{questionId}", question.getId())
+            mockMvc.perform(get("/api/v1/admin/questions/{questionId}", question.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("관리자 질문 단건 조회 성공"))
-                    .andExpect(jsonPath("$.data.id").value(question.getId()))
+                    .andExpect(jsonPath("$.data.questionId").value(question.getId()))
                     .andExpect(jsonPath("$.data.title").value("관리자용 단건 조회 질문"))
                     .andExpect(jsonPath("$.data.content").value("관리자는 승인 여부 관계없이 조회 가능"))
                     .andDo(print());
@@ -421,7 +421,7 @@ public class AdminQuestionControllerTest {
         @Test
         @DisplayName("관리자 질문 단건 조회 실패 - 존재하지 않는 ID")
         void fail1() throws Exception {
-            mockMvc.perform(get("/api/admin/questions/{questionId}", 999L)
+            mockMvc.perform(get("/api/v1/admin/questions/{questionId}", 999L)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
