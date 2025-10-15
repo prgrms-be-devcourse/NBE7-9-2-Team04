@@ -63,7 +63,7 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
 
-        if (!Boolean.TRUE.equals(question.getIsApproved())) {
+        if (!question.getIsApproved()) {
             throw new ErrorException(ErrorCode.QUESTION_NOT_APPROVED);
         }
 
