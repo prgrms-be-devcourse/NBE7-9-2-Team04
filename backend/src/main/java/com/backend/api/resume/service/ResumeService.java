@@ -3,6 +3,7 @@ package com.backend.api.resume.service;
 import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.api.resume.dto.response.ResumeCreateResponse;
+import com.backend.api.resume.dto.response.ResumeReadResponse;
 import com.backend.api.resume.dto.response.ResumeUpdateResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.resume.entity.Resume;
@@ -85,5 +86,16 @@ public class ResumeService {
         validateResumeAuthor(resume, user);
 
         resumeRepository.delete(resume);
+    }
+
+    public ResumeReadResponse readResume(Long userId) {
+        User user = userService.getUser(userId);
+        Resume resume = getResumeByUser(user);
+        return ResumeReadResponse.from(resume);
+    }
+
+    public Resume getResumeByUser(User user) {
+        return resumeRepository.findByUser(user)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_RESUME));
     }
 }

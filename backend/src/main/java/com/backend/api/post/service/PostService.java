@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -44,6 +46,10 @@ public class PostService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
         return PostResponse.from(post);
+    }
+
+    public Optional<Post> findById(Long id) {
+        return postRepository.findById(id);
     }
 
     @Transactional

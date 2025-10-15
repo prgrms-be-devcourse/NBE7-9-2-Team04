@@ -14,8 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -189,6 +188,113 @@ class QuestionControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").value("질문 내용은 필수입니다."))
+                    .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("질문 조회 API")
+    class t3 {
+
+        @Test
+        @DisplayName("질문 목록 조회 성공 - 승인된 질문만 반환")
+        void success() throws Exception {
+            // given
+            Question approvedQuestion = questionRepository.save(
+                    Question.builder()
+                            .title("승인된 질문")
+                            .content("승인된 질문 내용")
+                            .build()
+            );
+            approvedQuestion.setApproved(true);
+
+            Question unapprovedQuestion = questionRepository.save(
+                    Question.builder()
+                            .title("미승인 질문")
+                            .content("미승인 질문 내용")
+                            .build()
+            );
+            unapprovedQuestion.setApproved(false);
+
+            // when & then
+            mockMvc.perform(get("/api/questions")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("질문 목록 조회 성공"))
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data[0].isApproved").value(true))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 목록 조회 실패 - 데이터 없음")
+        void fail1() throws Exception {
+            // when & then
+            mockMvc.perform(get("/api/questions")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("질문 단건 조회 API")
+    class t4 {
+
+        @Test
+        @DisplayName("질문 단건 조회 성공")
+        void success() throws Exception {
+            Question question = questionRepository.save(
+                    Question.builder()
+                            .title("상세 질문")
+                            .content("상세 질문 내용")
+                            .build()
+            );
+            question.setApproved(true);
+
+            mockMvc.perform(get("/api/questions/{questionId}", question.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("질문 단건 조회 성공"))
+                    .andExpect(jsonPath("$.data.questionId").value(question.getId()))
+                    .andExpect(jsonPath("$.data.title").value("상세 질문"))
+                    .andExpect(jsonPath("$.data.content").value("상세 질문 내용"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 상세 조회 실패 - 존재하지 않는 ID")
+        void fail1() throws Exception {
+            Long invalidId = 999L;
+
+            mockMvc.perform(get("/api/questions/{questionId}", invalidId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 상세 조회 실패 - 승인되지 않은 질문 접근")
+        void fail2() throws Exception {
+            Question question = questionRepository.save(
+                    Question.builder()
+                            .title("미승인 질문")
+                            .content("미승인 질문 내용")
+                            .build()
+            );
+            question.setApproved(false);
+
+            mockMvc.perform(get("/api/questions/{questionId}", question.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.status").value("FORBIDDEN"))
+                    .andExpect(jsonPath("$.message").value("승인되지 않은 질문입니다."))
                     .andDo(print());
         }
     }

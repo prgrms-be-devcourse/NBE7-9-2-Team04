@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/questions")
 @RequiredArgsConstructor
@@ -22,18 +24,34 @@ public class QuestionController {
 
     @PostMapping
     @Operation(summary = "질문 생성", description = "사용자가 질문을 생성합니다.")
-    public ResponseEntity<ApiResponse<QuestionResponse>> addQuestion(
+    public ApiResponse<QuestionResponse> addQuestion(
             @Valid @RequestBody QuestionAddRequest request) {
         QuestionResponse response = questionService.addQuestion(request);
-        return ResponseEntity.ok(ApiResponse.ok("질문이 생성되었습니다.",response));
+        return ApiResponse.ok("질문이 생성되었습니다.",response);
     }
 
     @PutMapping("/{questionId}")
     @Operation(summary = "질문 수정", description = "사용자가 질문을 수정합니다.")
-    public ResponseEntity<ApiResponse<QuestionResponse>> updateQuestion(
+    public ApiResponse<QuestionResponse> updateQuestion(
             @PathVariable Long questionId,
             @Valid @RequestBody QuestionUpdateRequest request) {
         QuestionResponse response = questionService.updateQuestion(questionId,request);
-        return ResponseEntity.ok(ApiResponse.ok("질문이 수정되었습니다.",response));
+        return ApiResponse.ok("질문이 수정되었습니다.",response);
     }
+
+    @GetMapping
+    @Operation(summary = "질문 전체 조회", description = "승인된 질문만 조회합니다.")
+    public ApiResponse<List<QuestionResponse>> getApprovedQuestions() {
+        List<QuestionResponse> questions = questionService.getApprovedQuestions();
+        return ApiResponse.ok("질문 목록 조회 성공", questions);
+    }
+
+    @GetMapping("/{questionId}")
+    @Operation(summary = "질문 단건 조회", description = "질문 ID로 단건 조회합니다.")
+    public ApiResponse<QuestionResponse> getQuestionById(
+            @PathVariable Long questionId) {
+        QuestionResponse response = questionService.getApprovedQuestionById(questionId);
+        return ApiResponse.ok("질문 단건 조회 성공", response);
+    }
+
 }
