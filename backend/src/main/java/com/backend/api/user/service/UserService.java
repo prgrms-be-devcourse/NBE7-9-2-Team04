@@ -2,6 +2,7 @@ package com.backend.api.user.service;
 
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
+import com.backend.domain.user.entity.Role;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
@@ -20,6 +21,10 @@ public class UserService {
 
     public User signUp(UserSignupRequest request) {
 
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new ErrorException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
         String encodedPassword = passwordEncoder.encode(request.password());
         User user = User.builder()
                 .email(request.email())
@@ -29,7 +34,7 @@ public class UserService {
                 .age(request.age())
                 .github(request.github())
                 .image(request.image())
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .build();
 
         return userRepository.save(user);
@@ -37,7 +42,7 @@ public class UserService {
 
     public User login(UserLoginRequest request){
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_EMAIL));
 
         if(!passwordEncoder.matches(request.password(), user.getPassword())){
             throw new ErrorException(ErrorCode.WRONG_PASSWORD);

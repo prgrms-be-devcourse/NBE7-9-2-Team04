@@ -5,6 +5,7 @@ import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,15 +13,15 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.http.MediaType;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -51,7 +52,7 @@ class ResumeControllerTest {
                 .name("test")
                 .password("test1234")
                 .image(null)
-                .role(User.Role.USER)
+                .role(Role.USER)
                 .nickname("testnick")
                 .build();
 
