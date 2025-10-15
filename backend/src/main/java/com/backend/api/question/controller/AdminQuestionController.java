@@ -6,8 +6,6 @@ import com.backend.api.question.service.AdminQuestionService;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
-import com.backend.global.exception.ErrorCode;
-import com.backend.global.exception.ErrorException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
