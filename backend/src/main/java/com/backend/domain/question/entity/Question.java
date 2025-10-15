@@ -1,5 +1,6 @@
 package com.backend.domain.question.entity;
 
+import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -25,10 +26,15 @@ public class Question extends BaseEntity {
     @Column(nullable = false)
     private Integer score = 0; // 기본값 0
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User author;
+
     @Builder
-    public Question(String title, String content) {
+    public Question(String title, String content, User author) {
         this.title = title;
         this.content = content;
+        this.author = author;
     }
 
     public void setApproved(Boolean isApproved) {
