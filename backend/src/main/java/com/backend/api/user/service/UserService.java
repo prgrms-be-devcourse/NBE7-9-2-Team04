@@ -4,6 +4,7 @@ import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
 import com.backend.domain.user.entity.Role;
+import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
@@ -53,7 +54,7 @@ public class UserService {
         return user;
     }
 
-    public User getId(Long userId) {
+    public User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
     }
@@ -80,5 +81,10 @@ public class UserService {
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
 
         return new TokenResponse(newAccessToken, newRefreshToken);
+      
+    public UserMyPageResponse getInformation(Long userId){
+        User users = getUser(userId);
+
+        return UserMyPageResponse.fromEntity(users);
     }
 }
