@@ -44,7 +44,7 @@ public class Payment extends BaseEntity {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    //결제 요청 시간은 BaseEntity의 createDate로 사용
+    //결제 요청시간은 baseEntity createDate로
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
