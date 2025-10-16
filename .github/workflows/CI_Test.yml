@@ -17,6 +17,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+        
+    env: # ✅ GitHub Secrets 전달
+      SECRET_PATTERN: ${{ secrets.SECRET_PATTERN }}
 
     steps:
       - name: 리포지토리를 가져옵니다
