@@ -3,14 +3,11 @@ package com.backend.api.payment.controller;
 import com.backend.api.payment.dto.reponse.PaymentResponse;
 import com.backend.api.payment.dto.request.PaymentRequest;
 import com.backend.api.payment.service.PaymentService;
-import com.backend.domain.payment.entity.Payment;
 import com.backend.global.dto.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,15 +19,31 @@ public class PaymentController {
 
     //결제 승인
     @PostMapping("/confirm")
+    @Operation(summary = "결제 승인")
     public ApiResponse<PaymentResponse> confirm(
             @RequestBody PaymentRequest request
     ){
-        Payment payment = paymentService.confirmPayment(request);
-        PaymentResponse response = PaymentResponse.from(payment);
 
-
+        PaymentResponse response = paymentService.confirmPayment(request);
         return ApiResponse.ok("결제가 승인되었습니다.", response);
+    }
 
+    @GetMapping("/{paymentKey}")
+    @Operation(summary = "paymentKey로 결제 조회")
+    public ApiResponse<PaymentResponse> geyPaymentByKey(
+            @PathVariable String paymentKey
+    ){
+        PaymentResponse response = paymentService.geyPaymentByKey(paymentKey);
+        return ApiResponse.ok("결제 정보를 조회합니다", response);
+    }
+
+    @GetMapping("/{orderId}")
+    @Operation(summary = "orderId로 결제 조회")
+    public ApiResponse<PaymentResponse> geyPaymentByOrderId(
+            @PathVariable String orderId
+    ){
+        PaymentResponse response = paymentService.getPaymentByOrderId(orderId);
+        return ApiResponse.ok("결제 정보를 조회합니다", response);
     }
 
 }

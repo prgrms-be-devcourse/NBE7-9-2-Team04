@@ -1,6 +1,7 @@
 package com.backend.api.payment.service;
 
 
+import com.backend.api.payment.dto.reponse.PaymentResponse;
 import com.backend.api.payment.dto.request.PaymentRequest;
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.payment.entity.PaymentStatus;
@@ -48,7 +49,7 @@ public class PaymentService {
 
     //결제 승인
     @Transactional
-    public Payment confirmPayment(PaymentRequest request) throws IOException {
+    public PaymentResponse confirmPayment(PaymentRequest request){
         try {
             User user = rq.getUser(); // ✅ 현재 로그인 사용자 정보
 
@@ -60,54 +61,53 @@ public class PaymentService {
             JSONObject response = sendPostRequest("/confirm", body);
             int code = ((Number) response.get("_statusCode")).intValue();
 
-            if (code == 200) {
+            if (code != 200) throw new ErrorException(ErrorCode.PAYMENT_APPROVE_FAILED);
 
-                Payment payment = Payment.builder()
-                        .orderId((String) response.get("orderId"))
-                        .paymentKey((String) response.get("paymentKey"))
-                        .orderName((String) response.get("orderName"))
-                        .method((String) response.get("method"))
-                        .totalAmount(((Number) response.get("totalAmount")).longValue())
-                        .status(PaymentStatus.DONE)
-                        .approvedAt(LocalDateTime.now())
-                        .user(user)
-                        .build();
+            Payment payment = Payment.builder()
+                    .orderId((String) response.get("orderId"))
+                    .paymentKey((String) response.get("paymentKey"))
+                    .orderName((String) response.get("orderName"))
+                    .method((String) response.get("method"))
+                    .totalAmount(((Number) response.get("totalAmount")).longValue())
+                    .status(PaymentStatus.DONE)
+                    .approvedAt(LocalDateTime.now())
+                    .user(user)
+                    .build();
 
-                return paymentRepository.save(payment);
-            } else {
-                throw new ErrorException(ErrorCode.PAYMENT_APPROVE_FAILED);
-            }
+            paymentRepository.save(payment);
 
+            return PaymentResponse.from(payment);
+
+        } catch (IOException e) {
+            throw new ErrorException(ErrorCode.PAYMENT_APPROVE_FAILED);
         } catch (Exception e) {
             throw new ErrorException(ErrorCode.PAYMENT_APPROVE_FAILED);
         }
     }
 
-    public JSONObject geyPaymentByKey(String paymentKey) throws IOException {
+    public PaymentResponse geyPaymentByKey(String paymentKey) {
         try {
             JSONObject response = sendGetRequest("/" + paymentKey);
             int code = ((Number) response.get("_statusCode")).intValue();
+            if (code != 200) throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
 
-            if (code == 200) {
-                return response;
-            } else {
-                throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
-            }
+            Payment payment = toPaymentEntity(response);
+            return PaymentResponse.from(payment);
+
         } catch (Exception e) {
             throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
         }
     }
 
-    public JSONObject getPaymentByOrderId(String orderId) throws IOException {
+    public PaymentResponse getPaymentByOrderId(String orderId) {
         try {
             JSONObject response = sendGetRequest("/orders/" + orderId);
             int code = ((Number) response.get("_statusCode")).intValue();
+            if (code != 200) throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
 
-            if (code == 200) {
-                return response;
-            } else {
-                throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
-            }
+            Payment payment = toPaymentEntity(response);
+            return PaymentResponse.from(payment);
+
         } catch (Exception e) {
             throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
         }
@@ -178,4 +178,15 @@ public class PaymentService {
     }
 
 
+    private Payment toPaymentEntity(JSONObject response) {
+        return Payment.builder()
+                .orderId((String) response.get("orderId"))
+                .paymentKey((String) response.get("paymentKey"))
+                .orderName((String) response.get("orderName"))
+                .method((String) response.get("method"))
+                .totalAmount(((Number) response.get("totalAmount")).longValue())
+                .status(PaymentStatus.valueOf(((String) response.get("status")).toUpperCase()))
+                .approvedAt(LocalDateTime.now())
+                .build();
+    }
 }
