@@ -6,11 +6,8 @@ import { useState } from "react";
 import { fetchApi } from "@/lib/client";
 import Link from "next/link";
 
-//관리자 로그인 페이지
 export default function MyPage() {
   const router = useRouter();
-
-
 
   return (
     <>

@@ -4,7 +4,7 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export function FailPage() {
+export default function FailPage() {
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
   const message = searchParams.get("message");

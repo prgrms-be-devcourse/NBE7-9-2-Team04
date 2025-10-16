@@ -19,7 +19,6 @@ public record PaymentRequest(
         String orderId,
 
         @NotNull(message = "결제 금액은 필수입니다.")
-        @Size(min = 6, max = 64, message = "orderId는 6자 이상 64자 이하여야 합니다.")
         @Schema(description = "결제 금액", example = "3000")
         Long amount
 ) {

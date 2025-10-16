@@ -6,7 +6,9 @@ import com.backend.api.payment.dto.request.PaymentRequest;
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.payment.entity.PaymentStatus;
 import com.backend.domain.payment.repository.PaymentRepository;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -35,13 +37,14 @@ import java.util.Base64;
 @Slf4j
 public class PaymentService {
 
-    @Value("${toss.payments.secret-key")
+    @Value("${toss.payments.secret-key}")
     private String secretKey;
 
     @Value(("${toss.payments.base-url}"))
     private String baseUrl;
 
     private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository;
     private final Rq rq;
 
     private final JSONParser parser = new JSONParser();
@@ -51,7 +54,7 @@ public class PaymentService {
     @Transactional
     public PaymentResponse confirmPayment(PaymentRequest request){
         try {
-            User user = rq.getUser();
+            User user = getOrCreateUser(); // 잠시 임시 유저로 테스트
 
             JSONObject body = new JSONObject();
             body.put("paymentKey", request.paymentKey());
@@ -60,6 +63,7 @@ public class PaymentService {
 
             JSONObject response = sendPostRequest("/confirm", body);
             int code = ((Number) response.get("_statusCode")).intValue();
+
 
             if (code != 200) throw new ErrorException(ErrorCode.PAYMENT_APPROVE_FAILED);
 
@@ -78,39 +82,47 @@ public class PaymentService {
 
             return PaymentResponse.from(payment);
 
-        } catch (IOException e) {
+        }  catch (Exception e) {
+            if (e instanceof ErrorException ex) throw ex;
             throw new ErrorException(ErrorCode.PAYMENT_APPROVE_FAILED);
+        }
+    }
+
+
+    //임시 유저
+    private User getOrCreateUser() {
+        try {
+            return rq.getUser();
         } catch (Exception e) {
-            throw new ErrorException(ErrorCode.PAYMENT_APPROVE_FAILED);
+
+            return userRepository.findByEmail("test@local.com")
+                    .orElseGet(() -> {
+                        User tempUser = User.builder()
+                                .email("test@local.com")
+                                .password("test1234")
+                                .name("테스트유저")
+                                .nickname("tester")
+                                .age(25)
+                                .github("https://github.com/tester")
+                                .role(Role.USER)
+                                .build();
+                        return userRepository.save(tempUser);
+                    });
         }
     }
 
     public PaymentResponse geyPaymentByKey(String paymentKey) {
-        try {
-            JSONObject response = sendGetRequest("/" + paymentKey);
-            int code = ((Number) response.get("_statusCode")).intValue();
-            if (code != 200) throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
+        Payment payment = paymentRepository.findByPaymentKey(paymentKey)
+                .orElseThrow(() -> new ErrorException(ErrorCode.PAYMENT_NOT_FOUND));
 
-            Payment payment = toPaymentEntity(response);
-            return PaymentResponse.from(payment);
-
-        } catch (Exception e) {
-            throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
-        }
+        return PaymentResponse.from(payment);
     }
 
     public PaymentResponse getPaymentByOrderId(String orderId) {
-        try {
-            JSONObject response = sendGetRequest("/orders/" + orderId);
-            int code = ((Number) response.get("_statusCode")).intValue();
-            if (code != 200) throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.PAYMENT_NOT_FOUND));
 
-            Payment payment = toPaymentEntity(response);
-            return PaymentResponse.from(payment);
-
-        } catch (Exception e) {
-            throw new ErrorException(ErrorCode.PAYMENT_NOT_FOUND);
-        }
+        return PaymentResponse.from(payment);
     }
 
     //결제 취소 로직 추가해야함

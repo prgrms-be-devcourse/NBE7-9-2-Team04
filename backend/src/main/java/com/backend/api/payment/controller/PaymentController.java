@@ -28,7 +28,7 @@ public class PaymentController {
         return ApiResponse.ok("결제가 승인되었습니다.", response);
     }
 
-    @GetMapping("/{paymentKey}")
+    @GetMapping("/key/{paymentKey}")
     @Operation(summary = "paymentKey로 결제 조회")
     public ApiResponse<PaymentResponse> geyPaymentByKey(
             @PathVariable String paymentKey
@@ -37,7 +37,7 @@ public class PaymentController {
         return ApiResponse.ok("결제 정보를 조회합니다", response);
     }
 
-    @GetMapping("/{orderId}")
+    @GetMapping("/order/{orderId}")
     @Operation(summary = "orderId로 결제 조회")
     public ApiResponse<PaymentResponse> geyPaymentByOrderId(
             @PathVariable String orderId

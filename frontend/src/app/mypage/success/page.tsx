@@ -12,7 +12,7 @@ export default function SuccessPage() {
     async function confirm() {
       const requestData = {
         orderId: searchParams.get("orderId"),
-        amount: searchParams.get("amount"),
+        amount: Number(searchParams.get("amount")),
         paymentKey: searchParams.get("paymentKey"),
       };
 
@@ -32,7 +32,7 @@ export default function SuccessPage() {
     }
 
     confirm().catch((error) => {
-      window.location.href = `/fail?code=${error.code}&message=${error.message}`;
+      window.location.href = `/mypage/fail?code=${error.code}&message=${error.message}`;
     });
   }, []);
 
