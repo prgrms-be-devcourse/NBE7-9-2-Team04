@@ -5,6 +5,8 @@ import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Entity
+@Builder
+@AllArgsConstructor
 public class Subscription extends BaseEntity {
 
     //구독 유형
@@ -33,6 +37,8 @@ public class Subscription extends BaseEntity {
     private LocalDateTime endDate;
 
     //질문 가능 횟수
+    //무료 회원 3번
+    //유료 회원 5번
     @Column(nullable = false)
     private int questionLimit;
 

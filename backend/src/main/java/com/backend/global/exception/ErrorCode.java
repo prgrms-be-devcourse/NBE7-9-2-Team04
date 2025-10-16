@@ -38,8 +38,14 @@ public enum ErrorCode {
     // resume
     DUPLICATE_RESUME(HttpStatus.BAD_REQUEST, "이미 등록된 이력서가 있습니다."),
     NOT_FOUND_RESUME(HttpStatus.NOT_FOUND, "이력서를 찾을 수 없습니다."),
-    INVALID_USER(HttpStatus.FORBIDDEN, "이력서 수정 권한이 없습니다.");
+    INVALID_USER(HttpStatus.FORBIDDEN, "이력서 수정 권한이 없습니다."),
 
+
+    //payment
+    PAYMENT_APPROVE_FAILED(HttpStatus.BAD_REQUEST, "결제 승인을 실패했습니다"),
+    PAYMENT_LOAD_FAILED(HttpStatus.BAD_REQUEST, "결제 조회를 실패했습니다"),
+    PAYMENT_CANCEL_FAILED(HttpStatus.BAD_REQUEST, "결제 취소를 실패했습니다"),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다");
 
     private final HttpStatus httpStatus;
     private final String message;
