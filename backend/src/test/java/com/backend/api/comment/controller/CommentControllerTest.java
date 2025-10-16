@@ -97,7 +97,7 @@ public class CommentControllerTest {
 
         Comment comment2 = Comment.builder()
                 .content("2번 댓글")
-                .author(userRepository.findById(1L).orElseThrow())
+                .author(userRepository.findById(2L).orElseThrow())
                 .post(post1)
                 .build();
 
@@ -163,7 +163,7 @@ public class CommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
                 .andExpect(handler().methodName("createComment"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("CREATED"))
                 .andExpect(jsonPath("$.message").value("%d번 댓글이 생성되었습니다.".formatted(createdCommentId)))
                 .andExpect(jsonPath("$.data.id").value(createdCommentId))
@@ -235,19 +235,16 @@ public class CommentControllerTest {
         assertThat(updatedComment.getModifyDate()).isAfter(initialModifyDate); // 수정 날짜가 초기 날짜보다 이후인지 확인
     }
 
-    /* 현재 컨트롤러에서 임시 유저로 고정시켜서 보류
     @Test
-    @DisplayName("댓글 수정 - 다른 작성자의 댓글 수정")
+    @DisplayName("댓글 수정 - 다른 작성자의 댓글 수정 시도")
     void t3() throws Exception {
         long targetPostId = 1;
-        long targetCommentId = 1;
-        String content = "댓글 내용 수정";
-
-        User author = userRepository.findById(2L).get();
+        long targetCommentId = 2;
+        String content = "수정한 댓글";
 
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/posts/%d/comments/%d".formatted(targetPostId, targetCommentId))
+                        patch("/api/v1/posts/%d/comments/%d".formatted(targetPostId, targetCommentId))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -259,20 +256,17 @@ public class CommentControllerTest {
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("modifyItem"))
+                .andExpect(handler().methodName("updateComment"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value("FORBIDDEN"))
-                .andExpect(jsonPath("$.msg").value("댓글 수정 권한이 없습니다."));
+                .andExpect(jsonPath("$.message").value("권한이 없는 사용자입니다."));
     }
-    */
 
     @Test
     @DisplayName("댓글 삭제 - 1번 글의 1번 댓글 삭제")
     void t4() throws Exception {
         long targetPostId = 1;
         long targetCommentId = 1;
-
-        User author = userRepository.findById(1L).get();
 
         ResultActions resultActions = mvc
                 .perform(
@@ -292,10 +286,31 @@ public class CommentControllerTest {
         Comment comment = commentRepository.findById(targetCommentId).orElse(null);
         assertThat(comment).isNull();
     }
+    
+    @Test
+    @DisplayName("댓글 삭제 - 다른 사용자의 댓글 삭제 시도")
+    void t5() throws Exception {
+        long targetPostId = 1;
+        long targetCommentId = 2;
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/%d/comments/%d".formatted(targetPostId, targetCommentId))
+                )
+                .andDo(print());
+
+        // 필수 검증
+        resultActions
+                .andExpect(handler().handlerType(CommentController.class))
+                .andExpect(handler().methodName("deleteComment"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value("FORBIDDEN"))
+                .andExpect(jsonPath("$.message").value("권한이 없는 사용자입니다."));
+    }
 
     @Test
     @DisplayName("댓글 조회")
-    void t5() throws Exception {
+    void t6() throws Exception {
 
         long targetPostId = 1;
 
