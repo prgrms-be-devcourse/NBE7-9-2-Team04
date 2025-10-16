@@ -58,5 +58,15 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
+    public void updateUser(String email, String password, String name,
+                           String nickname, int age, String github, String image) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.nickname = nickname;
+        this.age = age;
+        this.github = github;
+        this.image = image;
+    }
 
 }
