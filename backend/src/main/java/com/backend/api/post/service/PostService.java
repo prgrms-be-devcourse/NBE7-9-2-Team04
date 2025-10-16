@@ -3,7 +3,6 @@ package com.backend.api.post.service;
 import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
 import com.backend.api.post.dto.response.PostResponse;
-import com.backend.api.user.service.UserService;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
@@ -20,17 +19,9 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UserService userService;
 
     @Transactional
-    public PostResponse createPost(PostAddRequest request, Long userId) {
-
-        if (userId == null) {
-            throw new ErrorException(ErrorCode.NOT_FOUND_USER);
-        }
-
-        User user = userService.getUser(userId);
-
+    public PostResponse createPost(PostAddRequest request, User user) {
         Post post = Post.builder()
                 .title(request.title())
                 .content(request.content())
@@ -57,16 +48,11 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse updatePost(Long postId, PostUpdateRequest request, Long userId) {
-
-        if (userId == null) {
-            throw new ErrorException(ErrorCode.NOT_FOUND_USER);
-        }
-
+    public PostResponse updatePost(Long postId, PostUpdateRequest request, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getUsers().getId().equals(userId)) {
+        if (!post.getUsers().getId().equals(user.getId())) {
             throw new ErrorException(ErrorCode.FORBIDDEN);
         }
         post.updatePost(request.title(), request.content(), request.deadline(), request.status(), request.pinStatus());
@@ -75,12 +61,11 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePost(Long postId, Long userId) {
-
+    public void deletePost(Long postId, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getUsers().getId().equals(userId)) {
+        if (!post.getUsers().getId().equals(user.getId())) {
             throw new ErrorException(ErrorCode.FORBIDDEN);
         }
 
