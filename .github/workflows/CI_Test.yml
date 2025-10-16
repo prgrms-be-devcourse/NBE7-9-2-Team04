@@ -20,6 +20,9 @@ jobs:
         
     env: # ✅ GitHub Secrets 전달
       SECRET_PATTERN: ${{ secrets.SECRET_PATTERN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      EMAIL_ID: ${{ secrets.EMAIL_ID }}
+      EMAIL_PW: ${{ secrets.EMAIL_PW }}
 
     steps:
       - name: 리포지토리를 가져옵니다
