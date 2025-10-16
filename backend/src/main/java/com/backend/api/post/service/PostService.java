@@ -25,6 +25,10 @@ public class PostService {
     @Transactional
     public PostResponse createPost(PostAddRequest request, Long userId) {
 
+        if (userId == null) {
+            throw new ErrorException(ErrorCode.NOT_FOUND_USER);
+        }
+
         User user = userService.getUser(userId);
 
         Post post = Post.builder()
@@ -54,6 +58,10 @@ public class PostService {
 
     @Transactional
     public PostResponse updatePost(Long postId, PostUpdateRequest request, Long userId) {
+
+        if (userId == null) {
+            throw new ErrorException(ErrorCode.NOT_FOUND_USER);
+        }
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));

@@ -16,14 +16,10 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("api/v1/posts")
 public class PostController {
-
-
     private final PostService postService;
 
-    // private final Long TEMP_USER_ID = 1L;
-
     @PostMapping
-    @Operation(summary = "게시글 생성")
+    @Operation(summary = "게시글 생성", description = "유저가 게시물을 등록합니다.")
     public ApiResponse<PostResponse> createPost(
             @Valid @RequestBody PostAddRequest request,
             @AuthenticationPrincipal Long userId) {
