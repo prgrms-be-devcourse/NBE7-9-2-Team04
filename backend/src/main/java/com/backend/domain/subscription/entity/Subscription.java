@@ -36,6 +36,10 @@ public class Subscription extends BaseEntity {
     @Column(nullable = false)
     private int questionLimit;
 
+    // 빌링 키 (정기 결제 시 필수. 일단은 주석 처리)
+//    @Column(name = "billing_key", unique = true, length = 100)
+//    private String billingKey;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

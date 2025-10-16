@@ -1,5 +1,6 @@
 package com.backend.domain.payment.entity;
 
+import com.backend.domain.subscription.entity.Subscription;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -19,7 +20,8 @@ public class Payment extends BaseEntity {
     private String orderId;
 
     //Toss가 제공하는 결제의 키 값
-    @Column(nullable = false, unique = true, length = 200)
+    //결제 승인 API 응답에서만 받음
+    @Column(unique = true, length = 200)
     private String paymentKey;
 
     //주문 내역
@@ -31,7 +33,6 @@ public class Payment extends BaseEntity {
     private Long totalAmount;
 
     //결제 방식
-    @Column(nullable = false)
     private String method;
 
     //결제 상태(토스 status)
@@ -48,5 +49,9 @@ public class Payment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id", unique = true) // FK 칼럼 생성
+    private Subscription subscription;
 
 }
