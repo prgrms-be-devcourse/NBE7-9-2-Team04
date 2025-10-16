@@ -1,6 +1,8 @@
 package com.backend.domain.user.entity;
 
 import com.backend.global.entity.BaseEntity;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Entity
-@Builder
 @Table(name = "users")
 public class User extends BaseEntity {
 
@@ -39,6 +40,11 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AccountStatus accountStatus = AccountStatus.ACTIVE; // 기본값 ACTIVE
+
+    @Builder
     public User(String email,
                 String password,
                 String name,
@@ -59,4 +65,9 @@ public class User extends BaseEntity {
     }
 
 
+    public void changeStatus(AccountStatus newStatus) {
+        if (newStatus != null && !this.accountStatus.equals(newStatus)) {
+            this.accountStatus = newStatus;
+        }
+    }
 }
