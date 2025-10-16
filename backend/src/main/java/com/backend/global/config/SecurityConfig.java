@@ -45,7 +45,7 @@ public class SecurityConfig {
                         ).permitAll()
 
 
-                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/{postId:\\d+}/comments", "/api/v1/posts", "api/v1/posts/{postId:\\d+}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/{postId:\\d+}/comments", "/api/v1/posts", "/api/v1/posts/{postId:\\d+}").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/users/login", "/api/v1/users/signup","/api/v1/users/refresh").permitAll()
                         .anyRequest().authenticated()
 

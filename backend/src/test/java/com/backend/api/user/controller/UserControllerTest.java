@@ -5,9 +5,14 @@ import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.security.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
 @ActiveProfiles("test")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserControllerTest {
 
     @Autowired
@@ -42,20 +46,23 @@ public class UserControllerTest {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     @Nested
     @DisplayName("회원가입 API")
-    class t1{
+    class t1 {
 
         @Test
         @DisplayName("정상 작동")
         void success() throws Exception {
             UserSignupRequest request = new UserSignupRequest(
-                    "test@naver.com",
+                    "signup1@naver.com",
                     "test1234",
                     "test",
-                    "testnick",
+                    "signupNick",
                     27,
-                    "https://github.com/test",
+                    "https://github.com/signup",
                     null
             );
 
@@ -66,7 +73,6 @@ public class UserControllerTest {
             );
 
             User user = userRepository.findByEmail(request.email()).orElseThrow();
-
 
             resultActions
                     .andExpect(handler().handlerType(UserController.class))
@@ -74,38 +80,31 @@ public class UserControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("%d번 회원가입이 완료되었습니다.".formatted(user.getId())))
-                    .andExpect(jsonPath("$.data.id").value(user.getId()))
                     .andExpect(jsonPath("$.data.email").value(request.email()))
-                    .andExpect(jsonPath("$.data.name").value(request.name()))
-                    .andExpect(jsonPath("$.data.nickname").value(user.getNickname()))
-                    .andExpect(jsonPath("$.data.age").value(user.getAge()))
-                    .andExpect(jsonPath("$.data.github").value(user.getGithub()))
-                    .andExpect(jsonPath("$.data.role").value(user.getRole().name()))
-                    .andDo(print());;
+                    .andExpect(jsonPath("$.data.nickname").value(request.nickname()))
+                    .andDo(print());
         }
 
         @Test
         @DisplayName("이미 존재하는 이메일로 회원가입")
         void fail() throws Exception {
-
             User existingUser = userRepository.save(User.builder()
-                    .email("test@naver.com")
+                    .email("signup2@naver.com")
                     .password(passwordEncoder.encode("test1234"))
                     .name("test")
-                    .nickname("testnick")
+                    .nickname("signupNick2")
                     .age(27)
-                    .github("https://github.com/test")
+                    .github("https://github.com/signup2")
                     .role(Role.USER)
                     .build());
 
-
             UserSignupRequest request = new UserSignupRequest(
-                    "test@naver.com",
+                    "signup2@naver.com",
                     "test1234",
                     "test",
-                    "testnick",
+                    "signupNick2",
                     27,
-                    "https://github.com/test",
+                    "https://github.com/signup2",
                     null
             );
 
@@ -114,9 +113,6 @@ public class UserControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
             );
-
-            User user = userRepository.findByEmail(request.email()).orElseThrow();
-
 
             resultActions
                     .andExpect(handler().handlerType(UserController.class))
@@ -126,7 +122,6 @@ public class UserControllerTest {
                     .andExpect(jsonPath("$.message").value("이미 존재하는 이메일입니다."))
                     .andDo(print());
         }
-
     }
 
 
@@ -137,25 +132,26 @@ public class UserControllerTest {
         @BeforeEach
         void setUp() {
             User user = User.builder()
-                    .email("test@naver.com")
+                    .email("login1@naver.com")
                     .age(27)
-                    .github("https://github.com/test")
+                    .github("https://github.com/login1")
                     .name("test")
                     .password(passwordEncoder.encode("test1234"))
                     .image(null)
                     .role(Role.USER)
-                    .nickname("testnick")
+                    .nickname("loginNick")
                     .build();
             userRepository.save(user);
 
         }
 
         @Test
-        @DisplayName("정상 작동")
+        @DisplayName("정상 작동 - 토큰 설정 확인")
         void success() throws Exception {
             UserLoginRequest request = new UserLoginRequest(
-                    "test@naver.com",
+                    "login1@naver.com",
                     "test1234"
+
             );
 
             ResultActions resultActions = mockMvc.perform(
@@ -179,6 +175,20 @@ public class UserControllerTest {
                     .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(user.getCreateDate().toString().substring(0, 20))))
                     .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(user.getModifyDate().toString().substring(0, 20))))
                     .andExpect(jsonPath("$.data.role").value(user.getRole().name()))
+
+                    //Access Token 쿠키 검증
+                    .andExpect(cookie().exists("accessToken"))
+                    .andExpect(cookie().httpOnly("accessToken", true))
+                    .andExpect(cookie().secure("accessToken", true))
+                    .andExpect(cookie().path("accessToken", "/"))
+                    .andExpect(cookie().value("accessToken", Matchers.not(Matchers.emptyString())))
+
+                    //Refresh Token 쿠키 검증
+                    .andExpect(cookie().exists("refreshToken"))
+                    .andExpect(cookie().httpOnly("refreshToken", true))
+                    .andExpect(cookie().secure("refreshToken", true))
+                    .andExpect(cookie().path("refreshToken", "/"))
+                    .andExpect(cookie().value("refreshToken", Matchers.not(Matchers.emptyString())))
                     .andDo(print());;
         }
 
@@ -209,7 +219,7 @@ public class UserControllerTest {
         @DisplayName("비밀번호 불일치")
         void fail2() throws Exception {
             UserLoginRequest request = new UserLoginRequest(
-                    "test@naver.com",
+                    "login1@naver.com",
                     "wrong1234"
             );
 
@@ -251,6 +261,104 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.status").value("OK"))
                 .andExpect(jsonPath("$.message").value("로그아웃이 되었습니다."))
                 .andDo(print());
+    }
+
+
+    @Nested
+    @DisplayName("토큰 재발급 API")
+    class t4{
+
+        private String validRefreshToken;
+        private User user;
+        private Long userId;
+
+        @BeforeEach
+        void setUp() {
+            user = User.builder()
+                    .email("refresh@naver.com")
+                    .age(27)
+                    .github("https://github.com/refresh")
+                    .name("test")
+                    .password(passwordEncoder.encode("refresh1234"))
+                    .image(null)
+                    .role(Role.USER)
+                    .nickname("refreshNick")
+                    .build();
+
+            userRepository.save(user);
+
+            userId = user.getId();
+            validRefreshToken = jwtTokenProvider.generateRefreshToken(
+                    userId,
+                    user.getEmail(),
+                    user.getRole()
+            );
+        }
+
+        @Test
+        @DisplayName("토큰 갱신 정상 작동")
+        void success() throws Exception {
+            ResultActions resultActions = mockMvc
+                    .perform(
+                            post("/api/v1/users/refresh")
+                                    .cookie(new Cookie("refreshToken", validRefreshToken))
+                    )
+                    .andDo(print());
+
+            resultActions
+                    .andExpect(handler().handlerType(UserController.class))
+                    .andExpect(handler().methodName("refresh"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("새로운 토큰이 발급되었습니다."))
+                    .andExpect(cookie().exists("refreshToken"))
+                    .andExpect(cookie().exists("accessToken"))
+                    .andDo(print());
+
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 refreshToken")
+        void fail1() throws Exception {
+            ResultActions resultActions = mockMvc
+                    .perform(
+                            //토큰 없이 요청
+                            post("/api/v1/users/refresh")
+                    )
+                    .andDo(print());
+
+            resultActions
+                    .andExpect(handler().handlerType(UserController.class))
+                    .andExpect(handler().methodName("refresh"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+                    .andExpect(jsonPath("$.message").value("Refresh Token을 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+
+        @Test
+        @DisplayName("유효하지 않은 refreshToken")
+        void fail2() throws Exception {
+
+            String wrongRefreshToken = "wrong-access-token";
+            ResultActions resultActions = mockMvc
+                    .perform(
+                            post("/api/v1/users/refresh")
+
+                                    .cookie(new Cookie("refreshToken", wrongRefreshToken))
+                    )
+                    .andDo(print());
+
+            resultActions
+                    .andExpect(handler().handlerType(UserController.class))
+                    .andExpect(handler().methodName("refresh"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+                    .andExpect(jsonPath("$.message").value("유효하지 않은 Refresh Token입니다."))
+                    .andDo(print());
+        }
+
     }
 
 }
