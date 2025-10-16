@@ -1,4 +1,4 @@
-package com.backend.api.payment;
+package com.backend.api.payment.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users")
-@Tag(name ="Users", description = "사용자 관련 API")
+@RequestMapping("/api/v1/payments")
+@Tag(name ="Payments", description = "결제 관련 API")
 public class PaymentController {
+
+
 }

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 public class Payment extends BaseEntity {
 
-    //주문 번호
+    //주문 번호. 여기서는 subscriptionId?
     @Column(nullable = false, unique = true)
     private String orderId;
 
