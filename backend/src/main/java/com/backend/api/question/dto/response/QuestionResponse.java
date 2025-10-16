@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public record QuestionResponse(
         @Schema(description = "질문 ID", example = "1")
@@ -21,6 +22,12 @@ public record QuestionResponse(
 
         @Schema(description = "점수", example = "5")
         Integer score,
+
+        @Schema(description = "작성자 ID", example = "1")
+        Long authorId,
+
+        @Schema(description = "작성자 닉네임", example = "user123")
+        String authorNickname,
 
         @Schema(description = "카테고리 ID 목록", example = "[1, 2]")
         List<Long> categoryIds,
@@ -39,6 +46,8 @@ public record QuestionResponse(
                 question.getContent(),
                 question.getIsApproved(),
                 question.getScore(),
+                question.getAuthor() != null ? question.getAuthor().getId() : null,
+                question.getAuthor() != null ? question.getAuthor().getNickname() : null,
                 null,
                 question.getCreateDate(),
                 question.getModifyDate()

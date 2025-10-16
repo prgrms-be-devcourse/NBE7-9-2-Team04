@@ -4,6 +4,8 @@ import com.backend.api.question.dto.request.QuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.api.question.service.QuestionService;
+import com.backend.domain.user.entity.User;
+import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,13 +22,15 @@ import java.util.List;
 public class QuestionController {
 
     private final QuestionService questionService;
+    private final Rq rq;
 
     @PostMapping
     @Operation(summary = "질문 생성", description = "사용자가 질문을 생성합니다.")
     public ApiResponse<QuestionResponse> addQuestion(
             @Valid @RequestBody QuestionAddRequest request) {
-        QuestionResponse response = questionService.addQuestion(request);
-        return ApiResponse.ok("질문이 생성되었습니다.",response);
+        User user = rq.getUser();
+        QuestionResponse response = questionService.addQuestion(request, user);
+        return ApiResponse.ok("질문이 생성되었습니다.", response);
     }
 
     @PutMapping("/{questionId}")
@@ -34,8 +38,9 @@ public class QuestionController {
     public ApiResponse<QuestionResponse> updateQuestion(
             @PathVariable Long questionId,
             @Valid @RequestBody QuestionUpdateRequest request) {
-        QuestionResponse response = questionService.updateQuestion(questionId,request);
-        return ApiResponse.ok("질문이 수정되었습니다.",response);
+        User user = rq.getUser();
+        QuestionResponse response = questionService.updateQuestion(questionId, request, user);
+        return ApiResponse.ok("질문이 수정되었습니다.", response);
     }
 
     @GetMapping

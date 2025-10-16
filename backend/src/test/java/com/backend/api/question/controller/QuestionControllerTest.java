@@ -4,12 +4,18 @@ import com.backend.api.question.dto.request.QuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
+import com.backend.domain.user.entity.Role;
+import com.backend.domain.user.entity.User;
+import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.Rq.Rq;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,15 +40,38 @@ class QuestionControllerTest {
     @Autowired
     private QuestionRepository questionRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    private User testUser;
+
     private Question savedQuestion;
+
+    @MockBean
+    private Rq rq;
 
     @BeforeEach
     void setUp() {
         questionRepository.deleteAll();
+        userRepository.deleteAll();
+
+        testUser = userRepository.save(
+                User.builder()
+                        .name("TestUser")
+                        .email("test@test.com")
+                        .github("https://github.com/tester")
+                        .password("1234")
+                        .nickname("tester")
+                        .role(Role.USER)
+                        .build()
+        );
+
+        Mockito.when(rq.getUser()).thenReturn(testUser);
 
         Question question = Question.builder()
                 .title("기존 제목")
                 .content("기존 내용")
+                .author(testUser)
                 .build();
 
         savedQuestion = questionRepository.save(question);
@@ -69,6 +98,8 @@ class QuestionControllerTest {
                     .andExpect(jsonPath("$.message").value("질문이 생성되었습니다."))
                     .andExpect(jsonPath("$.data.title").value("Spring Boot란?"))
                     .andExpect(jsonPath("$.data.content").value("Spring Boot의 핵심 개념과 장점을 설명해주세요."))
+                    .andExpect(jsonPath("$.data.authorId").value(testUser.getId()))
+                    .andExpect(jsonPath("$.data.authorNickname").value("tester"))
                     .andDo(print());
         }
 
@@ -199,11 +230,11 @@ class QuestionControllerTest {
         @Test
         @DisplayName("질문 목록 조회 성공 - 승인된 질문만 반환")
         void success() throws Exception {
-            // given
             Question approvedQuestion = questionRepository.save(
                     Question.builder()
                             .title("승인된 질문")
                             .content("승인된 질문 내용")
+                            .author(testUser)
                             .build()
             );
             approvedQuestion.setApproved(true);
@@ -212,11 +243,11 @@ class QuestionControllerTest {
                     Question.builder()
                             .title("미승인 질문")
                             .content("미승인 질문 내용")
+                            .author(testUser)
                             .build()
             );
             unapprovedQuestion.setApproved(false);
 
-            // when & then
             mockMvc.perform(get("/api/v1/questions")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
@@ -230,7 +261,6 @@ class QuestionControllerTest {
         @Test
         @DisplayName("질문 목록 조회 실패 - 데이터 없음")
         void fail1() throws Exception {
-            // when & then
             mockMvc.perform(get("/api/v1/questions")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
@@ -251,6 +281,7 @@ class QuestionControllerTest {
                     Question.builder()
                             .title("상세 질문")
                             .content("상세 질문 내용")
+                            .author(testUser)
                             .build()
             );
             question.setApproved(true);
@@ -286,6 +317,7 @@ class QuestionControllerTest {
                     Question.builder()
                             .title("미승인 질문")
                             .content("미승인 질문 내용")
+                            .author(testUser)
                             .build()
             );
             question.setApproved(false);
