@@ -22,7 +22,7 @@ public class PostController {
     @PostMapping
     @Operation(summary = "게시글 생성", description = "유저가 게시물을 등록합니다.")
     public ApiResponse<PostResponse> createPost(
-            @Valid @RequestBody PostAddRequest request) { // @AuthenticationPrincipal 제거
+            @Valid @RequestBody PostAddRequest request) {
 
         User user = rq.getUser(); // Rq를 통해 User 객체 가져오기
         PostResponse response = postService.createPost(request, user); // User 객체를 서비스로 전달
