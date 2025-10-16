@@ -51,7 +51,7 @@ public class PaymentService {
     @Transactional
     public PaymentResponse confirmPayment(PaymentRequest request){
         try {
-            User user = rq.getUser(); // ✅ 현재 로그인 사용자 정보
+            User user = rq.getUser();
 
             JSONObject body = new JSONObject();
             body.put("paymentKey", request.paymentKey());
