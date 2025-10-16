@@ -9,3 +9,7 @@ spring:
     properties:
       hibernate:
         ddl-auto: create-drop
+
+custom:
+  jwt:
+    secretPattern: ${SECRET_PATTERN}
