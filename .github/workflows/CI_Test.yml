@@ -19,7 +19,9 @@ jobs:
     runs-on: ubuntu-latest
         
     env: # ✅ GitHub Secrets 전달
+      SPRING_PROFILES_ACTIVE: test
       SECRET_PATTERN: ${{ secrets.SECRET_PATTERN }}
+      PAYMENT_SECRET_KEY: ${{ secrets.PAYMENT_SECRET_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       EMAIL_ID: ${{ secrets.EMAIL_ID }}
       EMAIL_PW: ${{ secrets.EMAIL_PW }}
