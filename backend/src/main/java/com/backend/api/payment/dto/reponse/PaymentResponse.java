@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
+//백 -> 클
 public record PaymentResponse(
         @Schema(description = "Payment 엔티티의 고유 ID", example = "1")
         Long paymentId,

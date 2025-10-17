@@ -45,10 +45,6 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
 
-    implementation("com.googlecode.json-simple:json-simple:1.1.1")
-    implementation("net.minidev:json-smart:2.5.2")
-    implementation("net.minidev:accessors-smart:2.5.2")
-
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
 
