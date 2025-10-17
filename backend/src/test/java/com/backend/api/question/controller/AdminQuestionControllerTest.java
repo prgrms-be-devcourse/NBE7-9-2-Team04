@@ -55,8 +55,6 @@ public class AdminQuestionControllerTest {
 
     @BeforeEach
     void setUp() {
-        questionRepository.deleteAll();
-        userRepository.deleteAll();
 
         testUser = userRepository.save(
                 User.builder()
