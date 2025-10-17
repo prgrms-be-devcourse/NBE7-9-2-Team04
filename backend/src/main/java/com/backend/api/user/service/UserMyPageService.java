@@ -3,16 +3,24 @@ package com.backend.api.user.service;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.Rq.Rq;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserMyPageService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Rq rq;
 
 
     public UserMyPageResponse modifyUser(Long userId, UserMyPageResponse.UserModify modify) {
@@ -28,6 +36,9 @@ public class UserMyPageService {
                 modify.getGithub(),
                 modify.getImage()
         );
+        if (!rq.getUser().getId().equals(userId)) {
+            throw new ErrorException(ErrorCode.SELF_INFORMATION);
+        }
 
         User saved = userRepository.save(user);
         return UserMyPageResponse.fromEntity(saved);
@@ -35,7 +46,7 @@ public class UserMyPageService {
 
     public UserMyPageResponse getInformation(Long userId){
         User users = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
 
         return UserMyPageResponse.fromEntity(users);
     }

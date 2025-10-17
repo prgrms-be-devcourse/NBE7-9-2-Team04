@@ -1,23 +1,14 @@
 package com.backend.api.user.controller;
 
-import com.backend.api.post.dto.request.PostUpdateRequest;
-import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.service.UserMyPageService;
-import com.backend.api.user.service.UserService;
-import com.backend.domain.user.entity.User;
-import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
-import com.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.nio.file.AccessDeniedException;
 
 
 @RestController
@@ -27,24 +18,22 @@ import java.nio.file.AccessDeniedException;
 public class UserMyPageController {
 
     private final UserMyPageService userMyPageService;
+    private final Rq rq;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserMyPageResponse> detailInformation(@PathVariable Long userId) {
-        return ResponseEntity.ok(userMyPageService.getInformation(userId));
+    @GetMapping("/me")
+    @Operation(summary = "개인 정보 조회")
+    public ApiResponse<UserMyPageResponse> detailInformation() {
+        Long userId = rq.getUser().getId();
+        return ApiResponse.ok(userMyPageService.getInformation(userId));
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping("/me")
     @Operation(summary = "개인 정보 수정")
-    public ResponseEntity<UserMyPageResponse> updateUser(
-            @PathVariable Long userId,
-            @RequestBody UserMyPageResponse.UserModify modify,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+    public ApiResponse<UserMyPageResponse> updateUser(
+            @RequestBody UserMyPageResponse.UserModify modify) {
 
-        if (!userDetails.getId().equals(userId)) {
-            throw new AccessDeniedException("본인 정보만 수정할 수 있습니다.");
-        }
-
+        Long userId = rq.getUser().getId();
         UserMyPageResponse response = userMyPageService.modifyUser(userId, modify);
-        return ResponseEntity.ok(response);
+        return ApiResponse.ok("개인 정보 수정이 완료되었습니다.",response);
     }
 }

@@ -13,6 +13,10 @@ public record ApiResponse<T>(
         return new ApiResponse<>(HttpStatus.OK, message, data);
     }
 
+    public static <T> ApiResponse<T> ok(T data) {
+        return ok("유저 정보를 불러왔습니다.", data);
+    }
+
     public static <T> ApiResponse<T> created( String message, T data) {
         return new ApiResponse<>(HttpStatus.CREATED, message, data);
     }
