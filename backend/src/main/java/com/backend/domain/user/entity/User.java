@@ -1,14 +1,17 @@
 package com.backend.domain.user.entity;
 
+import com.backend.domain.resume.entity.Resume;
 import com.backend.global.entity.BaseEntity;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Entity
 @Table(name = "users")
@@ -63,6 +66,8 @@ public class User extends BaseEntity {
         this.image = image;
         this.role = role;
     }
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Resume resume;
 
 
     public void changeStatus(AccountStatus newStatus) {
