@@ -1,14 +1,14 @@
 package com.backend.api.payment.dto.reponse;
 
-import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.payment.entity.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
-public record PaymentResponse(
-        @Schema(description = "Payment 엔티티의 고유 ID", example = "1")
-        Long paymentId,
+//Toss Payments API가 정한 필드와 형식을 그대로 매핑
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record PaymentConfirmResponse(
 
         @Schema(description = "토스에 전달되는 주문 ID", example = "1")
         String orderId,
@@ -34,19 +34,5 @@ public record PaymentResponse(
         @Schema(description = "결제 수정 시간", example = "2025-10-13T12:00:00")
         LocalDateTime approvedAt
 ) {
-
-    public static PaymentResponse from(Payment payment) {
-        return new PaymentResponse(
-                payment.getId(),
-                payment.getOrderId(),
-                payment.getPaymentKey(),
-                payment.getOrderName(),
-                payment.getTotalAmount(),
-                payment.getMethod(),
-                payment.getStatus(),
-                payment.getCreateDate(),
-                payment.getApprovedAt()
-        );
-    }
 
 }
