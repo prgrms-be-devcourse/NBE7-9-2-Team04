@@ -6,12 +6,18 @@ import com.backend.api.question.dto.request.QuestionScoreRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
+import com.backend.domain.user.entity.Role;
+import com.backend.domain.user.entity.User;
+import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.Rq.Rq;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,15 +43,38 @@ public class AdminQuestionControllerTest {
     @Autowired
     private QuestionRepository questionRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    private User testUser;
+
     private Question savedQuestion;
+
+    @MockBean
+    private Rq rq;
 
     @BeforeEach
     void setUp() {
         questionRepository.deleteAll();
+        userRepository.deleteAll();
+
+        testUser = userRepository.save(
+                User.builder()
+                        .name("Admin")
+                        .email("admin@test.com")
+                        .github("https://github.com/admin")
+                        .password("1234")
+                        .nickname("admin")
+                        .role(Role.ADMIN)
+                        .build()
+        );
+
+        Mockito.when(rq.getUser()).thenReturn(testUser);
 
         Question question = Question.builder()
                 .title("기존 제목")
                 .content("기존 내용")
+                .author(testUser)
                 .build();
 
         savedQuestion = questionRepository.save(question);
@@ -77,6 +106,8 @@ public class AdminQuestionControllerTest {
                     .andExpect(jsonPath("$.data.content").value("Spring Boot의 핵심 개념과 장점을 설명해주세요."))
                     .andExpect(jsonPath("$.data.score").value(5))
                     .andExpect(jsonPath("$.data.isApproved").value(true))
+                    .andExpect(jsonPath("$.data.authorId").value(testUser.getId()))
+                    .andExpect(jsonPath("$.data.authorNickname").value("admin"))
                     .andDo(print());
         }
 
@@ -163,6 +194,8 @@ public class AdminQuestionControllerTest {
                     .andExpect(jsonPath("$.message").value("질문이 수정되었습니다."))
                     .andExpect(jsonPath("$.data.title").value("관리자 수정 제목"))
                     .andExpect(jsonPath("$.data.content").value("관리자 수정 내용"))
+                    .andExpect(jsonPath("$.data.authorId").value(testUser.getId()))
+                    .andExpect(jsonPath("$.data.authorNickname").value("admin"))
                     .andDo(print());
         }
 
@@ -355,6 +388,7 @@ public class AdminQuestionControllerTest {
                     Question.builder()
                             .title("승인 질문")
                             .content("승인된 질문 내용")
+                            .author(testUser)
                             .build()
             );
             approved.setApproved(true);
@@ -363,6 +397,7 @@ public class AdminQuestionControllerTest {
                     Question.builder()
                             .title("미승인 질문")
                             .content("미승인 질문 내용")
+                            .author(testUser)
                             .build()
             );
             unapproved.setApproved(false);
@@ -403,6 +438,7 @@ public class AdminQuestionControllerTest {
                     Question.builder()
                             .title("관리자용 단건 조회 질문")
                             .content("관리자는 승인 여부 관계없이 조회 가능")
+                            .author(testUser)
                             .build()
             );
             question.setApproved(false);
@@ -441,6 +477,7 @@ public class AdminQuestionControllerTest {
                     Question.builder()
                             .title("관리자용 삭제 테스트 질문")
                             .content("삭제 성공 케이스")
+                            .author(testUser)
                             .build()
             );
 
@@ -450,6 +487,8 @@ public class AdminQuestionControllerTest {
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("관리자 질문 삭제 성공"))
                     .andDo(print());
+
+            Assertions.assertTrue(questionRepository.findById(question.getId()).isEmpty());
         }
 
         @Test
@@ -460,6 +499,38 @@ public class AdminQuestionControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
                     .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("관리자 질문 삭제 실패 - 일반 사용자는 삭제 불가")
+        void fail2() throws Exception {
+            User normalUser = userRepository.save(
+                    User.builder()
+                            .name("NormalUser")
+                            .email("user@test.com")
+                            .github("https://github.com/user")
+                            .password("1234")
+                            .nickname("user")
+                            .role(Role.USER)
+                            .build()
+            );
+
+            Mockito.when(rq.getUser()).thenReturn(normalUser);
+
+            Question question = questionRepository.save(
+                    Question.builder()
+                            .title("관리자용 삭제 테스트 질문")
+                            .content("삭제 불가 케이스")
+                            .author(testUser)
+                            .build()
+            );
+
+            mockMvc.perform(delete("/api/v1/admin/questions/{questionId}", question.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.status").value("FORBIDDEN"))
+                    .andExpect(jsonPath("$.message").value("접근 권한이 없습니다."))
                     .andDo(print());
         }
     }

@@ -44,7 +44,7 @@ public class CommentService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.COMMENT_NOT_FOUND));
 
         if (!comment.getAuthor().getId().equals(user.getId())) {
-            throw new ErrorException(ErrorCode.FORBIDDEN);
+            throw new ErrorException(ErrorCode.COMMENT_INVALID_USER);
         }
 
         comment.updateContent(newContent);
@@ -58,7 +58,7 @@ public class CommentService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.COMMENT_NOT_FOUND));
 
         if (!comment.getAuthor().getId().equals(user.getId())) {
-            throw new ErrorException(ErrorCode.FORBIDDEN);
+            throw new ErrorException(ErrorCode.COMMENT_INVALID_USER);
         }
 
         commentRepository.delete(comment);
