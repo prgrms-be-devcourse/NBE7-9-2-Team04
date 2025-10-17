@@ -43,6 +43,7 @@ public class AdminQuestionService {
     @Transactional
     public QuestionResponse addQuestion(@Valid AdminQuestionAddRequest request, User user) {
         validateAdminAuthority(user);
+        validateQuestionRequest(request.title(), request.content());
         Question question = createQuestion(request, user);
         Question saved = saveQuestion(question);
         return QuestionResponse.from(saved);
@@ -73,6 +74,7 @@ public class AdminQuestionService {
     @Transactional
     public QuestionResponse updateQuestion(Long questionId, @Valid AdminQuestionUpdateRequest request, User user) {
         validateAdminAuthority(user);
+        validateQuestionRequest(request.title(), request.content());
         Question question = findByIdOrThrow(questionId);
         updateAdminQuestion(question, request);
         return QuestionResponse.from(question);
@@ -86,6 +88,16 @@ public class AdminQuestionService {
                 request.score()
         );
     }
+
+    private void validateQuestionRequest(String title, String content) {
+        if (title == null || title.isBlank()) {
+            throw new ErrorException(ErrorCode.QUESTION_TITLE_NOT_BLANK);
+        }
+        if (content == null || content.isBlank()) {
+            throw new ErrorException(ErrorCode.QUESTION_CONTENT_NOT_BLANK);
+        }
+    }
+
 
     // 질문 승인/비승인 처리
     @Transactional

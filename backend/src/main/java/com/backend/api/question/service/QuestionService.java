@@ -56,6 +56,7 @@ public class QuestionService {
     @Transactional
     public QuestionResponse addQuestion(@Valid QuestionAddRequest request, User user) {
         validateUserAuthority(user);
+        validateQuestionRequest(request.title(),  request.content());
         Question question = createQuestion(request, user);
         Question saved = saveQuestion(question);
         return QuestionResponse.from(saved);
@@ -79,6 +80,7 @@ public class QuestionService {
         validateUserAuthority(user);
         Question question = findByIdOrThrow(questionId);
         validateQuestionAuthor(question, user);
+        validateQuestionRequest(request.title(), request.content());
 
         updateQuestionContent(question, request);
         return QuestionResponse.from(question);
@@ -86,6 +88,15 @@ public class QuestionService {
 
     private void updateQuestionContent(Question question, QuestionUpdateRequest request) {
         question.updateUserQuestion(request.title(), request.content());
+    }
+
+    private void validateQuestionRequest(String title, String content) {
+        if (title == null || title.isBlank()) {
+            throw new ErrorException(ErrorCode.QUESTION_TITLE_NOT_BLANK);
+        }
+        if (content == null || content.isBlank()) {
+            throw new ErrorException(ErrorCode.QUESTION_CONTENT_NOT_BLANK);
+        }
     }
 
     //승인된 질문 전체 조회
