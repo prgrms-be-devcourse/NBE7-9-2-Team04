@@ -55,7 +55,6 @@ public class PaymentService {
                                 .flatMap(errorBody -> {
                                     log.error("Toss Payment Approve Failed. Status: {}, Error Body: {}",
                                             clientResponse.statusCode(), errorBody);
-                                    // Toss API의 에러 메시지를 포함하여 ErrorException을 던질 수 있습니다.
                                     return Mono.error(new ErrorException(errorBody,ErrorCode.PAYMENT_APPROVE_FAILED ));
                                 }))
 
