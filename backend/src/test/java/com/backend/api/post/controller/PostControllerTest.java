@@ -9,7 +9,6 @@ import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
-import com.backend.global.security.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
@@ -21,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -33,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @Transactional
 @ActiveProfiles("test")
 class PostControllerTest {
@@ -50,15 +52,9 @@ class PostControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-
-    @Autowired // @MockBean에서 @Autowired로 변경
-    private JwtTokenProvider jwtTokenProvider;
-
     private User testUser;
     private User otherUser;
     private Post savedPost;
-    private String accessToken;
-    private String otherUserAccessToken;
 
     private final LocalDateTime FIXED_DEADLINE = LocalDateTime.now().plusDays(7).withNano(0);
 
@@ -73,13 +69,11 @@ class PostControllerTest {
                 .email("test1@test.com").password("pw").name("작성자1").nickname("user1").age(20).role(Role.USER)
                 .github("").build();
         userRepository.save(testUser);
-        accessToken = jwtTokenProvider.generateAccessToken(testUser.getId(), testUser.getEmail(), testUser.getRole());
 
         otherUser = User.builder()
                 .email("other@test.com").password("pw").name("다른사람").nickname("other").age(20).role(Role.USER)
                 .github("").build();
         userRepository.save(otherUser);
-        otherUserAccessToken = jwtTokenProvider.generateAccessToken(otherUser.getId(), otherUser.getEmail(), otherUser.getRole());
 
         Post post = Post.builder()
                 .title("기존 제목")
@@ -98,6 +92,7 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 작성 성공")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
             PostAddRequest request = new PostAddRequest(
@@ -111,7 +106,6 @@ class PostControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     post("/api/v1/posts")
-                            .header("Authorization", "Bearer " + accessToken) // 헤더 추가
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -127,6 +121,7 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 인증되지 않은 사용자(로그인 X)")
+        @WithAnonymousUser
         void fail1() throws Exception {
             // given
             PostAddRequest request = new PostAddRequest(
@@ -139,7 +134,7 @@ class PostControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    post("/api/v1/posts") // 인증 헤더 없이 요청
+                    post("/api/v1/posts")
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -155,6 +150,7 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 제목 누락")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail2() throws Exception {
             // given
             PostAddRequest request = new PostAddRequest(
@@ -168,7 +164,6 @@ class PostControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     post("/api/v1/posts")
-                            .header("Authorization", "Bearer " + accessToken) // 헤더 추가
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -184,6 +179,7 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 내용 누락")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail3() throws Exception {
             // given
             PostAddRequest request = new PostAddRequest(
@@ -197,7 +193,6 @@ class PostControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     post("/api/v1/posts")
-                            .header("Authorization", "Bearer " + accessToken) // 헤더 추가
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -218,6 +213,7 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 수정 성공")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
             PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED);
@@ -225,7 +221,6 @@ class PostControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     put("/api/v1/posts/{postId}", savedPost.getId())
-                            .header("Authorization", "Bearer " + accessToken) // 헤더 추가
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -244,6 +239,7 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 존재하지 않는 게시글")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_post_not_found() throws Exception {
             // given
             PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED);
@@ -251,7 +247,6 @@ class PostControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     put("/api/v1/posts/{postId}", 999L)
-                            .header("Authorization", "Bearer " + accessToken) // 헤더 추가
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -267,6 +262,7 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 작성자가 아님")
+        @WithUserDetails(value = "other@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_not_owner() throws Exception {
             // given
             PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED);
@@ -274,7 +270,6 @@ class PostControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     put("/api/v1/posts/{postId}", savedPost.getId())
-                            .header("Authorization", "Bearer " + otherUserAccessToken) // 다른 사용자 토큰으로 요청
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -290,6 +285,7 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 제목 누락")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_title_blank() throws Exception {
             // given
             PostUpdateRequest request = new PostUpdateRequest("", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED);
@@ -297,7 +293,6 @@ class PostControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     put("/api/v1/posts/{postId}", savedPost.getId())
-                            .header("Authorization", "Bearer " + accessToken) // 헤더 추가
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -318,13 +313,13 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 삭제 성공")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
 
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", savedPost.getId())
-                            .header("Authorization", "Bearer " + accessToken) // 헤더 추가
                             .accept(MediaType.APPLICATION_JSON)
             );
 
@@ -338,13 +333,13 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 존재하지 않는 게시글")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_post_not_found() throws Exception {
             // given
 
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", 999L)
-                            .header("Authorization", "Bearer " + accessToken) // 헤더 추가
                             .accept(MediaType.APPLICATION_JSON)
             );
 
@@ -358,13 +353,13 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 작성자가 아님")
+        @WithUserDetails(value = "other@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_not_owner() throws Exception {
             // given
 
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", savedPost.getId())
-                            .header("Authorization", "Bearer " + otherUserAccessToken) // 다른 사용자 토큰으로 요청
                             .accept(MediaType.APPLICATION_JSON)
             );
 
@@ -373,6 +368,56 @@ class PostControllerTest {
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.status").value("FORBIDDEN"))
                     .andExpect(jsonPath("$.message").value("접근 권한이 없습니다."))
+                    .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("게시글 단건 조회 API")
+    class GetPostApiTest {
+
+        @Test
+        @DisplayName("게시글 조회 성공")
+        @WithAnonymousUser
+        void success() throws Exception {
+            // given
+            Long postId = savedPost.getId();
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/posts/{postId}", postId)
+                            .accept(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("%d번 게시글을 성공적으로 조회했습니다.".formatted(postId)))
+                    .andExpect(jsonPath("$.data.postId").value(postId))
+                    .andExpect(jsonPath("$.data.title").value("기존 제목"))
+                    .andExpect(jsonPath("$.data.content").value("기존 내용"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 게시글")
+        @WithAnonymousUser
+        void fail_post_not_found() throws Exception {
+            // given
+            Long nonExistentPostId = 999L;
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/posts/{postId}", nonExistentPostId)
+                            .accept(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 게시글입니다."))
                     .andDo(print());
         }
     }
