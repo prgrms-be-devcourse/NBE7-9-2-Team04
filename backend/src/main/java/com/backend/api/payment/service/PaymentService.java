@@ -37,15 +37,12 @@ import java.util.Base64;
 @Slf4j
 public class PaymentService {
 
-    @Value("${toss.payments.secret-key}")
-    private String secretKey;
 
-    @Value(("${toss.payments.base-url}"))
-    private String baseUrl;
 
     private final PaymentRepository paymentRepository;
-    private final UserRepository userRepository;
+    private final UserRepository userRepository; //삭제 예정
     private final Rq rq;
+
 
     private final JSONParser parser = new JSONParser();
 
@@ -89,7 +86,7 @@ public class PaymentService {
     }
 
 
-    //임시 유저
+    //임시 유저. 삭제 예정
     private User getOrCreateUser() {
         try {
             return rq.getUser();
