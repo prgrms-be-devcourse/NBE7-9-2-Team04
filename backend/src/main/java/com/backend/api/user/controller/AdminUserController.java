@@ -23,10 +23,14 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
     private final Rq rq;
 
+    private User getCurrentUser() {
+        return rq.getUser();
+    }
+
     @GetMapping
     @Operation(summary = "전체 사용자 조회", description = "모든 사용자 정보를 조회합니다.")
     public ApiResponse<List<AdminUserResponse>> getAllUsers() {
-        User admin = rq.getUser();
+        User admin = getCurrentUser();
         List<AdminUserResponse> users = adminUserService.getAllUsers(admin);
         return ApiResponse.ok("전체 사용자 조회 성공", users);
     }
@@ -36,7 +40,7 @@ public class AdminUserController {
     public ApiResponse<AdminUserResponse> getUserById(
             @PathVariable Long userId
     ) {
-        User admin = rq.getUser();
+        User admin = getCurrentUser();
         AdminUserResponse user = adminUserService.getUserById(userId, admin);
         return ApiResponse.ok("특정 사용자 조회 성공", user);
     }
@@ -47,7 +51,7 @@ public class AdminUserController {
             @PathVariable Long userId,
             @Valid @RequestBody AdminUserStatusUpdateRequest request
     ) {
-        User admin = rq.getUser();
+        User admin = getCurrentUser();
         AdminUserResponse response = adminUserService.changeUserStatus(userId, request, admin);
         return ApiResponse.ok("사용자 상태 변경 성공", response);
     }

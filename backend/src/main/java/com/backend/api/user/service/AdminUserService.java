@@ -22,7 +22,8 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
 
-    public void CheckAdmin(User user) {
+    // 관리자 권한 검증
+    public void validateAdminAuthority(User user) {
         if (user == null) {
             throw new ErrorException(ErrorCode.UNAUTHORIZED_USER);
         }
@@ -31,54 +32,62 @@ public class AdminUserService {
         }
     }
 
+    // 사용자 존재 여부 검증
+    private User findByIdOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+    }
+
+    // 전체 사용자 조회
     public List<AdminUserResponse> getAllUsers(User admin) {
-        CheckAdmin(admin);
-        return userRepository.findAll().stream()
+        validateAdminAuthority(admin);
+        List<User> users = userRepository.findAll();
+
+        if (users.isEmpty()) {
+            throw new ErrorException(ErrorCode.NOT_FOUND_USER);
+        }
+
+        return mapToResponseList(users);
+    }
+
+    // 사용자 목록을 응답 DTO 리스트로 매핑
+    private List<AdminUserResponse> mapToResponseList(List<User> users) {
+        return users.stream()
                 .map(AdminUserResponse::from)
                 .toList();
     }
 
+    // 특정 사용자 조회
     public AdminUserResponse getUserById(Long userId, User admin) {
-        CheckAdmin(admin);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
-
-        return new AdminUserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getNickname(),
-                user.getAge(),
-                user.getGithub(),
-                user.getImage(),
-                user.getRole(),
-                user.getAccountStatus()
-        );
+        validateAdminAuthority(admin);
+        User user = findByIdOrThrow(userId);
+        return AdminUserResponse.from(user);
     }
 
+    // 사용자 상태 변경
     @Transactional
     public AdminUserResponse changeUserStatus(Long userId, AdminUserStatusUpdateRequest request, User admin) {
-        CheckAdmin(admin);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+        validateAdminAuthority(admin);
+        User user = findByIdOrThrow(userId);
 
-        AccountStatus newStatus = request.status();
+        validateNotDuplicateStatus(user, request.status());
+        user.changeStatus(request.status());
 
+        sendStatusChangeMailIfNeeded(user, request.status());
+        return AdminUserResponse.from(user);
+    }
+
+    // 중복 상태 변경 방지
+    private void validateNotDuplicateStatus(User user, AccountStatus newStatus) {
         if (user.getAccountStatus().equals(newStatus)) {
             throw new ErrorException(ErrorCode.DUPLICATE_STATUS);
         }
+    }
 
-        if (admin.getRole() != Role.ADMIN) {
-            throw new ErrorException(ErrorCode.FORBIDDEN);
-        }
-
-        user.changeStatus(newStatus);
-
-        if(request.status() == AccountStatus.SUSPENDED || request.status() == AccountStatus.BANNED) {
+    // 상태 변경에 따른 이메일 발송
+    private void sendStatusChangeMailIfNeeded(User user, AccountStatus status) {
+        if (status == AccountStatus.SUSPENDED || status == AccountStatus.BANNED) {
             emailService.sendStatusChangeMail(user);
         }
-
-        return AdminUserResponse.from(user);
-
     }
 }

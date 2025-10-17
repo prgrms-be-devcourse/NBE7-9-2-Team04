@@ -18,12 +18,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
 
-    private void checkAuthor(User user) {
+    //사용자 권한 검증
+    private void validateUserAuthority(User user) {
         if (user == null) {
             throw new ErrorException(ErrorCode.UNAUTHORIZED_USER);
         }
@@ -32,35 +33,62 @@ public class QuestionService {
         }
     }
 
-    //사용자용 질문 생성
+    //질문 존재 여부 검증
+    public Question findByIdOrThrow(Long questionId) {
+        return questionRepository.findById(questionId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+    }
+
+    //질문 작성자 본인 여부 검증
+    private void validateQuestionAuthor(Question question, User user) {
+        if (!question.getAuthor().getId().equals(user.getId())) {
+            throw new ErrorException(ErrorCode.FORBIDDEN);
+        }
+    }
+
+    private void validateApprovedQuestion(Question question) {
+        if (!question.getIsApproved()) {
+            throw new ErrorException(ErrorCode.QUESTION_NOT_APPROVED);
+        }
+    }
+
+    //사용자 질문 생성
     @Transactional
-    public QuestionResponse addQuestion(QuestionAddRequest request, User user) {
-        checkAuthor(user);
-        Question question = Question.builder()
+    public QuestionResponse addQuestion(@Valid QuestionAddRequest request, User user) {
+        validateUserAuthority(user);
+        Question question = createQuestion(request, user);
+        Question saved = saveQuestion(question);
+        return QuestionResponse.from(saved);
+    }
+
+    private Question createQuestion(QuestionAddRequest request, User user) {
+        return Question.builder()
                 .title(request.title())
                 .content(request.content())
                 .author(user)
                 .build();
-
-        Question saved = questionRepository.save(question);
-        return QuestionResponse.from(saved);
     }
 
-    //사용자용 질문 수정
+    private Question saveQuestion(Question question) {
+        return questionRepository.save(question);
+    }
+
+    //사용자 질문 수정
     @Transactional
     public QuestionResponse updateQuestion(Long questionId, @Valid QuestionUpdateRequest request, User user) {
-        checkAuthor(user);
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+        validateUserAuthority(user);
+        Question question = findByIdOrThrow(questionId);
+        validateQuestionAuthor(question, user);
 
-        if (!question.getAuthor().getId().equals(user.getId())) {
-            throw new ErrorException(ErrorCode.FORBIDDEN);
-        }
-
-        question.updateUserQuestion(request.title(), request.content());
+        updateQuestionContent(question, request);
         return QuestionResponse.from(question);
     }
 
+    private void updateQuestionContent(Question question, QuestionUpdateRequest request) {
+        question.updateUserQuestion(request.title(), request.content());
+    }
+
+    //승인된 질문 전체 조회
     @Transactional(readOnly = true)
     public List<QuestionResponse> getApprovedQuestions() {
         List<Question> questions = questionRepository.findByIsApprovedTrue();
@@ -69,21 +97,20 @@ public class QuestionService {
             throw new ErrorException(ErrorCode.NOT_FOUND_QUESTION);
         }
 
+        return mapToResponseList(questions);
+    }
+
+    private List<QuestionResponse> mapToResponseList(List<Question> questions) {
         return questions.stream()
                 .map(QuestionResponse::from)
                 .toList();
-
     }
 
+    //승인된 질문 단건 조회
     @Transactional(readOnly = true)
     public QuestionResponse getApprovedQuestionById(Long questionId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
-
-        if (!question.getIsApproved()) {
-            throw new ErrorException(ErrorCode.QUESTION_NOT_APPROVED);
-        }
-
+        Question question = findByIdOrThrow(questionId);
+        validateApprovedQuestion(question);
         return QuestionResponse.from(question);
     }
 }
