@@ -87,7 +87,7 @@ public class CommentController {
             @PathVariable Long postId
     ) {
 
-        Post post = postService.findById(postId).get();
+        Post post = postService.findPostByIdOrThrow(postId);
 
         List<CommentResponse> commentResponseList = post.getComments().reversed().stream()
                 .map(CommentResponse::new)
