@@ -189,16 +189,4 @@ public class PaymentService {
         return Base64.getEncoder().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
     }
 
-
-    private Payment toPaymentEntity(JSONObject response) {
-        return Payment.builder()
-                .orderId((String) response.get("orderId"))
-                .paymentKey((String) response.get("paymentKey"))
-                .orderName((String) response.get("orderName"))
-                .method((String) response.get("method"))
-                .totalAmount(((Number) response.get("totalAmount")).longValue())
-                .status(PaymentStatus.valueOf(((String) response.get("status")).toUpperCase()))
-                .approvedAt(LocalDateTime.now())
-                .build();
-    }
 }
