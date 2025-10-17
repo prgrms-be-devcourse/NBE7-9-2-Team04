@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 //Toss Payments API가 정한 필드와 형식을 그대로 매핑
+//토스 API -> 백
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record PaymentConfirmResponse(
 

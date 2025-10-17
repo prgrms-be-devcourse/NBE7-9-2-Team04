@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-//Toss payment
+//Toss payment api 통신을 위한 HTTP 클라이언트 설정
 @Configuration
 public class WebClientConfig {
 

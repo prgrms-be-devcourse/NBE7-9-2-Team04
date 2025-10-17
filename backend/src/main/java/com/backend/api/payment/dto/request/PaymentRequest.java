@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-
+//클라이언트 → 백엔드 → 토스 API
 public record PaymentRequest(
 
         @NotBlank(message = "결제 키 값은 필수입니다.")
