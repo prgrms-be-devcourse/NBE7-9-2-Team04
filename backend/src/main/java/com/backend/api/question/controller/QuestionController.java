@@ -24,11 +24,15 @@ public class QuestionController {
     private final QuestionService questionService;
     private final Rq rq;
 
+    private User getCurrentUser() {
+        return rq.getUser();
+    }
+
     @PostMapping
     @Operation(summary = "질문 생성", description = "사용자가 질문을 생성합니다.")
     public ApiResponse<QuestionResponse> addQuestion(
             @Valid @RequestBody QuestionAddRequest request) {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         QuestionResponse response = questionService.addQuestion(request, user);
         return ApiResponse.ok("질문이 생성되었습니다.", response);
     }
@@ -38,7 +42,7 @@ public class QuestionController {
     public ApiResponse<QuestionResponse> updateQuestion(
             @PathVariable Long questionId,
             @Valid @RequestBody QuestionUpdateRequest request) {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         QuestionResponse response = questionService.updateQuestion(questionId, request, user);
         return ApiResponse.ok("질문이 수정되었습니다.", response);
     }
@@ -57,5 +61,4 @@ public class QuestionController {
         QuestionResponse response = questionService.getApprovedQuestionById(questionId);
         return ApiResponse.ok("질문 단건 조회 성공", response);
     }
-
 }

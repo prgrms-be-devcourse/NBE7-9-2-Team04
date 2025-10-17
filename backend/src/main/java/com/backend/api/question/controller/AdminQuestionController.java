@@ -20,11 +20,15 @@ public class AdminQuestionController {
     private final AdminQuestionService adminQuestionService;
     private final Rq rq;
 
+    private User getCurrentUser() {
+        return rq.getUser();
+    }
+
     @PostMapping
     @Operation(summary = "질문 생성 (관리자)", description = "관리자가 새로운 질문을 직접 등록합니다.")
     public ApiResponse<QuestionResponse> addQuestion(
             @Valid @RequestBody AdminQuestionAddRequest request) {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         QuestionResponse response = adminQuestionService.addQuestion(request, user);
         return ApiResponse.ok("질문이 생성되었습니다.", response);
     }
@@ -34,7 +38,7 @@ public class AdminQuestionController {
     public ApiResponse<QuestionResponse> updateQuestion(
             @PathVariable Long questionId,
             @Valid @RequestBody AdminQuestionUpdateRequest request) {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         QuestionResponse response = adminQuestionService.updateQuestion(questionId, request, user);
         return ApiResponse.ok("질문이 수정되었습니다.", response);
     }
@@ -44,7 +48,7 @@ public class AdminQuestionController {
     public ApiResponse<QuestionResponse> approveQuestion(
             @PathVariable Long questionId,
             @RequestBody @Valid QuestionApproveRequest request) {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         QuestionResponse response = adminQuestionService.approveQuestion(questionId, request.isApproved(), user);
         String message = request.isApproved()
                 ? "질문이 승인 처리되었습니다."
@@ -57,7 +61,7 @@ public class AdminQuestionController {
     public ApiResponse<QuestionResponse> setQuestionScore(
             @PathVariable Long questionId,
             @RequestBody @Valid QuestionScoreRequest request) {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         QuestionResponse response = adminQuestionService.setQuestionScore(questionId, request.score(), user);
         return ApiResponse.ok("질문 점수가 수정되었습니다.", response);
     }
@@ -65,7 +69,7 @@ public class AdminQuestionController {
     @GetMapping
     @Operation(summary = "질문 전체 조회 (관리자)", description = "관리자가 질문 전체 조회합니다.(미승인 포함)")
     public ApiResponse<java.util.List<QuestionResponse>> getAllQuestions() {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         java.util.List<QuestionResponse> questions = adminQuestionService.getAllQuestions(user);
         return ApiResponse.ok("관리자 질문 목록 조회 성공", questions);
     }
@@ -74,7 +78,7 @@ public class AdminQuestionController {
     @Operation(summary = "질문 단건 조회 (관리자)", description = "관리자가 질문 ID로 단건 조회합니다.(미승인 포함)")
     public ApiResponse<QuestionResponse> getQuestionById(
             @PathVariable Long questionId) {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         QuestionResponse response = adminQuestionService.getQuestionById(questionId, user);
         return ApiResponse.ok("관리자 질문 단건 조회 성공", response);
     }
@@ -83,7 +87,7 @@ public class AdminQuestionController {
     @Operation(summary = "질문 삭제 (관리자)", description = "관리자가 질문을 삭제합니다.")
     public ApiResponse<Void> deleteQuestion(
             @PathVariable Long questionId) {
-        User user = rq.getUser();
+        User user = getCurrentUser();
         adminQuestionService.deleteQuestion(questionId, user);
         return ApiResponse.ok("관리자 질문 삭제 성공", null);
     }
