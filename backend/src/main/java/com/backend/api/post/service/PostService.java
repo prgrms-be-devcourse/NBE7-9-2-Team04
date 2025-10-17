@@ -3,6 +3,7 @@ package com.backend.api.post.service;
 import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
 import com.backend.api.post.dto.response.PostResponse;
+import com.backend.api.user.service.UserService;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
@@ -12,11 +13,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
+    private final UserService userService;
 
     @Transactional
     public PostResponse createPost(PostAddRequest request, User user) {
@@ -44,6 +48,17 @@ public class PostService {
         return PostResponse.from(post);
     }
 
+    @Transactional(readOnly = true)
+    public List<PostResponse> getPostsByUserId(Long userId) {
+        // 1. Repository를 통해 현재 유저가 작성한 모든 게시글을 최신순으로 조회
+        User user = userService.getUser(userId);
+        List<Post> myPosts = postRepository.findByUsersOrderByCreateDateDesc(user);
+
+        // 2. 조회된 Post 엔티티 목록을 PostResponse DTO 목록으로 변환
+        return myPosts.stream()
+                .map(PostResponse::from)
+                .toList();
+    }
 
     @Transactional
     public PostResponse updatePost(Long postId, PostUpdateRequest request, User user) {
