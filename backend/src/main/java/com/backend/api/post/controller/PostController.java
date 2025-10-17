@@ -24,7 +24,7 @@ public class PostController {
     public ApiResponse<PostResponse> createPost(
             @Valid @RequestBody PostAddRequest request) {
 
-        User user = rq.getUser();
+        User user = getCurrentUser();
         PostResponse response = postService.createPost(request, user);
 
         return ApiResponse.ok(
@@ -51,7 +51,7 @@ public class PostController {
             @PathVariable Long postId,
             @Valid @RequestBody PostUpdateRequest request) {
 
-        User user = rq.getUser();
+        User user = getCurrentUser();
         PostResponse response = postService.updatePost(postId, request, user);
 
         return ApiResponse.ok(
@@ -64,9 +64,13 @@ public class PostController {
     @Operation(summary = "게시글 삭제")
     public ApiResponse<Void> deletePost(@PathVariable Long postId) {
 
-        User user = rq.getUser();
+        User user = getCurrentUser();
         postService.deletePost(postId, user);
 
         return ApiResponse.ok("게시글 삭제가 완료되었습니다.", null);
+    }
+
+    private User getCurrentUser() {
+        return rq.getUser();
     }
 }

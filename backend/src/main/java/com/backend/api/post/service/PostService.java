@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -37,24 +35,17 @@ public class PostService {
     }
 
     public PostResponse getPost(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+        Post post = findPostByIdOrThrow(postId);
 
         return PostResponse.from(post);
     }
 
-    public Optional<Post> findById(Long id) {
-        return postRepository.findById(id);
-    }
 
     @Transactional
     public PostResponse updatePost(Long postId, PostUpdateRequest request, User user) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+        Post post = findPostByIdOrThrow(postId);
+        validatePostOwner(post, user);
 
-        if (!post.getUsers().getId().equals(user.getId())) {
-            throw new ErrorException(ErrorCode.FORBIDDEN);
-        }
         post.updatePost(request.title(), request.content(), request.deadline(), request.status(), request.pinStatus());
 
         return PostResponse.from(post);
@@ -62,13 +53,21 @@ public class PostService {
 
     @Transactional
     public void deletePost(Long postId, User user) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+        Post post = findPostByIdOrThrow(postId);
+        validatePostOwner(post, user);
 
+        postRepository.delete(post);
+    }
+
+
+    public Post findPostByIdOrThrow(Long postId) { // 중복 로직 헬퍼 메서드1
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    private void validatePostOwner(Post post, User user) { // 중복 로직 헬퍼 메서드2
         if (!post.getUsers().getId().equals(user.getId())) {
             throw new ErrorException(ErrorCode.FORBIDDEN);
         }
-
-        postRepository.delete(post);
     }
 }
