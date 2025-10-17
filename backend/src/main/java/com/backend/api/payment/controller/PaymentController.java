@@ -25,7 +25,7 @@ public class PaymentController {
     ){
 
         PaymentResponse response = paymentService.confirmPayment(request);
-        return ApiResponse.ok("결제가 승인되었습니다.", response);
+        return ApiResponse.created("결제가 승인되었습니다.", response);
     }
 
     @GetMapping("/key/{paymentKey}")
