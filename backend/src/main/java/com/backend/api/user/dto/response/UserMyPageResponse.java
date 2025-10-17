@@ -12,7 +12,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserMyPageResponse {
 
-    private long userId;
+    private Long userId;
     private String email;
     private String password;
     private String name;
@@ -23,6 +23,7 @@ public class UserMyPageResponse {
 
     public static UserMyPageResponse fromEntity(User users){
         return UserMyPageResponse.builder()
+                .userId(users.getId())
                 .email(users.getEmail())
                 .password(users.getPassword())
                 .name(users.getName())
