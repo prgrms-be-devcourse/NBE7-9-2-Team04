@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Router from "next/navigation"
 import Link from "next/link"
+import Pagination from "@/components/pagination"
 
 //임시 데이터
 const premiumPosts = [
@@ -171,25 +172,32 @@ const regularPosts = [
 ]
 
 export default function RecruitmentPage() {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [selectedCategory, setSelectedCategory] = useState("전체")
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 9;
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % premiumPosts.length)
     }, 5000)
     return () => clearInterval(timer)
-  }, [])
+  }, []);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % premiumPosts.length)
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + premiumPosts.length) % premiumPosts.length)
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % premiumPosts.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + premiumPosts.length) % premiumPosts.length);
 
   const filteredPosts =
     selectedCategory === "전체"
       ? regularPosts
-      : regularPosts.filter((post) => post.category === selectedCategory)
+      : regularPosts.filter((post) => post.category === selectedCategory);
+
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   return (
+    <>
     <div className="max-w-screen-xl mx-auto px-6 py-10">
 
       <div className="mb-10">
@@ -256,7 +264,11 @@ export default function RecruitmentPage() {
           {["전체", "프로젝트", "스터디"].map((category) => (
             <button
               key={category}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => {
+                setSelectedCategory(category)
+                setCurrentPage(1)
+              }}
+              
               className={`pb-2 text-base font-semibold ${
                 selectedCategory === category ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-gray-900"
               }`}
@@ -277,7 +289,7 @@ export default function RecruitmentPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPosts.map((post) => (
+          {currentPosts.map((post) => (
             <div key={post.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition">
               <div className="flex items-center justify-between mb-2 text-sm">
                 <span
@@ -311,6 +323,14 @@ export default function RecruitmentPage() {
           ))}
         </div>
       </div>
+
+      <Pagination 
+        currentPage={currentPage}
+        totalItems={filteredPosts.length}
+        itemsPerPage={postsPerPage}
+        onPageChange={setCurrentPage}
+        />
     </div>
+    </>
   )
 }
