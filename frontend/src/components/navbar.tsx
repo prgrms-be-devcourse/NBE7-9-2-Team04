@@ -6,38 +6,39 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
 export default function Navbar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [userName, setUserName] = useState("")
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     if (typeof localStorage !== "undefined") {
-      const loggedIn = localStorage.getItem("isLoggedIn") === "true"
-      const role = localStorage.getItem("userRole")
-      const name = localStorage.getItem("userName") || ""
+      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const role = localStorage.getItem("userRole");
+      const name = localStorage.getItem("userName") || "";
 
-      setIsLoggedIn(loggedIn)
-      setIsAdmin(role === "admin")
-      setUserName(name)
+      setIsLoggedIn(loggedIn);
+      setIsAdmin(role === "admin");
+      setUserName(name);
     }
   }, [pathname])
 
+  //수정 예정정
   const handleLogout = () => {
     if (typeof localStorage !== "undefined") {
-      localStorage.removeItem("isLoggedIn")
-      localStorage.removeItem("userRole")
-      localStorage.removeItem("userName")
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userName");
     }
-    setIsLoggedIn(false)
-    setIsAdmin(false)
-    setUserName("")
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    setUserName("");
 
     if (pathname === "/profile") {
-      window.location.href = "/"
+      window.location.href = "/";
     } else {
-      window.location.reload()
+      window.location.reload();
     }
   }
 
