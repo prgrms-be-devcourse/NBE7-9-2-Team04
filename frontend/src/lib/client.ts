@@ -1,6 +1,7 @@
 export function fetchApi(url: string, options?: RequestInit) {
 
     // 쿠키 자동 포함 
+    // 백엔드 ApiResponse로 수정 필요
     options = options || {};
     options.credentials = "include"
   
