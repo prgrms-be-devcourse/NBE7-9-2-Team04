@@ -26,7 +26,6 @@ export default function Pagination({
     return(
         <>
         <div className="flex justify-center items-center gap-2 mt-10">
-        {/* 이전 버튼 */}
         <button
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
@@ -54,7 +53,6 @@ export default function Pagination({
             </button>
         ))}
 
-        {/* 다음 버튼 */}
         <button
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}

@@ -303,14 +303,13 @@ export default function RecruitmentPage() {
                 >
                   {post.category}
                 </span>
-                <span className="text-gray-500 text-xs">⏰ {post.deadline}</span>
+                <span className="text-gray-500 text-xs">마감일 {post.deadline}</span>
               </div>
               <h3 className="text-lg font-semibold mb-1 line-clamp-2">{post.title}</h3>
               <p className="text-gray-600 text-sm line-clamp-3 mb-4">{post.description}</p>
 
               <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
                 <span>🧑‍🤝‍🧑 {post.members}</span>
-                <span>📅 {post.createdAt}</span>
               </div>
 
               <Link
