@@ -129,7 +129,7 @@ export default function RecruitmentCreatePage() {
                     placeholder="프로젝트 소개, 필요 기술, 진행 방식 등을 자세히 작성해주세요"
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    rows={10}
+                    rows={15}
                     required
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
