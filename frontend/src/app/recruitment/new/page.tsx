@@ -1,5 +1,5 @@
 "use client";
 
-export default function PostCreatePage() {
+export default function RecruitmentCreatePage() {
   return <div>게시글 작성 페이지</div>;
 }

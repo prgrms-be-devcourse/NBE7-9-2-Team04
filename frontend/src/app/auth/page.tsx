@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("user")
   const returnUrl = searchParams.get("returnUrl")
 
-//백 연동 코드 추후 수정 예정. 임시로 넣어둠둠
+//백 연동 코드 추후 수정 예정. 임시로 넣어둠
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>, isAdmin = false) => {
     e.preventDefault()
     setIsLoading(true)

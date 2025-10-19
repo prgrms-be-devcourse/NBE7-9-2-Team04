@@ -12,13 +12,8 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [userName, setUserName] = useState("")
 
-  // 상단바 메뉴 링크의 기본/활성 스타일
-  const linkBaseClasses = "inline-flex h-10 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
-  const activeLinkClasses = "bg-blue-100 text-blue-800"
-
   useEffect(() => {
-    // window/localStorage 접근을 클라이언트 환경에서만 수행
-    if (typeof localStorage !== 'undefined') {
+    if (typeof localStorage !== "undefined") {
       const loggedIn = localStorage.getItem("isLoggedIn") === "true"
       const role = localStorage.getItem("userRole")
       const name = localStorage.getItem("userName") || ""
@@ -26,12 +21,11 @@ export default function Navbar() {
       setIsLoggedIn(loggedIn)
       setIsAdmin(role === "admin")
       setUserName(name)
-
     }
   }, [pathname])
 
   const handleLogout = () => {
-    if (typeof localStorage !== 'undefined') {
+    if (typeof localStorage !== "undefined") {
       localStorage.removeItem("isLoggedIn")
       localStorage.removeItem("userRole")
       localStorage.removeItem("userName")
@@ -47,12 +41,11 @@ export default function Navbar() {
     }
   }
 
-  // 드롭다운 메뉴 아이템 컴포넌트 (HTML로 단순화)
-  const DropdownItem = ({ href, title, description }: { href: string, title: string, description: string }) => (
+  const DropdownItem = ({ href, title, description }: { href: string; title: string; description: string }) => (
     <li>
       <Link
         href={href}
-        className="block p-3 rounded-md hover:bg-gray-100 transition-colors outline-none focus:bg-gray-100"
+        className="block p-3 rounded-md hover:bg-gray-100 focus:bg-gray-100 outline-none"
       >
         <div className="text-sm font-medium">{title}</div>
         <p className="text-xs text-gray-500 mt-1">{description}</p>
@@ -61,10 +54,8 @@ export default function Navbar() {
   )
 
   return (
-    <>
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 text-gray-900">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur text-gray-900">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-2xl">DevStation</span>
@@ -72,11 +63,12 @@ export default function Navbar() {
 
           <nav className="hidden md:flex">
             <ul className="flex items-center gap-1">
-              
               <li>
-                <Link 
-                  href="/recruitment" 
-                  className={`${linkBaseClasses} ${pathname === "/recruitment" ? activeLinkClasses : ""}`}
+                <Link
+                  href="/recruitment"
+                  className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
+                    pathname === "/recruitment" ? "bg-blue-100 text-blue-800" : ""
+                  }`}
                 >
                   👥 모집
                 </Link>
@@ -103,18 +95,22 @@ export default function Navbar() {
               </li>
 
               <li>
-                <Link 
-                  href="/qna" 
-                  className={`${linkBaseClasses} ${pathname === "/qna" ? activeLinkClasses : ""}`}
+                <Link
+                  href="/qna"
+                  className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
+                    pathname === "/qna" ? "bg-blue-100 text-blue-800" : ""
+                  }`}
                 >
                   💬 QnA
                 </Link>
               </li>
 
               <li>
-                <Link 
-                  href="/ranking" 
-                  className={`${linkBaseClasses} ${pathname === "/ranking" ? activeLinkClasses : ""}`}
+                <Link
+                  href="/ranking"
+                  className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
+                    pathname === "/ranking" ? "bg-blue-100 text-blue-800" : ""
+                  }`}
                 >
                   🏆 랭킹
                 </Link>
@@ -122,12 +118,13 @@ export default function Navbar() {
 
               {isLoggedIn && isAdmin && (
                 <li>
-                  <Link 
-                    href="/admin" 
-                    className={`${linkBaseClasses} ${pathname?.startsWith("/admin") ? activeLinkClasses : ""}`}
+                  <Link
+                    href="/admin"
+                    className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
+                      pathname?.startsWith("/admin") ? "bg-blue-100 text-blue-800" : ""
+                    }`}
                   >
-                    <span className="w-4 h-4 mr-2">🛡️</span>
-                    관리자
+                    🛡️ 관리자
                   </Link>
                 </li>
               )}
@@ -138,25 +135,29 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
-              <Link href="/profile" className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 p-2">
-                <span className="h-5 w-5 text-lg">👤</span>
+              <Link
+                href="/profile"
+                className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 p-2"
+              >
+                👤
               </Link>
-              
-              <button 
+              <button
                 onClick={handleLogout}
                 className="inline-flex h-10 px-4 bg-white hover:bg-gray-100 text-gray-800 font-medium rounded-md items-center justify-center border border-gray-300"
               >
-                <span className="w-4 h-4 mr-2">➡️</span>
-                로그아웃
+                ➡️ 로그아웃
               </button>
             </>
           ) : (
             <>
-              <Link href="/profile" className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 p-2">
-                <span className="h-5 w-5 text-lg">👤</span>
+              <Link
+                href="/profile"
+                className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 p-2"
+              >
+                👤
               </Link>
-              
-              <Link href="/auth" 
+              <Link
+                href="/auth"
                 className="inline-flex h-10 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 items-center justify-center"
               >
                 로그인
@@ -166,6 +167,5 @@ export default function Navbar() {
         </div>
       </div>
     </header>
-    </>
-  );
+  )
 }
