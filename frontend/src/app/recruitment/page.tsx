@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Router from "next/navigation"
 import Link from "next/link"
 import Pagination from "@/components/pagination"
+import CategoryTab from "@/components/categoryTab";
 
 //임시 데이터
 const premiumPosts = [
@@ -113,62 +114,7 @@ const regularPosts = [
     members: "4/6",
     author: "강데브",
     createdAt: "2025-10-14",
-  },
-  {
-    id: "8",
-    title: "DevOps 스터디 모집",
-    description:
-      "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
-    category: "스터디",
-    deadline: "2025-11-28",
-    members: "4/6",
-    author: "강데브",
-    createdAt: "2025-10-14",
-  },
-  {
-    id: "9",
-    title: "DevOps 스터디 모집",
-    description:
-      "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
-    category: "스터디",
-    deadline: "2025-11-28",
-    members: "4/6",
-    author: "강데브",
-    createdAt: "2025-10-14",
-  },
-  {
-    id: "10",
-    title: "DevOps 스터디 모집",
-    description:
-      "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
-    category: "스터디",
-    deadline: "2025-11-28",
-    members: "4/6",
-    author: "강데브",
-    createdAt: "2025-10-14",
-  },  {
-    id: "11",
-    title: "DevOps 스터디 모집",
-    description:
-      "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
-    category: "스터디",
-    deadline: "2025-11-28",
-    members: "4/6",
-    author: "강데브",
-    createdAt: "2025-10-14",
-  },
-  {
-    id: "12",
-    title: "DevOps 스터디 모집",
-    description:
-      "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
-    category: "스터디",
-    deadline: "2025-11-28",
-    members: "4/6",
-    author: "강데브",
-    createdAt: "2025-10-14",
-  },
-
+  }
 ]
 
 export default function RecruitmentPage() {
@@ -176,6 +122,7 @@ export default function RecruitmentPage() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 9;
+  const categories = ["전체", "프로젝트", "스터디"];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -259,26 +206,11 @@ export default function RecruitmentPage() {
       </div>
 
       {/* 카테고리*/}
-      <div className="border-b border-gray-200 mb-6">
-        <div className="flex space-x-6">
-          {["전체", "프로젝트", "스터디"].map((category) => (
-            <button
-              key={category}
-              onClick={() => {
-                setSelectedCategory(category)
-                setCurrentPage(1)
-              }}
-              
-              className={`pb-2 text-base font-semibold ${
-                selectedCategory === category ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
-
+        <CategoryTab categories={categories} selected={selectedCategory} onSelect={(c) => {
+          setSelectedCategory(c);
+          setCurrentPage(1);
+        }}/>
+        
       {/* 모집글 목록 */}
       <div>
         <div className="flex items-center justify-between mb-6">
@@ -333,3 +265,4 @@ export default function RecruitmentPage() {
     </>
   )
 }
+
