@@ -23,13 +23,13 @@ const questions = [
 
 //임시 데이터
 const todayQuestion = {
-  id: "q3",
+  id: "3",
   title: "데이터베이스 정규화에 대해 설명하세요",
   category: "데이터베이스",
-  difficulty: "중",
   points: 10,
   description: "데이터베이스 정규화의 개념과 1NF, 2NF, 3NF에 대해 설명해주세요.",
 }
+
 export default function CsQuestionPage() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [currentPage, setCurrentPage] = useState(1);
