@@ -43,7 +43,6 @@ public class AdminQuestionService {
     @Transactional
     public QuestionResponse addQuestion(@Valid AdminQuestionAddRequest request, User user) {
         validateAdminAuthority(user);
-        validateQuestionRequest(request.title(), request.content());
         Question question = createQuestion(request, user);
         Question saved = saveQuestion(question);
         return QuestionResponse.from(saved);
@@ -57,10 +56,10 @@ public class AdminQuestionService {
                 .build();
 
         if (request.isApproved() != null) {
-            question.setApproved(request.isApproved());
+            question.updateApproved(request.isApproved());
         }
         if (request.score() != null) {
-            question.setScore(request.score());
+            question.updateScore(request.score());
         }
 
         return question;
@@ -74,7 +73,6 @@ public class AdminQuestionService {
     @Transactional
     public QuestionResponse updateQuestion(Long questionId, @Valid AdminQuestionUpdateRequest request, User user) {
         validateAdminAuthority(user);
-        validateQuestionRequest(request.title(), request.content());
         Question question = findByIdOrThrow(questionId);
         updateAdminQuestion(question, request);
         return QuestionResponse.from(question);
@@ -89,22 +87,12 @@ public class AdminQuestionService {
         );
     }
 
-    private void validateQuestionRequest(String title, String content) {
-        if (title == null || title.isBlank()) {
-            throw new ErrorException(ErrorCode.QUESTION_TITLE_NOT_BLANK);
-        }
-        if (content == null || content.isBlank()) {
-            throw new ErrorException(ErrorCode.QUESTION_CONTENT_NOT_BLANK);
-        }
-    }
-
-
     // 질문 승인/비승인 처리
     @Transactional
     public QuestionResponse approveQuestion(Long questionId, boolean isApproved, User user) {
         validateAdminAuthority(user);
         Question question = findByIdOrThrow(questionId);
-        question.setApproved(isApproved);
+        question.updateApproved(isApproved);
         return QuestionResponse.from(question);
     }
 
@@ -113,7 +101,7 @@ public class AdminQuestionService {
     public QuestionResponse setQuestionScore(Long questionId, Integer score, User user) {
         validateAdminAuthority(user);
         Question question = findByIdOrThrow(questionId);
-        question.setScore(score);
+        question.updateScore(score);
         return QuestionResponse.from(question);
     }
 

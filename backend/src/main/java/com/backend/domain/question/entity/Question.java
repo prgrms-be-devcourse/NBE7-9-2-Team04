@@ -37,11 +37,11 @@ public class Question extends BaseEntity {
         this.author = author;
     }
 
-    public void setApproved(Boolean isApproved) {
+    public void updateApproved(Boolean isApproved) {
         this.isApproved = isApproved;
     }
 
-    public void setScore(Integer score) { this.score = score; }
+    public void updateScore(Integer newScore) { this.score = newScore; }
 
     public void updateUserQuestion(String title, String content) {
         this.title = title;
@@ -57,7 +57,7 @@ public class Question extends BaseEntity {
         }
 
         if(score != null) {
-            setScore(score);
+            updateScore(score);
         }
     }
 }
