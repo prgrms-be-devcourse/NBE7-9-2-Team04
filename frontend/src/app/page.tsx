@@ -16,9 +16,9 @@ export default function HomePage() {
 
   const handlePremiumClick = () => {
     if (isLoggedIn) {
-      router.push("/profile?tab=subscription")
+      router.replace("/profile?tab=subscription")
     } else {
-      router.push("/login?returnUrl=/profile?tab=subscription")
+      router.replace("/login?returnUrl=/profile?tab=subscription")
     }
   }
 
@@ -39,7 +39,7 @@ export default function HomePage() {
                 href="/recruitment" 
                 className="inline-flex h-11 px-8 bg-blue-400 text-white font-medium rounded-md hover:bg-blue-500 items-center justify-center"
               >
-                시작하기
+                팀 모집
               </Link>
               <Link 
                 href="/interview" 
