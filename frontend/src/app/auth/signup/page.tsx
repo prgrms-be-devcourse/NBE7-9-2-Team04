@@ -1,31 +1,10 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { fetchApi } from "@/lib/client"; 
 
-//임시 코드
-const fetchApi = (url: string, options: { method: string, body: string }) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const { email } = JSON.parse(options.body);
-
-      const existingEmails = ["user@test.com", "admin@test.com", "test@example.com"]
-      
-      if (url === "/api/v1/users/signup") {
-        if (existingEmails.includes(email)) {
-          resolve({ resultCode: "409", msg: "이미 사용 중인 이메일입니다" });
-        } else if (email === "error@test.com") {
-          reject(new Error("서버 처리 중 알 수 없는 에러가 발생했습니다."));
-        } else {
-          resolve({ resultCode: "201", msg: "회원가입 성공" });
-        }
-      } else {
-        reject(new Error("API 경로가 유효하지 않습니다."));
-      }
-    }, 1000); // 1초 지연 시뮬레이션
-  });
-};
 
 // 폼 데이터 타입 정의
 interface FormData {
@@ -45,6 +24,8 @@ interface Errors {
 }
 
 export default function SignupPage() {
+
+    const router = useRouter();
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -130,10 +111,8 @@ export default function SignupPage() {
       const resultCode = String(data.resultCode);
 
       if (resultCode.startsWith("20")) {
-        // 성공 (201 Created)
         alert(data.msg || "회원가입 성공! 로그인 페이지로 이동합니다.");
-        // 로그인 페이지로 리디렉션
-        window.location.href = "/login";
+        router.replace("/login");
       } else if (resultCode === "409") {
         // 이메일 중복 등의 에러
         setErrors(prev => ({ ...prev, email: data.msg || "이미 사용 중인 이메일입니다" }));
