@@ -6,7 +6,7 @@ import Link from "next/link"
 import { fetchApi } from "@/lib/client"; 
 
 
-// 폼 데이터 타입 정의
+// 폼 데이터 타입 정의(수정 예정)
 interface FormData {
   email: string
   password: string
@@ -17,7 +17,7 @@ interface FormData {
   githubUrl: string
 }
 
-// 에러 메시지 타입 정의
+// 에러 메시지 타입 정의(수정 예정)
 interface Errors {
   email: string
   password: string
@@ -114,7 +114,6 @@ export default function SignupPage() {
         alert(data.msg || "회원가입 성공! 로그인 페이지로 이동합니다.");
         router.replace("/login");
       } else if (resultCode === "409") {
-        // 이메일 중복 등의 에러
         setErrors(prev => ({ ...prev, email: data.msg || "이미 사용 중인 이메일입니다" }));
       } else {
         // 기타 서버 에러
