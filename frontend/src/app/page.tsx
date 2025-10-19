@@ -37,7 +37,7 @@ export default function HomePage() {
             <div className="flex gap-4 justify-center pt-4">
               <Link 
                 href="/recruitment" 
-                className="inline-flex h-11 px-8 bg-blue-400 text-white font-medium rounded-md hover:bg-blue-500 items-center justify-center"
+                className="inline-flex h-11 px-8 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 items-center justify-center"
               >
                 팀 모집
               </Link>
