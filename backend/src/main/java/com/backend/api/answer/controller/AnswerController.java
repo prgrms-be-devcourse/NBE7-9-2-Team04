@@ -1,0 +1,109 @@
+package com.backend.api.answer.controller;
+
+import com.backend.api.answer.dto.request.AnswerRequest;
+import com.backend.api.answer.dto.response.AnswerCreateResponse;
+import com.backend.api.answer.dto.response.AnswerReadResponse;
+import com.backend.api.answer.dto.response.AnswerUpdateResponse;
+import com.backend.api.answer.service.AnswerService;
+import com.backend.domain.answer.entity.Answer;
+import com.backend.domain.user.entity.User;
+import com.backend.global.Rq.Rq;
+import com.backend.global.dto.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/questions")
+@Tag(name = "AnswerController", description = "면접 답변 API")
+public class AnswerController {
+
+    private final Rq rq;
+    private final AnswerService answerService;
+
+    @PostMapping("/{questionId}/answers")
+    @Operation(summary = "답변 작성")
+    public ApiResponse<AnswerCreateResponse> createAnswer(
+            @PathVariable Long questionId,
+            @RequestBody @Valid AnswerRequest reqBody
+    ) {
+        User currentUser = rq.getUser();
+
+        Answer newAnswer = answerService.writeAnswer(currentUser, questionId, reqBody);
+
+        return ApiResponse.created(
+                "%d번 답변이 생성되었습니다.".formatted(newAnswer.getId()),
+                new AnswerCreateResponse(newAnswer)
+        );
+    }
+
+    @PatchMapping("/{questionId}/answers/{answerId}")
+    @Operation(summary = "답변 수정")
+    public ApiResponse<AnswerUpdateResponse> updateAnswer(
+            @PathVariable Long answerId,
+            @RequestBody @Valid AnswerRequest reqBody
+    ) {
+        User currentUser = rq.getUser();
+
+        Answer updatedAnswer = answerService.updateAnswer(
+                currentUser,
+                answerId,
+                reqBody
+        );
+
+        return ApiResponse.ok(
+                "%d번 답변이 수정되었습니다.".formatted(updatedAnswer.getId()),
+                new AnswerUpdateResponse(updatedAnswer)
+        );
+    }
+
+    @DeleteMapping("/{questionId}/answers/{answerId}")
+    @Operation(summary = "답변 삭제")
+    public ApiResponse<Void> deleteAnswer(
+            @PathVariable Long answerId
+    ) {
+        User currentUser = rq.getUser();
+
+        answerService.deleteAnswer(currentUser, answerId);
+
+        return ApiResponse.ok(
+                "%d번 답변이 삭제되었습니다.".formatted(answerId),
+                null
+        );
+    }
+
+    @GetMapping("/{questionId}/answers")
+    @Operation(summary = "답변 목록 조회")
+    public ApiResponse<List<AnswerReadResponse>> readAnswers(
+            @PathVariable Long questionId
+    ) {
+        List<AnswerReadResponse> answerReadResponseList = answerService.findAnswers(questionId);
+
+        return ApiResponse.ok(
+                "%d번 질문의 답변 목록 조회 성공".formatted(questionId),
+                answerReadResponseList
+        );
+    }
+
+    @GetMapping(value = "/{questionId}/answers/{answerId}")
+    @Transactional(readOnly = true)
+    @Operation(summary = "답변 단건 조회")
+    public ApiResponse<AnswerReadResponse> readAnswer(
+            @PathVariable Long questionId,
+            @PathVariable Long answerId
+    ) {
+        Answer answer = answerService.findAnswer(questionId, answerId);
+
+        return ApiResponse.ok(
+                "%d번 질문의 %d번 답변 조회 성공".formatted(questionId, answerId),
+                new AnswerReadResponse(answer)
+        );
+    }
+
+}
