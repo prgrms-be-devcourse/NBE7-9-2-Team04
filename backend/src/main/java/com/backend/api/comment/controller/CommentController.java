@@ -1,11 +1,10 @@
 package com.backend.api.comment.controller;
 
-import com.backend.api.comment.dto.request.CommentCreateRequest;
+import com.backend.api.comment.dto.request.CommentRequest;
 import com.backend.api.comment.dto.response.CommentResponse;
 import com.backend.api.comment.service.CommentService;
 import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
-import com.backend.domain.post.entity.Post;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
@@ -31,7 +30,7 @@ public class CommentController {
     @Operation(summary = "댓글 작성")
     public ApiResponse<CommentResponse> createComment(
             @PathVariable Long postId,
-            @RequestBody @Valid CommentCreateRequest reqBody
+            @RequestBody @Valid CommentRequest reqBody
     ) {
 
         User currentUser = rq.getUser();
@@ -48,7 +47,7 @@ public class CommentController {
     @Operation(summary = "댓글 수정")
     public ApiResponse<CommentResponse> updateComment(
             @PathVariable Long commentId,
-            @RequestBody @Valid CommentCreateRequest reqBody
+            @RequestBody @Valid CommentRequest reqBody
     ) {
 
         User currentUser = rq.getUser();
@@ -83,15 +82,11 @@ public class CommentController {
 
     @GetMapping("/{postId}/comments")
     @Operation(summary = "댓글 목록 조회")
-    public ApiResponse<List<CommentResponse>> getComments(
+    public ApiResponse<List<CommentResponse>> readComments(
             @PathVariable Long postId
     ) {
 
-        Post post = postService.findById(postId).get();
-
-        List<CommentResponse> commentResponseList = post.getComments().reversed().stream()
-                .map(CommentResponse::new)
-                .toList();
+        List<CommentResponse> commentResponseList = commentService.getCommentsByPostId(postId);
 
         return ApiResponse.ok(
                 "%d번 게시글의 댓글 목록 조회 성공".formatted(postId),

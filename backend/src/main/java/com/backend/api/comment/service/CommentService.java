@@ -1,9 +1,10 @@
 package com.backend.api.comment.service;
 
+import com.backend.api.comment.dto.response.CommentResponse;
+import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.Post;
-import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -11,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Optional;
-
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,17 +20,21 @@ import java.util.Optional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PostRepository postRepository;
+    private final PostService postService;
+
+    public Comment findByIdOrThrow(Long id) {
+        return commentRepository.findById(id)
+                .orElseThrow(() -> new ErrorException(ErrorCode.COMMENT_NOT_FOUND));
+    }
 
     @Transactional
-    public Comment writeComment(User user, Long postId, String content) {
+    public Comment writeComment(User author, Long postId, String content) {
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+        Post post = postService.findByIdOrThrow(postId);
 
         Comment comment = Comment.builder()
                 .content(content)
-                .author(user)
+                .author(author)
                 .post(post)
                 .build();
 
@@ -39,11 +42,10 @@ public class CommentService {
     }
 
     @Transactional
-    public Comment updateComment(User user, Long commentId, String newContent) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.COMMENT_NOT_FOUND));
+    public Comment updateComment(User author, Long commentId, String newContent) {
+        Comment comment = this.findByIdOrThrow(commentId);
 
-        if (!comment.getAuthor().getId().equals(user.getId())) {
+        if (!comment.getAuthor().getId().equals(author.getId())) {
             throw new ErrorException(ErrorCode.COMMENT_INVALID_USER);
         }
 
@@ -53,19 +55,22 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(User user, Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.COMMENT_NOT_FOUND));
+    public void deleteComment(User author, Long commentId) {
+        Comment comment = this.findByIdOrThrow(commentId);
 
-        if (!comment.getAuthor().getId().equals(user.getId())) {
+        if (!comment.getAuthor().getId().equals(author.getId())) {
             throw new ErrorException(ErrorCode.COMMENT_INVALID_USER);
         }
 
         commentRepository.delete(comment);
     }
 
-    public Optional<Comment> findById(Long id) {
-        return commentRepository.findById(id);
+    public List<CommentResponse> getCommentsByPostId(Long postId) {
+        Post post = postService.findByIdOrThrow(postId);
+
+        return post.getComments().reversed().stream()
+                .map(CommentResponse::new)
+                .toList();
     }
 
 }
