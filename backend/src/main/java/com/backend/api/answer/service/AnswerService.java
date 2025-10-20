@@ -4,10 +4,10 @@ import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.dto.request.AnswerUpdateRequest;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.question.service.QuestionService;
+import com.backend.api.user.service.UserService;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.question.entity.Question;
-import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
@@ -26,6 +26,7 @@ public class AnswerService {
     private final AnswerRepository answerRepository;
     private final QuestionService questionService;
     private final Rq rq;
+    private final UserService userService;
 
     public Answer findByIdOrThrow(Long id) {
         return answerRepository.findById(id)
@@ -73,11 +74,10 @@ public class AnswerService {
         answerRepository.delete(answer);
     }
 
-    public List<AnswerReadResponse> findAnswers(Long questionId) {
-        Question question = questionService.findByIdOrThrow(questionId);
-
-        return question.getAnswers().reversed().stream()
-                .filter(Answer::isPublic)
+    public List<AnswerReadResponse> findAnswersByQuestionId(Long questionId) {
+        questionService.findByIdOrThrow(questionId);
+        return answerRepository.findByQuestionIdAndIsPublicTrueOrderByCreateDateDesc(questionId)
+                .stream()
                 .map(AnswerReadResponse::new)
                 .toList();
     }
@@ -87,8 +87,7 @@ public class AnswerService {
         Answer answer = question.getAnswerByIdOrThrow(answerId);
 
         if(!answer.isPublic()) {
-            User currentUser = rq.getUser();
-            if (!answer.getAuthor().getId().equals(currentUser.getId())) {
+            if (!answer.getAuthor().getId().equals(rq.getUser().getId())) {
                 throw new ErrorException(ErrorCode.ANSWER_NOT_PUBLIC);
             }
         }
@@ -96,5 +95,17 @@ public class AnswerService {
         return answer;
     }
 
-    private final QuestionRepository questionRepository;
+    public List<AnswerReadResponse> findAnswersByUserId(Long userId) {
+        userService.getUser(userId);
+
+        if(!rq.getUser().getId().equals(userId)) {
+            throw new ErrorException(ErrorCode.ANSWER_INVALID_USER);
+        }
+
+        return answerRepository.findByAuthorIdOrderByCreateDateDesc(userId)
+                .stream()
+                .map(AnswerReadResponse::new)
+                .toList();
+    }
+
 }

@@ -2,10 +2,12 @@ package com.backend.api.comment.service;
 
 import com.backend.api.comment.dto.response.CommentResponse;
 import com.backend.api.post.service.PostService;
+import com.backend.api.user.service.UserService;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.user.entity.User;
+import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,8 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostService postService;
+    private final UserService userService;
+    private final Rq rq;
 
     public Comment findByIdOrThrow(Long id) {
         return commentRepository.findById(id)
@@ -66,11 +70,21 @@ public class CommentService {
     }
 
     public List<CommentResponse> getCommentsByPostId(Long postId) {
-        Post post = postService.findPostByIdOrThrow(postId);
-
-        return post.getComments().reversed().stream()
+        postService.findPostByIdOrThrow(postId);
+        return commentRepository.findByPostIdOrderByCreateDateDesc(postId)
+                .stream()
                 .map(CommentResponse::new)
                 .toList();
     }
 
+    public List<CommentResponse> getCommentsByUserId(Long userId) {
+        userService.getUser(userId);
+        if(!rq.getUser().getId().equals(userId)) {
+            throw new ErrorException(ErrorCode.COMMENT_INVALID_USER);
+        }
+        return commentRepository.findByAuthorIdOrderByCreateDateDesc(userId)
+                .stream()
+                .map(CommentResponse::new)
+                .toList();
+    }
 }

@@ -1,5 +1,10 @@
 package com.backend.api.user.controller;
 
+import com.backend.api.answer.dto.response.AnswerReadResponse;
+import com.backend.api.answer.service.AnswerService;
+import com.backend.api.comment.dto.response.CommentResponse;
+import com.backend.api.comment.service.CommentService;
+import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.service.UserMyPageService;
 import com.backend.global.Rq.Rq;
@@ -10,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +26,8 @@ public class UserMyPageController {
 
     private final UserMyPageService userMyPageService;
     private final Rq rq;
+    private final CommentService commentService;
+    private final AnswerService answerService;
 
     @GetMapping("/me")
     @Operation(summary = "개인 정보 조회")
@@ -36,4 +45,29 @@ public class UserMyPageController {
         UserMyPageResponse response = userMyPageService.modifyUser(userId, modify);
         return ApiResponse.ok("개인 정보 수정이 완료되었습니다.",response);
     }
+
+    @GetMapping("/{userId}/comments")
+    @Operation(summary = "사용자가 작성한 댓글 목록 조회")
+    public ApiResponse<List<CommentResponse>> getUserComments(
+            @PathVariable Long userId
+    ) {
+        List<CommentResponse> userComments = commentService.getCommentsByUserId(userId);
+        return ApiResponse.ok(
+                "사용자가 작성한 댓글 목록 조회를 완료했습니다.",
+                userComments
+        );
+    }
+
+    @GetMapping("/{userId}/answers")
+    @Operation(summary = "사용자가 작성한 면접 답변 목록 조회")
+    public ApiResponse<List<AnswerReadResponse>> getUserAnswers(
+            @PathVariable Long userId
+    ) {
+        List<AnswerReadResponse> userAnswers = answerService.findAnswersByUserId(userId);
+        return ApiResponse.ok(
+                "사용자가 작성한 면접 답변 목록 조회를 완료했습니다.",
+                userAnswers
+        );
+    }
+
 }
