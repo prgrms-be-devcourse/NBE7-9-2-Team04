@@ -8,12 +8,12 @@ import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.post.service.PostService;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.service.UserMyPageService;
+import com.backend.api.user.service.UserService;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +22,11 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/users")
-@Tag(name ="Users", description = "마이페이지 관련 API")
+@Tag(name = "Users", description = "마이페이지 관련 API")
 public class UserMyPageController {
 
+    private final UserService userService;
+    private final PostService postService;
     private final UserMyPageService userMyPageService;
     private final Rq rq;
     private final CommentService commentService;
@@ -44,7 +46,25 @@ public class UserMyPageController {
 
         Long userId = rq.getUser().getId();
         UserMyPageResponse response = userMyPageService.modifyUser(userId, modify);
-        return ApiResponse.ok("개인 정보 수정이 완료되었습니다.",response);
+        return ApiResponse.ok("개인 정보 수정이 완료되었습니다.", response);
+
+    }
+
+    @GetMapping("/{userId}")
+    @Operation(summary = "마이페이지 상세 정보 조회")
+    public ApiResponse<UserMyPageResponse> detailInformation(@PathVariable Long userId) {
+        UserMyPageResponse response = userMyPageService.getInformation(userId);
+        return ApiResponse.ok("사용자 상세 정보 조회를 완료했습니다.", response);
+    }
+
+    @GetMapping("/{userId}/posts")
+    @Operation(summary = "사용자가 작성한 모집글 목록 조회")
+    public ApiResponse<List<PostResponse>> getUserPosts(@PathVariable Long userId) {
+        List<PostResponse> userPosts = postService.getPostsByUserId(userId);
+        return ApiResponse.ok(
+                "사용자가 작성한 모집글 목록 조회를 완료했습니다.",
+                userPosts
+        );
     }
 
     @GetMapping("/{userId}/comments")
