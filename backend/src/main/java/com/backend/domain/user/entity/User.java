@@ -69,6 +69,16 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Resume resume;
 
+    public void updateUser(String email, String password, String name,
+                           String nickname, int age, String github, String image) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.nickname = nickname;
+        this.age = age;
+        this.github = github;
+        this.image = image;
+    }
 
     public void changeStatus(AccountStatus newStatus) {
         if (newStatus != null && !this.accountStatus.equals(newStatus)) {

@@ -1,14 +1,18 @@
 package com.backend.api.user.dto.response;
 
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.user.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Builder
 @Getter
+@AllArgsConstructor
 public class UserMyPageResponse {
 
-    private int userId;
+    private long userId;
     private String email;
     private String password;
     private String name;
@@ -27,5 +31,17 @@ public class UserMyPageResponse {
                 .github(users.getGithub())
                 .image(users.getImage())
                 .build();
+    }
+
+
+    @Getter
+    public class UserModify {
+        private String email;
+        private String password;
+        private String name;
+        private String nickname;
+        private int age;
+        private String github;
+        private String image;
     }
 }

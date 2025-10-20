@@ -1,14 +1,14 @@
 package com.backend.api.user.controller;
 
 import com.backend.api.user.dto.response.UserMyPageResponse;
-import com.backend.api.user.service.UserService;
+import com.backend.api.user.service.UserMyPageService;
+import com.backend.global.Rq.Rq;
+import com.backend.global.dto.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -17,10 +17,35 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name ="Users", description = "마이페이지 관련 API")
 public class UserMyPageController {
 
-    private final UserService userService;
+    private final UserMyPageService userMyPageService;
+    private final Rq rq;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserMyPageResponse> detailInformation(@PathVariable Long userId) {
-        return ResponseEntity.ok(userService.getInformation(userId));
+    @GetMapping("/me")
+    @Operation(summary = "개인 정보 조회")
+    public ApiResponse<UserMyPageResponse> detailInformation() {
+        Long userId = rq.getUser().getId();
+        return ApiResponse.ok(userMyPageService.getInformation(userId));
+    }
+
+    @PutMapping("/me")
+    @Operation(summary = "개인 정보 수정")
+    public ApiResponse<UserMyPageResponse> updateUser(
+            @RequestBody UserMyPageResponse.UserModify modify) {
+
+        Long userId = rq.getUser().getId();
+        UserMyPageResponse response = userMyPageService.modifyUser(userId, modify);
+        return ApiResponse.ok("개인 정보 수정이 완료되었습니다.",response);
+    }
+
+    @GetMapping("/me/myproblems")
+    @Operation(summary = "본인이 푼 문제 확인")
+    public ApiResponse<UserMyPageResponse> completeSolution() {
+
+    }
+
+    @GetMapping("/me/ranking")
+    @Operation(summary = "개인 랭킹 확인")
+    public ApiResponse<UserMyPageResponse> ranking() {
+
     }
 }

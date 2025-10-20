@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -92,10 +94,5 @@ public class UserService {
 
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
-      
-    public UserMyPageResponse getInformation(Long userId){
-        User users = getUser(userId);
 
-        return UserMyPageResponse.fromEntity(users);
-    }
 }
