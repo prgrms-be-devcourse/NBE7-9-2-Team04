@@ -1,5 +1,6 @@
 package com.backend.domain.question.entity;
 
+import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import com.backend.global.exception.ErrorCode;
@@ -8,6 +9,10 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -29,6 +34,9 @@ public class Question extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
+
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval=true)
+    private List<Answer> answers = new ArrayList<>();
 
     @Builder
     public Question(String title, String content, User author) {
@@ -78,4 +86,12 @@ public class Question extends BaseEntity {
             throw new ErrorException(ErrorCode.QUESTION_CONTENT_NOT_BLANK);
         }
     }
+
+    public Answer getAnswerByIdOrThrow(Long answerId) {
+        return answers.stream()
+                .filter(a -> a.getId().equals(answerId))
+                .findFirst()
+                .orElseThrow(() -> new ErrorException(ErrorCode.ANSWER_NOT_FOUND));
+    }
+
 }
