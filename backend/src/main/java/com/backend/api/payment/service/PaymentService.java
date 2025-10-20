@@ -15,7 +15,6 @@ import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.parser.JSONParser;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,36 +29,29 @@ import java.time.LocalDateTime;
 @Slf4j
 public class PaymentService {
 
-
-
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository; //삭제 예정
     private final WebClient webClient;
     private final Rq rq;
 
 
-    private final JSONParser parser = new JSONParser();
-
-
     //결제 승인
     @Transactional
     public PaymentResponse confirmPayment(PaymentRequest request){
         User user = getOrCreateUser(); // 잠시 임시 유저로 테스트
-
         PaymentConfirmResponse response = webClient.post()
-                .uri("/confirm")
+                .uri("/confirm") // 결제 승인 API 호출
                 .bodyValue(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, clientResponse ->
                         clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> {
-                                    log.error("Toss Payment Approve Failed. Status: {}, Error Body: {}",
-                                            clientResponse.statusCode(), errorBody);
-                                    return Mono.error(new ErrorException(errorBody,ErrorCode.PAYMENT_APPROVE_FAILED ));
-                                }))
-
+                                .flatMap(errorBody ->
+                                        Mono.error(new ErrorException(errorBody, ErrorCode.PAYMENT_APPROVE_FAILED))
+                                )
+                )
                 .bodyToMono(PaymentConfirmResponse.class)
                 .block();
+
 
         Payment payment = Payment.builder()
                 .orderId(response.orderId())
