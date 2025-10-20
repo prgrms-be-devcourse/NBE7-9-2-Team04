@@ -5,6 +5,7 @@ import com.backend.api.answer.service.AnswerService;
 import com.backend.api.comment.dto.response.CommentResponse;
 import com.backend.api.comment.service.CommentService;
 import com.backend.api.post.dto.response.PostResponse;
+import com.backend.api.post.service.PostService;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.service.UserMyPageService;
 import com.backend.global.Rq.Rq;
