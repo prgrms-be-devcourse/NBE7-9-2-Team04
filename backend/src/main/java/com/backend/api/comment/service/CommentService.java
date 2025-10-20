@@ -1,9 +1,9 @@
 package com.backend.api.comment.service;
 
+import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.Post;
-import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.Optional;
 
 
@@ -21,13 +20,16 @@ import java.util.Optional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PostRepository postRepository;
+    private final PostService postService;
 
     @Transactional
     public Comment writeComment(User user, Long postId, String content) {
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+        if (!user.validateActiveStatus()) {
+            throw new ErrorException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
+
+        Post post = postService.findPostByIdOrThrow(postId);
 
         Comment comment = Comment.builder()
                 .content(content)

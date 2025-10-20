@@ -37,27 +37,18 @@ public class Question extends BaseEntity {
         this.author = author;
     }
 
-    public void setApproved(Boolean isApproved) {
+    public void updateApproved(Boolean isApproved) {
         this.isApproved = isApproved;
     }
 
-    public void setScore(Integer score) {
-        if(score < 0) {
-            throw new ErrorException(ErrorCode.INVALID_QUESTION_SCORE);
-        }
-        this.score = score;
-    }
+    public void updateScore(Integer newScore) { this.score = newScore; }
 
     public void updateUserQuestion(String title, String content) {
-        validateTitleAndContent(title, content);
-
         this.title = title;
         this.content = content;
     }
 
     public void updateAdminQuestion(String title, String content, Boolean isApproved, Integer score) {
-        validateTitleAndContent(title, content);
-
         this.title = title;
         this.content = content;
 
@@ -66,16 +57,7 @@ public class Question extends BaseEntity {
         }
 
         if(score != null) {
-            setScore(score);
-        }
-    }
-
-    private void validateTitleAndContent(String title, String content) {
-        if (title == null || title.isBlank()) {
-            throw new ErrorException(ErrorCode.QUESTION_TITLE_NOT_BLANK);
-        }
-        if (content == null || content.isBlank()) {
-            throw new ErrorException(ErrorCode.QUESTION_CONTENT_NOT_BLANK);
+            updateScore(score);
         }
     }
 }
