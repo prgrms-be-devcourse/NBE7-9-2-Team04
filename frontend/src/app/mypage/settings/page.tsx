@@ -81,7 +81,7 @@ export default function SettingsPage() {
                 )}
                 <div className="flex justify-end gap-2">
                 <button
-                    className="px-3 py-1 border rounded-md hover:bg-gray-100"
+                    className="px-3 py-1 rounded-md hover:bg-gray-100"
                     onClick={()  =>  router.replace("/mypage")}
                 >
                     취소
