@@ -56,6 +56,7 @@ export default function ProfilePage() {
   }
 
   return (
+    <>
     <div className="space-y-8">
       {/* 프로필 카드 */}
       <div className="bg-white rounded-lg p-6 shadow-md">
@@ -142,5 +143,6 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

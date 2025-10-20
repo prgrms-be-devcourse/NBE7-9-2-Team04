@@ -31,6 +31,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
   ];
 
   return (
+    <>
     <div className="max-w-7xl mx-auto px-4 py-8">
 
       <div className="mb-8">
@@ -67,5 +68,6 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
         </main>
       </div>
     </div>
+    </>
   );
 }

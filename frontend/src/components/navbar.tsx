@@ -87,9 +87,9 @@ export default function Navbar() {
 
               <li>
                 <Link
-                  href="/ranking"
+                  href="/portfolio_review"
                   className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
-                    pathname === "/ranking" ? "bg-blue-100 text-blue-800" : ""
+                    pathname === "/portfolio_review" ? "bg-blue-100 text-blue-800" : ""
                   }`}
                 >
                   📝 포트폴리오 첨삭

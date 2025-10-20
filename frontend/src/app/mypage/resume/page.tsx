@@ -90,6 +90,7 @@ export default function ResumePage() {
   }
 
   return (
+    <>
     <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
       <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">💼 이력서 관리</h2>
       <p className="text-gray-500 mb-6">이력서 정보를 등록하고 관리하세요.</p>
@@ -167,6 +168,7 @@ export default function ResumePage() {
         저장
       </button>
     </div>
+    </>
   );
 }
 function Section({

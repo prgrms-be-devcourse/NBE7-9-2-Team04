@@ -101,6 +101,19 @@ export default function HomePage() {
 
             <div className="rounded-lg border border-gray-200 shadow-sm flex flex-col bg-white">
               <div className="p-6 space-y-2">
+                <span className="w-10 h-10 mb-2 text-blue-500 text-3xl">📄</span>
+                <h3 className="text-xl font-semibold">포트폴리오 첨삭</h3>
+                <p className="text-sm text-gray-600">포트폴리오를 AI가 분석하고 개선점을 제안합니다</p>
+              </div>
+              <div className="p-6 pt-0 flex-grow">
+                <Link href="/interview/portfolio" className="text-blue-500 hover:underline p-0">
+                  시작하기
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 shadow-sm flex flex-col bg-white">
+              <div className="p-6 space-y-2">
                 <span className="w-10 h-10 mb-2 text-blue-500 text-3xl">🏆</span> 
                 <h3 className="text-xl font-semibold">티어 & 랭킹 시스템</h3>
                 <p className="text-sm text-gray-600">문제를 풀고 질문을 등록하여 티어를 올려보세요</p>
