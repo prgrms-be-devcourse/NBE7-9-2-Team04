@@ -130,7 +130,6 @@ public class CommentControllerTest {
 
         long targetPostId = 1; // 동적으로 생성된 게시글 ID 사용
         String content = "새로운 댓글";
-        User author = userRepository.findById(1L).get();
 
         // DB에 댓글 생성 전 개수
         long initialCommentCount = commentRepository.count();
@@ -218,9 +217,7 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.data.content").value(content))
                 .andExpect(jsonPath("$.data.authorId").value(expectedAuthorId))
                 .andExpect(jsonPath("$.data.authorNickName").value(expectedAuthorNickname))
-                .andExpect(jsonPath("$.data.postId").value(targetPostId))
-                .andExpect(jsonPath("$.data.content").value(content)) // 내용이 수정되었는지 확인
-                .andExpect(jsonPath("$.data.authorId").value(expectedAuthorId)); // 작성자 ID가 유지되는지 확인
+                .andExpect(jsonPath("$.data.postId").value(targetPostId));
 
         commentRepository.flush();
 
@@ -259,7 +256,7 @@ public class CommentControllerTest {
                 .andExpect(handler().methodName("updateComment"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value("FORBIDDEN"))
-                .andExpect(jsonPath("$.message").value("권한이 없는 사용자입니다."));
+                .andExpect(jsonPath("$.message").value("해당 댓글에 대한 권한이 없는 사용자입니다."));
     }
 
     @Test
@@ -305,7 +302,7 @@ public class CommentControllerTest {
                 .andExpect(handler().methodName("deleteComment"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value("FORBIDDEN"))
-                .andExpect(jsonPath("$.message").value("권한이 없는 사용자입니다."));
+                .andExpect(jsonPath("$.message").value("해당 댓글에 대한 권한이 없는 사용자입니다."));
     }
 
     @Test
@@ -322,7 +319,7 @@ public class CommentControllerTest {
 
         resultActions
                 .andExpect(handler().handlerType(CommentController.class))
-                .andExpect(handler().methodName("getComments"))
+                .andExpect(handler().methodName("readComments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("OK"))
                 .andExpect(jsonPath("$.message").value("%d번 게시글의 댓글 목록 조회 성공".formatted(targetPostId)));
