@@ -56,10 +56,10 @@ public class AdminQuestionService {
                 .build();
 
         if (request.isApproved() != null) {
-            question.setApproved(request.isApproved());
+            question.updateApproved(request.isApproved());
         }
         if (request.score() != null) {
-            question.setScore(request.score());
+            question.updateScore(request.score());
         }
 
         return question;
@@ -92,7 +92,7 @@ public class AdminQuestionService {
     public QuestionResponse approveQuestion(Long questionId, boolean isApproved, User user) {
         validateAdminAuthority(user);
         Question question = findByIdOrThrow(questionId);
-        question.setApproved(isApproved);
+        question.updateApproved(isApproved);
         return QuestionResponse.from(question);
     }
 
@@ -101,7 +101,7 @@ public class AdminQuestionService {
     public QuestionResponse setQuestionScore(Long questionId, Integer score, User user) {
         validateAdminAuthority(user);
         Question question = findByIdOrThrow(questionId);
-        question.setScore(score);
+        question.updateScore(score);
         return QuestionResponse.from(question);
     }
 
