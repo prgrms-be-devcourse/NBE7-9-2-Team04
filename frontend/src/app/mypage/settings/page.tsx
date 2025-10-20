@@ -99,12 +99,12 @@ export default function MySettingsPage() {
 
 
         {canEdit ? (
-            <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold mb-2">개인정보 수정</h2>
-            <p className="text-gray-500 mb-6">
-                회원 정보를 수정하고 저장하세요.
-            </p>
-
+            //<div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm max-w-2xl mx-auto">
+            <div className="max-w-screen-lg mx-auto px-6 py-10">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold mb-2">⚙️ 개인정보 수정</h1>
+                    <p className="text-gray-500 mb-6">회원 정보를 수정하고 저장하세요.</p>
+                </div>
             <form
                 className="space-y-5"
                 onSubmit={(e) => {

@@ -19,13 +19,6 @@ export default function ProfilePage() {
     
   };
 
-
-
-  const solvedProblems = [
-    { id: "q1", title: "TCP와 UDP의 차이점", category: "네트워크", solvedAt: "2025-10-15" },
-    { id: "q2", title: "프로세스와 스레드", category: "운영체제", solvedAt: "2025-10-14" },
-  ];
-
   // useEffect(() => {
   //   const isLoggedIn = localStorage.getItem("isLoggedIn");
   //   if (!isLoggedIn || isLoggedIn !== "true") {

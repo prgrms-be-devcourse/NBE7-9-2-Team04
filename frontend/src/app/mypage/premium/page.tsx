@@ -50,11 +50,11 @@ export default function MyPremiumPage() {
 
   return (
     <>
-    <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-        💳 유료 서비스 관리
-      </h2>
-      <p className="text-gray-500 mb-8">프리미엄 멤버십을 관리하세요.</p>
+      <div className="max-w-screen-lg mx-auto px-6 py-10">
+        <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2"> 💳 유료 서비스 관리</h1>
+            <p className="text-gray-500 mb-6">프리미엄 멤버십을 관리하세요.</p>
+        </div>
 
       {isPremium ? (
         <div className="space-y-6">

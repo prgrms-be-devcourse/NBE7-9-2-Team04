@@ -27,91 +27,90 @@ export default function MyResumePage() {
 
   return (
     <>
-    <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
-      <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">💼 이력서 관리</h2>
-      <p className="text-gray-500 mb-6">이력서 정보를 등록하고 관리하세요.</p>
-
-      {/* 자기소개 */}
-      <div className="mb-6">
-        <label className="block font-semibold mb-1">이력서 내용</label>
-        <textarea
-          className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
-          placeholder="자기소개 및 경력 요약을 작성하세요"
-          rows={6}
-          value={resumeData.content}
-          onChange={(e) => setResumeData({ ...resumeData, content: e.target.value })}
-        />
-      </div>
-
-      {/* 기술 스택 */}
-      <div className="mb-6">
-        <label className="block font-semibold mb-1">기술 스택</label>
-        <textarea
-          className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
-          placeholder="예: React, Next.js, TypeScript, Node.js, PostgreSQL"
-          rows={3}
-          value={resumeData.skill}
-          onChange={(e) => setResumeData({ ...resumeData, skill: e.target.value })}
-        />
-      </div>
-
-        {/* 기술 스택 */}
-       <div className="mb-6">
-        <label className="block font-semibold mb-1">대외 활동</label>
-        <textarea
-          className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
-          placeholder="예: 해커톤 대회 1등"
-          rows={3}
-          value={resumeData.activity}
-          onChange={(e) => setResumeData({ ...resumeData, activity: e.target.value })}
-        />
-      </div>
-
-      
-        {/* 자격증*/}
-        <div className="mb-6">
-        <label className="block font-semibold mb-1">자격증</label>
-        <textarea
-          className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
-          placeholder="예: 정보처리기사"
-          rows={3}
-          value={resumeData.certification}
-          onChange={(e) => setResumeData({ ...resumeData, certification: e.target.value })}
-        />
-      </div>
-
-      
-        {/* 경력 사항*/}
-        <div className="mb-6">
-        <label className="block font-semibold mb-1">경력 사항</label>
-        <textarea
-          className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
-          placeholder="예: 데브 회사 2년차"
-          rows={3}
-          value={resumeData.career}
-          onChange={(e) => setResumeData({ ...resumeData, career: e.target.value })}
-        />
-      </div>
-
-      {/* 포트폴리오 URL */}
-      <div className="mb-6">
-        <label className="block font-semibold mb-1">포트폴리오 URL</label>
-        <div className="flex items-center gap-2">
-          <span className="text-xl">💻</span>
-          <input
-            type="text"
-            className="flex-1 border border-gray-300 rounded-md p-2"
-            placeholder="https://github.com/username 또는 포트폴리오 사이트"
-            value={resumeData.portfolioUrl}
-            onChange={(e) => setResumeData({ ...resumeData, portfolioUrl: e.target.value })}
-          />
+    <div className="max-w-screen-lg mx-auto px-6 py-10">
+        <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">💼 이력서 관리</h1>
+            <p className="text-gray-500 mb-6">이력서 정보를 등록하고 관리하세요.</p>
         </div>
-      </div>
 
-      <button className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-semibold">
-        저장
-      </button>
-    </div>
+
+        <div className="mb-6">
+            <label className="block font-semibold mb-1">이력서 내용</label>
+            <textarea
+            className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
+            placeholder="자기소개 및 경력 요약을 작성하세요"
+            rows={6}
+            value={resumeData.content}
+            onChange={(e) => setResumeData({ ...resumeData, content: e.target.value })}
+            />
+        </div>
+
+
+        <div className="mb-6">
+            <label className="block font-semibold mb-1">기술 스택</label>
+            <textarea
+            className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
+            placeholder="예: React, Next.js, TypeScript, Node.js, PostgreSQL"
+            rows={3}
+            value={resumeData.skill}
+            onChange={(e) => setResumeData({ ...resumeData, skill: e.target.value })}
+            />
+        </div>
+
+        <div className="mb-6">
+            <label className="block font-semibold mb-1">대외 활동</label>
+            <textarea
+            className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
+            placeholder="예: 해커톤 대회 1등"
+            rows={3}
+            value={resumeData.activity}
+            onChange={(e) => setResumeData({ ...resumeData, activity: e.target.value })}
+            />
+        </div>
+
+        
+        <div className="mb-6">
+            <label className="block font-semibold mb-1">자격증</label>
+            <textarea
+            className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
+            placeholder="예: 정보처리기사"
+            rows={3}
+            value={resumeData.certification}
+            onChange={(e) => setResumeData({ ...resumeData, certification: e.target.value })}
+            />
+        </div>
+
+
+        <div className="mb-6">
+            <label className="block font-semibold mb-1">경력 사항</label>
+            <textarea
+            className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
+            placeholder="예: 데브 회사 2년차"
+            rows={3}
+            value={resumeData.career}
+            onChange={(e) => setResumeData({ ...resumeData, career: e.target.value })}
+            />
+        </div>
+
+
+        <div className="mb-6">
+            <label className="block font-semibold mb-1">포트폴리오 URL</label>
+            <div className="flex items-center gap-2">
+            <span className="text-xl">💻</span>
+            <input
+                type="text"
+                className="flex-1 border border-gray-300 rounded-md p-2"
+                placeholder="https://github.com/username 또는 포트폴리오 사이트"
+                value={resumeData.portfolioUrl}
+                onChange={(e) => setResumeData({ ...resumeData, portfolioUrl: e.target.value })}
+            />
+            </div>
+        </div>
+
+        <button className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-semibold">
+            저장
+        </button>
+     </div>
     </>
   );
 }
