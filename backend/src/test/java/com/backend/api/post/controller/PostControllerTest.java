@@ -82,6 +82,7 @@ class PostControllerTest {
                 .deadline(FIXED_DEADLINE)
                 .status(PostStatus.ING)
                 .pinStatus(PinStatus.NOT_PINNED)
+                .recruitCount(4)
                 .build();
         savedPost = postRepository.save(post);
     }
@@ -100,7 +101,8 @@ class PostControllerTest {
                     "새로운 내용입니다.",
                     FIXED_DEADLINE,
                     PostStatus.ING,
-                    PinStatus.NOT_PINNED
+                    PinStatus.NOT_PINNED,
+                    5
             );
 
             // when
@@ -116,6 +118,7 @@ class PostControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.data.title").value("새로운 게시물"))
+                    .andExpect(jsonPath("$.data.recruitCount").value(5))
                     .andDo(print());
         }
 
@@ -129,7 +132,8 @@ class PostControllerTest {
                     "함께 팀 프로젝트를 진행할 백엔드 개발자 구합니다.",
                     FIXED_DEADLINE,
                     PostStatus.ING,
-                    PinStatus.NOT_PINNED
+                    PinStatus.NOT_PINNED,
+                    4
             );
 
             // when
@@ -158,7 +162,8 @@ class PostControllerTest {
                     "내용은 있습니다.",
                     FIXED_DEADLINE,
                     PostStatus.ING,
-                    PinStatus.NOT_PINNED
+                    PinStatus.NOT_PINNED,
+                    4
             );
 
             // when
@@ -187,7 +192,8 @@ class PostControllerTest {
                     "", // 내용 누락
                     FIXED_DEADLINE,
                     PostStatus.ING,
-                    PinStatus.NOT_PINNED
+                    PinStatus.NOT_PINNED,
+                    4
             );
 
             // when
@@ -216,7 +222,7 @@ class PostControllerTest {
         @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
-            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED);
+            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED, 10);
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -234,6 +240,7 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.data.content").value("수정된 내용"))
                     .andExpect(jsonPath("$.data.status").value(PostStatus.CLOSED.name()))
                     .andExpect(jsonPath("$.data.pinStatus").value(PinStatus.PINNED.name()))
+                    .andExpect(jsonPath("$.data.recruitCount").value(10))
                     .andDo(print());
         }
 
@@ -242,7 +249,7 @@ class PostControllerTest {
         @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_post_not_found() throws Exception {
             // given
-            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED);
+            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED, 10);
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -265,7 +272,7 @@ class PostControllerTest {
         @WithUserDetails(value = "other@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_not_owner() throws Exception {
             // given
-            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED);
+            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED, 10);
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -288,7 +295,7 @@ class PostControllerTest {
         @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_title_blank() throws Exception {
             // given
-            PostUpdateRequest request = new PostUpdateRequest("", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED);
+            PostUpdateRequest request = new PostUpdateRequest("", "수정된 내용", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED, 10);
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -397,6 +404,7 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.data.postId").value(postId))
                     .andExpect(jsonPath("$.data.title").value("기존 제목"))
                     .andExpect(jsonPath("$.data.content").value("기존 내용"))
+                    .andExpect(jsonPath("$.data.recruitCount").value(4))
                     .andDo(print());
         }
 
