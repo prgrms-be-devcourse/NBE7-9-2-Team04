@@ -36,7 +36,7 @@ public enum ErrorCode {
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-    COMMENT_INVALID_USER(HttpStatus.FORBIDDEN, "권한이 없는 사용자입니다."),
+    COMMENT_INVALID_USER(HttpStatus.FORBIDDEN, "해당 댓글에 대한 권한이 없는 사용자입니다."),
 
     //Question
     QUESTION_TITLE_NOT_BLANK(HttpStatus.BAD_REQUEST, "질문 제목은 공백일 수 없습니다."),
@@ -46,6 +46,11 @@ public enum ErrorCode {
     QUESTION_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 질문입니다."),
     ALREADY_APPROVED_QUESTION(HttpStatus.BAD_REQUEST, "이미 승인된 질문입니다."),
     QUESTION_NOT_APPROVED(HttpStatus.FORBIDDEN, "승인되지 않은 질문입니다."),
+
+    // Answer
+    ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답변입니다."),
+    ANSWER_NOT_PUBLIC(HttpStatus.FORBIDDEN, "비공개 답변입니다."),
+    ANSWER_INVALID_USER(HttpStatus.FORBIDDEN, "해당 답변에 대한 권한이 없는 사용자입니다."),
 
     // resume
     DUPLICATE_RESUME(HttpStatus.BAD_REQUEST, "이미 등록된 이력서가 있습니다."),

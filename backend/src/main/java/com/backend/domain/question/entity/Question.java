@@ -1,11 +1,16 @@
 package com.backend.domain.question.entity;
 
+import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -31,6 +36,8 @@ public class Question extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     private QuestionCategoryType categoryType;
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval=true)
+    private List<Answer> answers = new ArrayList<>();
 
     @Builder
     public Question(String title, String content, User author, QuestionCategoryType categoryType) {
@@ -65,4 +72,12 @@ public class Question extends BaseEntity {
     public void changeCategory(QuestionCategoryType categoryType) {
         this.categoryType = categoryType;
     }
+
+    public Answer getAnswerByIdOrThrow(Long answerId) {
+        return answers.stream()
+                .filter(a -> a.getId().equals(answerId))
+                .findFirst()
+                .orElseThrow(() -> new ErrorException(ErrorCode.ANSWER_NOT_FOUND));
+    }
+
 }
