@@ -1,5 +1,6 @@
 package com.backend.api.user.service;
 
+import com.backend.api.user.dto.request.UserMyPageQuestionRequest;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
@@ -11,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -19,6 +23,7 @@ public class UserMyPageService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Rq rq;
+    private UserMyPageQuestionRequest userMyPageQuestionRequest;
 
 
     public UserMyPageResponse modifyUser(Long userId, UserMyPageResponse.UserModify modify) {
@@ -49,4 +54,8 @@ public class UserMyPageService {
         return UserMyPageResponse.fromEntity(users);
     }
 
+
+    public List<UserMyPageResponse.SolvedProblem> getSolvedProblems(Long userId) {
+        return List.of();
+    }
 }
