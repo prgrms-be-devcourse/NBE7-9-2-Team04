@@ -97,7 +97,18 @@ export default function Navbar() {
 
               <li>
                 <Link
-                  href="/qna"
+                  href="/ranking"
+                  className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
+                    pathname === "/ranking" ? "bg-blue-100 text-blue-800" : ""
+                  }`}
+                >
+                  📝 포트폴리오 첨삭
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/portfolio_review"
                   className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
                     pathname === "/qna" ? "bg-blue-100 text-blue-800" : ""
                   }`}
@@ -116,6 +127,8 @@ export default function Navbar() {
                   🏆 랭킹
                 </Link>
               </li>
+
+              
 
               {isLoggedIn && isAdmin && (
                 <li>
