@@ -49,7 +49,9 @@ public class SecurityConfig {
                                 "/api/v1/posts/{postId:\\d+}/comments",
                                 "/api/v1/posts",
                                 "/api/v1/posts/{postId:\\d+}",
-                                "/api/v1/questions/**" ).permitAll()
+                                "/api/v1/payments/*",
+                                "/api/v1/questions/{questionId}/answers",
+                                "/api/v1/questions/{questionId}/answers/*").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/users/login", "/api/v1/users/signup","/api/v1/users/refresh").permitAll()
                         .anyRequest().authenticated()
 
