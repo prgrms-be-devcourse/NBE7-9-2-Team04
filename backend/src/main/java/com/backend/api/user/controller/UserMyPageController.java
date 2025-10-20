@@ -36,16 +36,4 @@ public class UserMyPageController {
         UserMyPageResponse response = userMyPageService.modifyUser(userId, modify);
         return ApiResponse.ok("개인 정보 수정이 완료되었습니다.",response);
     }
-
-    @GetMapping("/me/myproblems")
-    @Operation(summary = "본인이 푼 문제 확인")
-    public ApiResponse<UserMyPageResponse> completeSolution() {
-
-    }
-
-    @GetMapping("/me/ranking")
-    @Operation(summary = "개인 랭킹 확인")
-    public ApiResponse<UserMyPageResponse> ranking() {
-
-    }
 }
