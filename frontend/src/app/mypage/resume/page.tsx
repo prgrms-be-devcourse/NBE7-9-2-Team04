@@ -7,13 +7,16 @@ export default function ResumePage() {
 
   const [resumeData, setResumeData] = useState({
     content: "",
-    techStack: "",
+    skill: "",
+    activity: "",
+    certification: "",
+    career: "",
     portfolioUrl: "",
   });
 
-  const [activities, setActivities] = useState<any[]>([]);
-  const [certifications, setCertifications] = useState<any[]>([]);
-  const [experiences, setExperiences] = useState<any[]>([]);
+//   const [activities, setActivities] = useState<any[]>([]);
+//   const [certifications, setCertifications] = useState<any[]>([]);
+//   const [experiences, setExperiences] = useState<any[]>([]);
 
   // ✅ 임시 유저 가정
   useEffect(() => {
@@ -21,73 +24,6 @@ export default function ResumePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // ✅ 통합 handle 함수 (백엔드 연동 대비)
-  const handleAdd = (type: string) => {
-    const id = Date.now();
-    const newItem =
-      type === "activity"
-        ? { id, date: "", name: "", description: "" }
-        : type === "certification"
-        ? { id, date: "", name: "" }
-        : { id, company: "", position: "", startDate: "", endDate: "" };
-
-    switch (type) {
-      case "activity":
-        setActivities((prev) => [...prev, newItem]);
-        break;
-      case "certification":
-        setCertifications((prev) => [...prev, newItem]);
-        break;
-      case "experience":
-        setExperiences((prev) => [...prev, newItem]);
-        break;
-    }
-
-    // 나중에 fetch(`/api/${type}`, { method: "POST", body: JSON.stringify(newItem) })
-  };
-
-  const handleUpdate = (type: string, id: number, field: string, value: string) => {
-    const updateList = (list: any[]) => list.map((item) => (item.id === id ? { ...item, [field]: value } : item));
-
-    switch (type) {
-      case "activity":
-        setActivities(updateList(activities));
-        break;
-      case "certification":
-        setCertifications(updateList(certifications));
-        break;
-      case "experience":
-        setExperiences(updateList(experiences));
-        break;
-    }
-
-    // 나중에 fetch(`/api/${type}/${id}`, { method: "PUT", body: JSON.stringify({ [field]: value }) })
-  };
-
-  const handleRemove = (type: string, id: number) => {
-    const filterList = (list: any[]) => list.filter((item) => item.id !== id);
-
-    switch (type) {
-      case "activity":
-        setActivities(filterList(activities));
-        break;
-      case "certification":
-        setCertifications(filterList(certifications));
-        break;
-      case "experience":
-        setExperiences(filterList(experiences));
-        break;
-    }
-
-    // 나중에 fetch(`/api/${type}/${id}`, { method: "DELETE" })
-  };
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] text-gray-500">
-        로딩 중...
-      </div>
-    );
-  }
 
   return (
     <>
@@ -114,40 +50,48 @@ export default function ResumePage() {
           className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
           placeholder="예: React, Next.js, TypeScript, Node.js, PostgreSQL"
           rows={3}
-          value={resumeData.techStack}
-          onChange={(e) => setResumeData({ ...resumeData, techStack: e.target.value })}
+          value={resumeData.skill}
+          onChange={(e) => setResumeData({ ...resumeData, skill: e.target.value })}
         />
       </div>
 
-      {/* 대외 활동 */}
-      <Section
-        title="대외 활동"
-        type="activity"
-        list={activities}
-        handleAdd={handleAdd}
-        handleUpdate={handleUpdate}
-        handleRemove={handleRemove}
-      />
+        {/* 기술 스택 */}
+       <div className="mb-6">
+        <label className="block font-semibold mb-1">대외 활동</label>
+        <textarea
+          className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
+          placeholder="예: 해커톤 대회 1등"
+          rows={3}
+          value={resumeData.activity}
+          onChange={(e) => setResumeData({ ...resumeData, activity: e.target.value })}
+        />
+      </div>
 
-      {/* 자격증 */}
-      <Section
-        title="자격증"
-        type="certification"
-        list={certifications}
-        handleAdd={handleAdd}
-        handleUpdate={handleUpdate}
-        handleRemove={handleRemove}
-      />
+      
+        {/* 자격증*/}
+        <div className="mb-6">
+        <label className="block font-semibold mb-1">자격증</label>
+        <textarea
+          className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
+          placeholder="예: 정보처리기사"
+          rows={3}
+          value={resumeData.certification}
+          onChange={(e) => setResumeData({ ...resumeData, certification: e.target.value })}
+        />
+      </div>
 
-      {/* 경력 사항 */}
-      <Section
-        title="경력 사항"
-        type="experience"
-        list={experiences}
-        handleAdd={handleAdd}
-        handleUpdate={handleUpdate}
-        handleRemove={handleRemove}
-      />
+      
+        {/* 경력 사항*/}
+        <div className="mb-6">
+        <label className="block font-semibold mb-1">경력 사항</label>
+        <textarea
+          className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
+          placeholder="예: 데브 회사 2년차"
+          rows={3}
+          value={resumeData.career}
+          onChange={(e) => setResumeData({ ...resumeData, career: e.target.value })}
+        />
+      </div>
 
       {/* 포트폴리오 URL */}
       <div className="mb-6">
@@ -171,6 +115,8 @@ export default function ResumePage() {
     </>
   );
 }
+
+/* 이후 활동 폼 추가 시 필요요
 function Section({
     title,
     type,
@@ -267,3 +213,5 @@ function Section({
       </div>
     );
   }
+
+  */
