@@ -100,7 +100,7 @@ public class AnswerControllerTest {
         com.backend.domain.answer.entity.Answer answer2 = com.backend.domain.answer.entity.Answer.builder()
                 .content("두 번째 답변 내용")
                 .isPublic(false)
-                .author(userRepository.findById(1L).orElseThrow())
+                .author(userRepository.findById(2L).orElseThrow())
                 .question(question1)
                 .build();
 
@@ -580,7 +580,7 @@ public class AnswerControllerTest {
         }
 
         @Test
-        @DisplayName("답변 단건 조회 - 비공개 답변 조회 시도")
+        @DisplayName("답변 단건 조회 - 다른 사용자의 비공개 답변 조회 시도")
         void fail1() throws Exception {
             long targetQuestionId = 1;
             long targetAnswerId = 2;
