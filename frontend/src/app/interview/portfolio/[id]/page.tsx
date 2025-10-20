@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 //임시 데이터
 const interviewData = {
   id: "p1",
-  projectName: "E-commerce Platform",
   githubUrl: "https://github.com/user/ecommerce-app",
   questions: [
     { id: "q1", question: "이 프로젝트에서 Next.js를 선택한 이유는 무엇인가요?" },
@@ -84,8 +83,7 @@ export default function PortfolioQuestionDetailPage() {
 
       {/* 진행바 */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-1">{interviewData.projectName}</h2>
-        <p className="text-gray-500 text-sm mb-3">{interviewData.githubUrl}</p>
+        <h2 className="text-2xl font-bold mb-1">{interviewData.githubUrl}</h2>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-blue-600 h-2 rounded-full transition-all duration-500"

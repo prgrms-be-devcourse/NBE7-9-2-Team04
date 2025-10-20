@@ -8,14 +8,12 @@ const mockPortfolios = [
   {
     id: "p1",
     githubUrl: "https://github.com/user/ecommerce-app",
-    projectName: "E-commerce Platform",
     analyzedAt: "2025-10-10",
     questionsCount: 8,
   },
   {
     id: "p2",
     githubUrl: "https://github.com/user/chat-app",
-    projectName: "Real-time Chat Application",
     analyzedAt: "2025-10-05",
     questionsCount: 5,
   },
@@ -43,7 +41,7 @@ export default function PortfolioQuestionPage() {
           onClick={handleAddPortfolioQuestion}
           className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md  hover:bg-blue-600 transition"
         >
-          새로운 포트폴리오 면접 시작
+          새로운 면접 시작
         </button>
       </div>
         
@@ -64,10 +62,7 @@ export default function PortfolioQuestionPage() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold">{portfolio.projectName}</h3>
-                  <p className="text-sm text-gray-500 break-all mt-1">
-                    {portfolio.githubUrl}
-                  </p>
+                  <h3 className="text-lg font-semibold">{portfolio.githubUrl}</h3>
                 </div>
                 <span className="text-sm bg-gray-100 border border-gray-200 px-2 py-1 rounded-md text-gray-700">
                   {portfolio.questionsCount}개 질문
