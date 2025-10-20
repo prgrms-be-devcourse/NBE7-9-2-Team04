@@ -24,5 +24,8 @@ public record PostUpdateRequest(
         PostStatus status,
 
         @NotNull(message = "상단 고정 여부는 필수입니다.")
-        PinStatus pinStatus
+        PinStatus pinStatus,
+
+        @NotNull(message = "모집 인원은 필수입니다.")
+        Integer recruitCount
 ) {}

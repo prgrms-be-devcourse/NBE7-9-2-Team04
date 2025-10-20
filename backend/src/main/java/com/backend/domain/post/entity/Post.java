@@ -38,6 +38,9 @@ public class Post extends BaseEntity {
     private PinStatus pinStatus; // 상단 고정 여부
 
     @NotNull
+    private Integer recruitCount; // 모집 인원
+
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false) // userId와 매핑
     private User users;  // 게시글 작성자 ID
@@ -45,12 +48,13 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    public void updatePost(String title, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus) {
+    public void updatePost(String title, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus,Integer recruitCount) {
         this.title = title;
         this.content = content;
         this.deadline = deadline;
         this.status = status;
         this.pinStatus = pinStatus;
+        this.recruitCount = recruitCount;
     }
 
     public void updatePinStatus(PinStatus pinStatus) {

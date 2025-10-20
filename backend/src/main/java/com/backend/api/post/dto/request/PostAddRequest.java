@@ -31,5 +31,9 @@ public record PostAddRequest(
 
         @Schema(description = "상단 고정 여부", example = "NOT_PINNED")
         @NotNull(message = "상단 고정 여부는 필수입니다.")
-        PinStatus pinStatus
+        PinStatus pinStatus,
+
+        @Schema(description = "모집 인원", example = "4")
+        @NotNull(message = "모집 인원은 필수입니다.")
+        Integer recruitCount
 ) {}
