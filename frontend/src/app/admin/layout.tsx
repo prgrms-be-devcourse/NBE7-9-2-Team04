@@ -19,17 +19,17 @@ export default function ProfileLayout({
     },
     {
       title: "질문 관리",
-      href: "/admin/question",
+      href: "/admin/questions",
       icon: "💬",
     },
     {
       title: "게시글 관리",
-      href: "/admin/recruitment",
+      href: "/admin/recruitments",
       icon: "📰",
     },
     {
       title: "결제 관리",
-      href: "/admin/payment",
+      href: "/admin/premiums",
       icon: "💰",
     }
   ];
