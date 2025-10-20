@@ -52,4 +52,12 @@ public class Post extends BaseEntity {
         this.status = status;
         this.pinStatus = pinStatus;
     }
+
+    public void updatePinStatus(PinStatus pinStatus) {
+        this.pinStatus = pinStatus;
+    }
+
+    public void updateStatus(PostStatus status) {
+        this.status = status;
+    }
 }
