@@ -31,7 +31,6 @@ public class CommentController {
             @PathVariable Long postId,
             @RequestBody @Valid CommentRequest reqBody
     ) {
-
         User currentUser = rq.getUser();
 
         Comment newComment = commentService.writeComment(currentUser, postId, reqBody.content());
@@ -48,7 +47,6 @@ public class CommentController {
             @PathVariable Long commentId,
             @RequestBody @Valid CommentRequest reqBody
     ) {
-
         User currentUser = rq.getUser();
 
         Comment updatedComment = commentService.updateComment(
@@ -68,7 +66,6 @@ public class CommentController {
     public ApiResponse<Void> deleteComment(
             @PathVariable Long commentId
     ) {
-
         User currentUser = rq.getUser();
 
         commentService.deleteComment(currentUser, commentId);
@@ -84,7 +81,6 @@ public class CommentController {
     public ApiResponse<List<CommentResponse>> readComments(
             @PathVariable Long postId
     ) {
-
         List<CommentResponse> commentResponseList = commentService.getCommentsByPostId(postId);
 
         return ApiResponse.ok(

@@ -28,13 +28,13 @@ public class CommentService {
     }
 
     @Transactional
-    public Comment writeComment(User author, Long postId, String content) {
+    public Comment writeComment(User currentUser, Long postId, String content) {
 
         Post post = postService.findByIdOrThrow(postId);
 
         Comment comment = Comment.builder()
                 .content(content)
-                .author(author)
+                .author(currentUser)
                 .post(post)
                 .build();
 
@@ -42,10 +42,10 @@ public class CommentService {
     }
 
     @Transactional
-    public Comment updateComment(User author, Long commentId, String newContent) {
+    public Comment updateComment(User currentUser, Long commentId, String newContent) {
         Comment comment = this.findByIdOrThrow(commentId);
 
-        if (!comment.getAuthor().getId().equals(author.getId())) {
+        if (!comment.getAuthor().getId().equals(currentUser.getId())) {
             throw new ErrorException(ErrorCode.COMMENT_INVALID_USER);
         }
 
@@ -55,10 +55,10 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(User author, Long commentId) {
+    public void deleteComment(User currentUser, Long commentId) {
         Comment comment = this.findByIdOrThrow(commentId);
 
-        if (!comment.getAuthor().getId().equals(author.getId())) {
+        if (!comment.getAuthor().getId().equals(currentUser.getId())) {
             throw new ErrorException(ErrorCode.COMMENT_INVALID_USER);
         }
 
