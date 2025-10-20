@@ -1,12 +1,15 @@
 package com.backend.api.answer.service;
 
-import com.backend.api.answer.dto.request.AnswerRequest;
+import com.backend.api.answer.dto.request.AnswerCreateRequest;
+import com.backend.api.answer.dto.request.AnswerUpdateRequest;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.question.service.QuestionService;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.User;
+import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ public class AnswerService {
 
     private final AnswerRepository answerRepository;
     private final QuestionService questionService;
+    private final Rq rq;
 
     public Answer findByIdOrThrow(Long id) {
         return answerRepository.findById(id)
@@ -29,8 +33,7 @@ public class AnswerService {
     }
 
     @Transactional
-    public Answer writeAnswer(User author, Long questionId, AnswerRequest reqBody) {
-
+    public Answer writeAnswer(User currentUser, Long questionId, AnswerCreateRequest reqBody) {
         String content = reqBody.content();
 
         Question question = questionService.findByIdOrThrow(questionId);
@@ -39,7 +42,7 @@ public class AnswerService {
         Answer answer = Answer.builder()
                 .content(content)
                 .isPublic(isPublic)
-                .author(author)
+                .author(currentUser)
                 .question(question)
                 .build();
 
@@ -47,10 +50,10 @@ public class AnswerService {
     }
 
     @Transactional
-    public Answer updateAnswer(User author, Long answerId, AnswerRequest reqBody) {
+    public Answer updateAnswer(User currentUser, Long answerId, AnswerUpdateRequest reqBody) {
         Answer answer = this.findByIdOrThrow(answerId);
 
-        if (!answer.getAuthor().getId().equals(author.getId())) {
+        if (!answer.getAuthor().getId().equals(currentUser.getId())) {
             throw new ErrorException(ErrorCode.ANSWER_INVALID_USER);
         }
 
@@ -60,10 +63,10 @@ public class AnswerService {
     }
 
     @Transactional
-    public void deleteAnswer(User author, Long answerId) {
+    public void deleteAnswer(User currentUser, Long answerId) {
         Answer answer = this.findByIdOrThrow(answerId);
 
-        if (!answer.getAuthor().getId().equals(author.getId())) {
+        if (!answer.getAuthor().getId().equals(currentUser.getId())) {
             throw new ErrorException(ErrorCode.ANSWER_INVALID_USER);
         }
 
@@ -82,11 +85,16 @@ public class AnswerService {
     public Answer findAnswer (Long questionId, Long answerId) {
         Question question = questionService.findByIdOrThrow(questionId);
         Answer answer = question.getAnswerByIdOrThrow(answerId);
+
         if(!answer.isPublic()) {
-            throw new ErrorException(ErrorCode.ANSWER_NOT_PUBLIC);
+            User currentUser = rq.getUser();
+            if (!answer.getAuthor().getId().equals(currentUser.getId())) {
+                throw new ErrorException(ErrorCode.ANSWER_NOT_PUBLIC);
+            }
         }
 
         return answer;
     }
 
+    private final QuestionRepository questionRepository;
 }

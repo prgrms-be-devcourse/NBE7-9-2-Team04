@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record AnswerRequest (
+public record AnswerCreateRequest(
     @NotBlank(message = "답변 내용을 입력해주세요.")
     @Size(min = 1, max = 1000, message = "답변 내용은 1자 이상 1000자 이하여야 합니다.")
     @Schema(description = "면접 답변 내용", example = "이것은 면접 답변입니다.")

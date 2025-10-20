@@ -31,9 +31,13 @@ public class Answer extends BaseEntity {
     @JoinColumn(nullable = false)
     private Question question;
 
-    public void update(String content, boolean isPublic) {
-        this.content = content;
-        this.isPublic = isPublic;
+    public void update(String content, Boolean isPublic) {
+        if(content != null && !content.isBlank()) {
+            this.content = content;
+        }
+        if(isPublic != null) {
+            this.isPublic = isPublic;
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 package com.backend.api.answer.controller;
 
-import com.backend.api.answer.dto.request.AnswerRequest;
+import com.backend.api.answer.dto.request.AnswerCreateRequest;
+import com.backend.api.answer.dto.request.AnswerUpdateRequest;
 import com.backend.api.answer.dto.response.AnswerCreateResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.dto.response.AnswerUpdateResponse;
@@ -31,7 +32,7 @@ public class AnswerController {
     @Operation(summary = "답변 작성")
     public ApiResponse<AnswerCreateResponse> createAnswer(
             @PathVariable Long questionId,
-            @RequestBody @Valid AnswerRequest reqBody
+            @RequestBody @Valid AnswerCreateRequest reqBody
     ) {
         User currentUser = rq.getUser();
 
@@ -47,7 +48,7 @@ public class AnswerController {
     @Operation(summary = "답변 수정")
     public ApiResponse<AnswerUpdateResponse> updateAnswer(
             @PathVariable Long answerId,
-            @RequestBody @Valid AnswerRequest reqBody
+            @RequestBody @Valid AnswerUpdateRequest reqBody
     ) {
         User currentUser = rq.getUser();
 
