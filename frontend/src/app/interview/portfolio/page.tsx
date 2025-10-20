@@ -17,7 +17,7 @@ const mockPortfolios = [
     githubUrl: "https://github.com/user/chat-app",
     projectName: "Real-time Chat Application",
     analyzedAt: "2025-10-05",
-    questionsCount: 6,
+    questionsCount: 5,
   },
 ];
 
@@ -43,7 +43,7 @@ export default function PortfolioQuestionPage() {
           onClick={handleAddPortfolioQuestion}
           className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md  hover:bg-blue-600 transition"
         >
-          포트폴리오 질문 추가
+          새로운 포트폴리오 면접 시작
         </button>
       </div>
         
@@ -79,7 +79,7 @@ export default function PortfolioQuestionPage() {
                   분석일: {portfolio.analyzedAt}
                 </span>
                 <button
-                  onClick={() => router.push(`/mypage/interview/${portfolio.id}`)}
+                  onClick={() => router.replace(`/interview/portfolio/${portfolio.id}`)}
                   className="text-blue-600 border border-blue-500 px-3 py-1.5 rounded-md hover:bg-blue-50 transition text-sm font-medium"
                 >
                   면접 시작

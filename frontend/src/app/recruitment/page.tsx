@@ -16,6 +16,7 @@ const premiumPosts = [
     deadline: "2025-11-30",
     members: "3/5",
     isPremium: true,
+    status : "모집중"
   },
   {
     id: "p2",
@@ -25,6 +26,7 @@ const premiumPosts = [
     deadline: "2025-11-15",
     members: "4/6",
     isPremium: true,
+    status : "모집중"
   },
   {
     id: "p3",
@@ -34,6 +36,7 @@ const premiumPosts = [
     deadline: "2025-11-20",
     members: "2/4",
     isPremium: true,
+    status : "모집중"
   },
 ]
 
@@ -49,6 +52,7 @@ const regularPosts = [
     members: "2/4",
     author: "김개발",
     createdAt: "2025-10-10",
+    status : "마감"
   },
   {
     id: "2",
@@ -60,6 +64,7 @@ const regularPosts = [
     members: "5/8",
     author: "박알고",
     createdAt: "2025-10-12",
+    status : "모집중"
   },
   {
     id: "3",
@@ -71,6 +76,7 @@ const regularPosts = [
     members: "1/3",
     author: "이독서",
     createdAt: "2025-10-13",
+    status : "모집중"
   },
   {
     id: "4",
@@ -82,6 +88,7 @@ const regularPosts = [
     members: "3/6",
     author: "최타입",
     createdAt: "2025-10-14",
+    status : "마감"
   },
   {
     id: "5",
@@ -92,6 +99,7 @@ const regularPosts = [
     members: "2/5",
     author: "정게임",
     createdAt: "2025-10-15",
+    status : "마감"
   },
   {
     id: "6",
@@ -103,6 +111,7 @@ const regularPosts = [
     members: "4/6",
     author: "강데브",
     createdAt: "2025-10-14",
+    status : "마감"
   },
   {
     id: "7",
@@ -114,6 +123,7 @@ const regularPosts = [
     members: "4/6",
     author: "강데브",
     createdAt: "2025-10-14",
+    status : "마감"
   }
 ]
 
@@ -138,10 +148,16 @@ export default function RecruitmentPage() {
     selectedCategory === "전체"
       ? regularPosts
       : regularPosts.filter((post) => post.category === selectedCategory);
+  
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
+      if (a.status === "모집중" && b.status !== "모집중") return -1;
+      if (a.status !== "모집중" && b.status === "모집중") return 1;
+        return 0;
+  });
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const currentPosts = sortedPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   return (
     <>
@@ -224,17 +240,30 @@ export default function RecruitmentPage() {
           {currentPosts.map((post) => (
             <div key={post.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition">
               <div className="flex items-center justify-between mb-2 text-sm">
-                <span
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    post.category === "프로젝트"
-                      ? "bg-indigo-50 text-indigo-700"
-                      : post.category === "스터디"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-gray-50 text-gray-700" 
-                  }`}
-                >
-                  {post.category}
-                </span>
+                <div className="flex items-center gap-1.5">  {/* ✅ gap 줄이기 (기존 2 → 1.5) */}
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        post.category === "프로젝트"
+                          ? "bg-indigo-50 text-indigo-700"
+                          : post.category === "스터디"
+                          ? "bg-green-50 text-green-700"
+                          : "bg-gray-50 text-gray-700"
+                      }`}
+                    >
+                      {post.category}
+                    </span>
+
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        post.status === "모집중"
+                          ? "bg-red-50 text-red-700"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {post.status}
+                    </span>
+                  </div>
+
                 <span className="text-gray-500 text-xs">마감일 {post.deadline}</span>
               </div>
               <h3 className="text-lg font-semibold mb-1 line-clamp-2">{post.title}</h3>

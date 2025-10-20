@@ -98,7 +98,7 @@ export default function Navbar() {
 
               <li>
                 <Link
-                  href="/portfolio_review"
+                  href="/qna"
                   className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
                     pathname === "/qna" ? "bg-blue-100 text-blue-800" : ""
                   }`}
