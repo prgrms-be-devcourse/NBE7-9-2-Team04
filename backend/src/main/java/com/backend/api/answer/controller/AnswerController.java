@@ -84,7 +84,7 @@ public class AnswerController {
     public ApiResponse<List<AnswerReadResponse>> readAnswers(
             @PathVariable Long questionId
     ) {
-        List<AnswerReadResponse> answerReadResponseList = answerService.findAnswers(questionId);
+        List<AnswerReadResponse> answerReadResponseList = answerService.findAnswersByQuestionId(questionId);
 
         return ApiResponse.ok(
                 "%d번 질문의 답변 목록 조회 성공".formatted(questionId),
