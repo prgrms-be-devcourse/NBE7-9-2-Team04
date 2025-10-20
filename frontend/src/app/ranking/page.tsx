@@ -15,7 +15,6 @@ const currentUser = {
   problemsSolved: 100,
   score: 500,
   rank: 15,
-  questionsSubmitted: 5,
 };
 
 const rankings = [
@@ -25,7 +24,6 @@ const rankings = [
     problemsSolved: 185,
     score: 1980,
     rank: 1,
-    questionsSubmitted: 12,
   },
   {
     id: "u3",
@@ -33,7 +31,6 @@ const rankings = [
     problemsSolved: 165,
     score: 2000,
     rank: 2,
-    questionsSubmitted: 8,
   },
   {
     id: "u4",
@@ -41,7 +38,6 @@ const rankings = [
     problemsSolved: 142,
     score: 1720,
     rank: 3,
-    questionsSubmitted: 10,
   },
   {
     id: "u5",
@@ -49,7 +45,6 @@ const rankings = [
     problemsSolved: 128,
     score: 1580,
     rank: 4,
-    questionsSubmitted: 7,
   },
   {
     id: "u6",
@@ -57,7 +52,6 @@ const rankings = [
     problemsSolved: 115,
     score: 1420,
     rank: 5,
-    questionsSubmitted: 6,
   },
   {
     id: "u7",
@@ -65,7 +59,6 @@ const rankings = [
     problemsSolved: 98,
     score: 1250,
     rank: 6,
-    questionsSubmitted: 4,
   },
   {
     id: "u8",
@@ -73,7 +66,6 @@ const rankings = [
     problemsSolved: 87,
     score: 1100,
     rank: 7,
-    questionsSubmitted: 5,
   },
   {
     id: "u9",
@@ -81,7 +73,6 @@ const rankings = [
     problemsSolved: 76,
     score: 980,
     rank: 8,
-    questionsSubmitted: 3,
   },
   {
     id: "u10",
@@ -89,7 +80,6 @@ const rankings = [
     problemsSolved: 68,
     score: 870,
     rank: 9,
-    questionsSubmitted: 4,
   },
   {
     id: "u11",
@@ -97,7 +87,6 @@ const rankings = [
     problemsSolved: 55,
     score: 720,
     rank: 10,
-    questionsSubmitted: 2,
   },
 ];
 
@@ -150,7 +139,7 @@ export default function RankingPage() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 mt-6">
+        <div className="grid md:grid-cols-2 gap-4 mt-6">
           <div className="bg-gray-50 rounded-lg p-4 text-center border border-gray-300">
             <p className="text-gray-500 text-sm">해결한 문제</p>
             <p className="text-3xl font-bold mt-1">
@@ -160,12 +149,6 @@ export default function RankingPage() {
           <div className="bg-gray-50 rounded-lg p-4 text-center border border-gray-300">
             <p className="text-gray-500 text-sm">총 점수</p>
             <p className="text-3xl font-bold mt-1">{currentUser.score}</p>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4 text-center border border-gray-300">
-            <p className="text-gray-500 text-sm">제출한 질문</p>
-            <p className="text-3xl font-bold mt-1">
-              {currentUser.questionsSubmitted}
-            </p>
           </div>
         </div>
 
@@ -275,8 +258,6 @@ export default function RankingPage() {
                     <span>{user.problemsSolved}문제</span>
                     <span>•</span>
                     <span>{user.score}점</span>
-                    <span>•</span>
-                    <span>질문 {user.questionsSubmitted}개</span>
                   </div>
                 </div>
                 <div
