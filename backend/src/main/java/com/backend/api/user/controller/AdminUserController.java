@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/users")
-@Tag(name ="Admin", description = "사용자 관리 API(관리자)")
+@Tag(name ="Admin User", description = "사용자 관리 API(관리자)")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
