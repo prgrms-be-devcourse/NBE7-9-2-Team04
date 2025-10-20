@@ -71,7 +71,7 @@ export default function PortfolioQuestionDetailPage() {
 
       <div className="flex items-center justify-between mb-8">
         <button
-          onClick={() => router.replace("/mypage/interview")}
+          onClick={() => router.replace("/interview/portfolio")}
           className="flex items-center text-gray-600 hover:text-gray-800"
         >
           ← 목록으로

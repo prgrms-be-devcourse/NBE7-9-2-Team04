@@ -1,22 +1,27 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function PortfolioReviewPage() {
-  const [notionUrl, setNotionUrl] = useState("");
+  const router = useRouter();
+
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  const portfolioUrl = "";
+
   const handleAnalyze = async () => {
-    if (!notionUrl.trim()) {
-      alert("노션 포트폴리오 URL을 입력해주세요.");
+    if (!portfolioUrl.trim()) {
+      alert("등록된 포트폴리오가 없습니다. 마이페이지에서 노션 포트폴리오 URL을 등록해주세요.");
+      router.replace("/mypage/resume");
       return;
     }
 
     setIsAnalyzing(true);
     setFeedback(null);
 
-    // ✅ 실제 API 연동 시 여기에 fetch 추가
+    //여기에 fetch 추가
     setTimeout(() => {
       setFeedback(`
 ## 📊 포트폴리오 분석 결과
@@ -49,31 +54,18 @@ export default function PortfolioReviewPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-
       <div className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">
-          포트폴리오 첨삭
-        </h1>
+        <h1 className="text-3xl font-bold mb-2">포트폴리오 첨삭</h1>
         <p className="text-gray-500">
-          AI가 노션 포트폴리오를 분석하고 개선 방향을 제안합니다.
+          AI가 당신의 포트폴리오를 분석하고 개선 방향을 제안합니다.
         </p>
       </div>
 
-
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
-        <h2 className="text-2xl font-semibold mb-2">노션 URL 입력</h2>
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8 text-center">
+        <h2 className="text-2xl font-semibold mb-2">AI 포트폴리오 분석</h2>
         <p className="text-sm text-gray-500 mb-4">
-          공개된 노션 포트폴리오 링크를 입력해주세요.
+          등록된 포트폴리오를 기반으로 AI가 자동으로 분석합니다.
         </p>
-
-        <input
-          type="url"
-          placeholder="https://notion.so/your-portfolio"
-          value={notionUrl}
-          onChange={(e) => setNotionUrl(e.target.value)}
-          disabled={isAnalyzing}
-          className="w-full border border-gray-300 rounded-md p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
 
         <button
           onClick={handleAnalyze}
@@ -87,7 +79,6 @@ export default function PortfolioReviewPage() {
           {isAnalyzing ? "🔍 AI가 분석 중입니다..." : "✨ AI 첨삭 시작"}
         </button>
       </div>
-
 
       {isAnalyzing && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
