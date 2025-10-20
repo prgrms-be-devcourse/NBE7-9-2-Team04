@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-export default function ResumePage() {
+export default function MyResumePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [resumeData, setResumeData] = useState({

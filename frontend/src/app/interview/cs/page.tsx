@@ -41,9 +41,13 @@ export default function CsQuestionPage() {
     ? questions
     : questions.filter((question) => question.category === selectedCategory);
 
-  const indexOfLastQuestion= currentPage * itemsPerPage;
-  const indexOfFirstQuestion = indexOfLastQuestion - itemsPerPage;
-  const currentQuestions = filteredQuestions.slice(indexOfFirstQuestion, indexOfLastQuestion);
+    
+  const getPagedData = (data: any[], page: number) => {
+    const start = (page - 1) * itemsPerPage;
+    return data.slice(start, start + itemsPerPage);
+  };
+  
+  const pagedQuestions = getPagedData(filteredQuestions, currentPage);
 
 
 
@@ -81,9 +85,12 @@ export default function CsQuestionPage() {
 
       {/* 카테고리 */}
       <div className="flex justify-between items-center mb-6 border-b border-gray-200 pb-2">
-        <CategoryTab categories={categories} selected={selectedCategory} onSelect={(c) => {
-          setSelectedCategory(c);
-          setCurrentPage(1);
+        <CategoryTab 
+          categories={categories} 
+          selected={selectedCategory} 
+          onSelect={(c) => {
+            setSelectedCategory(c);
+            setCurrentPage(1);
         }}/>
 
         <Link
@@ -96,7 +103,7 @@ export default function CsQuestionPage() {
 
       {/* 질문 목록 */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentQuestions.map((q) => (
+        {pagedQuestions.map((q) => (
           <div
             key={q.id}
             className={`border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition ${

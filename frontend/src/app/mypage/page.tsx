@@ -19,16 +19,7 @@ export default function ProfilePage() {
     
   };
 
-  const userPosts = [
-    { id: "1", title: "Next.js 14 프로젝트 팀원 모집", status: "모집중", date: "2025-10-10" },
-    { id: "2", title: "React 스터디 모집", status: "마감", date: "2025-10-08" },
-  ];
 
-  const userComments = [
-    { id: "1", postId: "1", content: "좋은 프로젝트네요! 참여하고 싶습니다.", postTitle: "Next.js 14 프로젝트 팀원 모집", date: "2025-10-12" },
-    { id: "2", postId: "2", content: "저도 같은 문제를 겪었는데...", postTitle: "React 스터디 모집", date: "2025-10-11" },
-  ];
-  
 
   const solvedProblems = [
     { id: "q1", title: "TCP와 UDP의 차이점", category: "네트워크", solvedAt: "2025-10-15" },
@@ -120,62 +111,6 @@ export default function ProfilePage() {
             <p className="text-gray-500 text-sm">제출한 질문</p>
             <p className="text-2xl font-bold mt-1">{userData.questionsSubmitted}</p>
           </div>
-        </div>
-      </div>
-
-      {/* 작성한 글 */}
-      <div className="bg-white rounded-lg p-6 shadow-md">
-        <h3 className="text-xl font-semibold mb-4">📝 작성한 글</h3>
-        <div className="space-y-3">
-          {userPosts.map((post) => (
-            <div 
-              key={post.id} 
-              className="flex justify-between items-center p-3 border border-gray-200 rounded-md hover:bg-gray-100"
-              onClick={() => router.replace(`/recruitment/${post.id}`)}>
-              <div>
-                <p className="font-medium">{post.title}</p>
-                <p className="text-sm text-gray-500">{post.date}</p>
-              </div>
-              <span className="px-2 py-1 text-xs rounded text-gray-700 bg-blue-50">{post.status}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 작성한 댓글 */}
-      <div className="bg-white rounded-lg p-6 shadow-md">
-        <h3 className="text-xl font-semibold mb-4">💬 작성한 댓글</h3>
-        <div className="space-y-3">
-          {userComments.map((comment) => (
-            <div 
-            key={comment.id} 
-            className="flex justify-between items-center p-3 border border-gray-200 rounded-md hover:bg-gray-100"
-            onClick={() => router.replace(`/recruitment/${comment.postId}`)}>            
-              <div>
-              <p className="font-medium">{comment.content}</p> 
-              <p className="text-xs text-gray-500"> {comment.postTitle} • {comment.date} </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 해결한 문제. 이동경로 수정 */}
-      <div className="bg-white rounded-lg p-6 shadow-md">
-        <h3 className="text-xl font-semibold mb-4">💡 해결한 문제</h3>
-        <div className="space-y-3">
-          {solvedProblems.map((problem) => (
-            <div 
-            key={problem.id} 
-            className="flex justify-between items-center p-3 border  border-gray-200 rounded-md hover:bg-gray-100"
-            onClick={() => router.replace(`/interview/cs/${problem.id}`)}>            
-              <div>
-                <p className="font-medium">{problem.title}</p>
-                <p className="text-sm text-gray-500">{problem.solvedAt}</p>
-              </div>
-              <span className="px-2 py-1 text-xs rounded text-gray-700 bg-blue-50">{problem.category}</span>
-            </div>
-          ))}
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-ser
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-export default function SettingsPage() {
+export default function MySettingsPage() {
     const router= useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [showPasswordModal, setShowPasswordModal] = useState(true);

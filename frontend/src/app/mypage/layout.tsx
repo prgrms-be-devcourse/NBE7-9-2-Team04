@@ -9,24 +9,34 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
 
   const profileNavItems = [
     {
-      title: "활동 내역",
-      href: "/mypage",
-      icon: "📊",
+        title: "기본 정보",
+        href: "/mypage",
+        icon: "📊",
     },
     {
-      title: "이력서 관리",
-      href: "/mypage/resume",
-      icon: "📄",
+        title: "내 활동",
+        href: "/mypage/activity",
+        icon: "📝",
     },
     {
-      title: "개인정보",
-      href: "/mypage/settings",
-      icon: "⚙️",
+        title: "문제 풀이 기록",
+        href: "/mypage/solved",
+        icon: "💡",
+      },
+    {
+        title: "이력서 관리",
+        href: "/mypage/resume",
+        icon: "📄",
     },
     {
-      title: "유료 서비스",
-      href: "/mypage/premium",
-      icon: "💳",
+        title: "개인정보",
+        href: "/mypage/settings",
+        icon: "⚙️",
+    },
+    {
+        title: "유료 서비스",
+        href: "/mypage/premium",
+        icon: "💳",
     },
   ];
 
