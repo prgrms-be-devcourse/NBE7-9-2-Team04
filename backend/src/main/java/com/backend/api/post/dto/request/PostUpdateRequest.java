@@ -15,6 +15,10 @@ public record PostUpdateRequest(
         @Size(min = 2, max = 255, message = "제목은 2자 이상 255자 이하로 입력해주세요.")
         String title,
 
+        @NotBlank(message = "한 줄 소개는 필수입니다.")
+        @Size(min = 10, message = "한 줄 소개는 최소 10자 이상 입력해주세요.")
+        String introduction,
+
         @NotBlank(message = "내용은 필수입니다.")
         @Size(min = 10, message = "내용은 최소 10자 이상 입력해주세요.")
         String content,

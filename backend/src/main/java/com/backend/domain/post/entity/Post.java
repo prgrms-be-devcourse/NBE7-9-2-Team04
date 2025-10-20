@@ -4,6 +4,7 @@ import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -26,6 +27,10 @@ public class Post extends BaseEntity {
     @NotNull
     @Size(min = 2, max = 255)
     private String title; // 제목
+
+    @NotNull
+    @Size(min = 2)
+    private String introduction; // 한 줄 소개
 
     @NotNull
     @Size(min = 10)
@@ -51,8 +56,9 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    public void updatePost(String title, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount) {
+    public void updatePost(String title, String introduction, @NotBlank(message = "내용은 필수입니다.") @Size(min = 10, message = "내용은 최소 10자 이상 입력해주세요.") String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount) {
         this.title = title;
+        this.introduction = introduction;
         this.content = content;
         this.deadline = deadline;
         this.status = status;

@@ -30,6 +30,7 @@ public class PostService {
 
         Post post = Post.builder()
                 .title(request.title())
+                .introduction(request.introduction())
                 .content(request.content())
                 .deadline(request.deadline())
                 .status(request.status())
@@ -64,7 +65,7 @@ public class PostService {
         Post post = findPostByIdOrThrow(postId);
         validatePostOwner(post, user);
 
-        post.updatePost(request.title(), request.content(), request.deadline(), request.status(), request.pinStatus(), request.recruitCount());
+        post.updatePost(request.title(), request.introduction(),request.content(), request.deadline(), request.status(), request.pinStatus(), request.recruitCount());
 
         return PostResponse.from(post);
     }

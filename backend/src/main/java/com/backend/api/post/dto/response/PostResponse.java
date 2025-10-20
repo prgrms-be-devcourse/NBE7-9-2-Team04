@@ -18,8 +18,8 @@ import java.util.Optional;
         @Schema(description = "제목", example = "첫번째 게시물")
             String title,
 
-        @Schema(description = "내용", example = "함께 팀 프로젝트를 진행할 백엔드 개발자 구합니다.")
-            String content,
+        @Schema(description = "한 줄 소개", example = "사이드 프로젝트 할 팀원 구합니다")
+            String introduction,
 
         @Schema(description = "마감일", example = "2025-10-25T17:00:00")
             LocalDateTime deadline,
@@ -36,7 +36,10 @@ import java.util.Optional;
         @Schema(description = "상단 고정 여부", example = "UNPINNED", allowableValues = {"PINNED", "NOT_PINNED"})
             PinStatus pinStatus,
 
-        Integer recruitCount, @Schema(description = "작성자의 닉네임", example = "개발자A")
+        @Schema(description = "모집 인원", example = "4")
+        Integer recruitCount,
+
+        @Schema(description = "작성자의 닉네임", example = "개발자A")
             String nickName // 작성자의 닉네임
     ) {
 
