@@ -36,6 +36,4 @@ public class UserMyPageController {
         UserMyPageResponse response = userMyPageService.modifyUser(userId, modify);
         return ApiResponse.ok("개인 정보 수정이 완료되었습니다.",response);
     }
-
-
 }
