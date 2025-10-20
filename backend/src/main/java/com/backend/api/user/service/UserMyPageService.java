@@ -1,8 +1,9 @@
 package com.backend.api.user.service;
 
-import com.backend.api.user.dto.request.UserMyPageQuestionRequest;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.user.entity.UserQuestion;
+import com.backend.domain.user.repository.UserQuestionRepository;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
@@ -23,7 +24,7 @@ public class UserMyPageService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Rq rq;
-    private UserMyPageQuestionRequest userMyPageQuestionRequest;
+    private final UserQuestionRepository userQuestionRepository;
 
 
     public UserMyPageResponse modifyUser(Long userId, UserMyPageResponse.UserModify modify) {
@@ -56,6 +57,14 @@ public class UserMyPageService {
 
 
     public List<UserMyPageResponse.SolvedProblem> getSolvedProblems(Long userId) {
-        return List.of();
+
+        List<UserQuestion> solvedQuestions = userQuestionRepository.findByUserId(userId);
+
+        return solvedQuestions.stream()
+                .map(q -> UserMyPageResponse.SolvedProblem.builder()
+                        .title(q.getTitle())
+                        .modifyDate(q.getModifyDate())
+                        .build())
+                .toList();
     }
 }

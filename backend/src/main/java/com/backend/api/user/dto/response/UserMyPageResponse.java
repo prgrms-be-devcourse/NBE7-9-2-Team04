@@ -51,7 +51,7 @@ public class UserMyPageResponse {
     @Builder
     @AllArgsConstructor
     public static class SolvedProblem {
-        private long title;              // 문제 ID// 문제 제목
+        private String title;              // 문제 ID// 문제 제목
         private LocalDateTime modifyDate; // 수정일
     }
 }
