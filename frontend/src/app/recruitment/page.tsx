@@ -14,7 +14,7 @@ const premiumPosts = [
     description: "5년 이상 경력의 백엔드 개발자를 찾습니다. Spring Boot, AWS 경험 필수",
     category: "프로젝트",
     deadline: "2025-11-30",
-    members: "3/5",
+    members: "4",
     isPremium: true,
     status : "모집중"
   },
@@ -24,7 +24,7 @@ const premiumPosts = [
     description: "React 18 최신 기능을 함께 공부할 스터디원을 모집합니다",
     category: "스터디",
     deadline: "2025-11-15",
-    members: "4/6",
+    members: "4",
     isPremium: true,
     status : "모집중"
   },
@@ -34,7 +34,7 @@ const premiumPosts = [
     description: "OpenAI API를 활용한 챗봇 서비스 개발 프로젝트",
     category: "프로젝트",
     deadline: "2025-11-20",
-    members: "2/4",
+    members: "4",
     isPremium: true,
     status : "모집중"
   },
@@ -49,7 +49,7 @@ const regularPosts = [
       "Next.js 14 App Router를 활용한 커머스 사이트 제작 프로젝트입니다. 디자이너 1명, 프론트엔드 개발자 2명을 찾습니다.",
     category: "프로젝트",
     deadline: "2025-11-25",
-    members: "2/4",
+    members: "4",
     author: "김개발",
     createdAt: "2025-10-10",
     status : "마감"
@@ -61,7 +61,7 @@ const regularPosts = [
       "주 3회 온라인으로 진행되는 알고리즘 스터디입니다. 백준 골드 티어 이상만 지원 가능합니다.",
     category: "스터디",
     deadline: "2025-11-18",
-    members: "5/8",
+    members: "4",
     author: "박알고",
     createdAt: "2025-10-12",
     status : "모집중"
@@ -73,7 +73,7 @@ const regularPosts = [
       "독서 기록 및 리뷰 공유 앱을 만들 팀원을 찾습니다. React Native 경험자 우대",
     category: "프로젝트",
     deadline: "2025-11-22",
-    members: "1/3",
+    members: "4",
     author: "이독서",
     createdAt: "2025-10-13",
     status : "모집중"
@@ -85,7 +85,7 @@ const regularPosts = [
       "TypeScript 기초부터 고급까지 함께 공부할 스터디원 모집합니다",
     category: "스터디",
     deadline: "2025-11-20",
-    members: "3/6",
+    members: "4",
     author: "최타입",
     createdAt: "2025-10-14",
     status : "마감"
@@ -96,7 +96,7 @@ const regularPosts = [
     description: "Unity를 활용한 2D 플랫포머 게임 제작 프로젝트입니다",
     category: "프로젝트",
     deadline: "2025-12-01",
-    members: "2/5",
+    members: "4",
     author: "정게임",
     createdAt: "2025-10-15",
     status : "마감"
@@ -108,7 +108,7 @@ const regularPosts = [
       "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
     category: "스터디",
     deadline: "2025-11-28",
-    members: "4/6",
+    members: "4",
     author: "강데브",
     createdAt: "2025-10-14",
     status : "마감"
@@ -120,7 +120,7 @@ const regularPosts = [
       "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
     category: "스터디",
     deadline: "2025-11-28",
-    members: "4/6",
+    members: "4",
     author: "강데브",
     createdAt: "2025-10-14",
     status : "마감"
@@ -193,7 +193,7 @@ export default function RecruitmentPage() {
                       <p className="text-gray-700 text-sm line-clamp-2">{post.description}</p>
                     </div>
                     <div className="flex items-center gap-1 text-gray-700 text-sm mt-3">
-                      🧑‍🤝‍🧑 <span>{post.members}</span>
+                      🧑‍🤝‍🧑 <span>{post.members}명</span>
                     </div>
                   </div>
 
@@ -270,7 +270,7 @@ export default function RecruitmentPage() {
               <p className="text-gray-600 text-sm line-clamp-3 mb-4">{post.description}</p>
 
               <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                <span>🧑‍🤝‍🧑 {post.members}</span>
+                <span>🧑‍🤝‍🧑 {post.members}명</span>
               </div>
 
               <Link
