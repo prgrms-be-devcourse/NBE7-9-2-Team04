@@ -50,11 +50,9 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<PostResponse> getPostsByUserId(Long userId) {
-        // 1. Repository를 통해 현재 유저가 작성한 모든 게시글을 최신순으로 조회
         User user = userService.getUser(userId);
         List<Post> myPosts = postRepository.findByUsersOrderByCreateDateDesc(user);
 
-        // 2. 조회된 Post 엔티티 목록을 PostResponse DTO 목록으로 변환
         return myPosts.stream()
                 .map(PostResponse::from)
                 .toList();
