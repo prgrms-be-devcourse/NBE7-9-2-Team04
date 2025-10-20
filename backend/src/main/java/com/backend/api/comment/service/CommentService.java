@@ -30,7 +30,7 @@ public class CommentService {
     @Transactional
     public Comment writeComment(User currentUser, Long postId, String content) {
 
-        Post post = postService.findByIdOrThrow(postId);
+        Post post = postService.findPostByIdOrThrow(postId);
 
         Comment comment = Comment.builder()
                 .content(content)
@@ -66,7 +66,7 @@ public class CommentService {
     }
 
     public List<CommentResponse> getCommentsByPostId(Long postId) {
-        Post post = postService.findByIdOrThrow(postId);
+        Post post = postService.findPostByIdOrThrow(postId);
 
         return post.getComments().reversed().stream()
                 .map(CommentResponse::new)
