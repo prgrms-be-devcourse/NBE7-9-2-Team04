@@ -13,33 +13,23 @@ export default function Navbar() {
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    if (typeof localStorage !== "undefined") {
-      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-      const role = localStorage.getItem("userRole");
-      const name = localStorage.getItem("userName") || "";
+    // 백엔드 연동 전이므로 무조건 임시 유저 로그인 상태로 간주
+    const tempUser = {
+      name: "임시유저",
+      role: "user",
+    };
+  
+    setIsLoggedIn(true);
+    setUserName(tempUser.name);
+    setIsAdmin(tempUser.role === "admin");
+  }, []); // ✅ 빈 배열로 고정
 
-      setIsLoggedIn(loggedIn);
-      setIsAdmin(role === "admin");
-      setUserName(name);
-    }
-  }, [pathname])
-
-  //수정 예정정
+  // ✅ 로그아웃 (임시 처리)
   const handleLogout = () => {
-    if (typeof localStorage !== "undefined") {
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("userRole");
-      localStorage.removeItem("userName");
-    }
-    setIsLoggedIn(false);
-    setIsAdmin(false);
-    setUserName("");
-
-    if (pathname === "/profile") {
-      window.location.href = "/";
-    } else {
-      window.location.reload();
-    }
+    setIsLoggedIn(false)
+    setIsAdmin(false)
+    setUserName("")
+    router.push("/") // 홈으로 이동
   }
 
   const DropdownItem = ({ href, title, description }: { href: string; title: string; description: string }) => (
@@ -150,7 +140,7 @@ export default function Navbar() {
           {isLoggedIn ? (
             <>
               <Link
-                href="/profile"
+                href="/mypage"
                 className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 p-2"
               >
                 👤
@@ -165,7 +155,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/profile"
+                href="/mypage"
                 className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 p-2"
               >
                 👤
