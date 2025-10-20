@@ -5,6 +5,7 @@ import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -23,9 +24,11 @@ public class Post extends BaseEntity {
 
 
     @NotNull
+    @Size(min = 2, max = 255)
     private String title; // 제목
 
     @NotNull
+    @Size(min = 10)
     private String content; // 내용
 
     @NotNull
@@ -45,10 +48,10 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false) // userId와 매핑
     private User users;  // 게시글 작성자 ID
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    public void updatePost(String title, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus,Integer recruitCount) {
+    public void updatePost(String title, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount) {
         this.title = title;
         this.content = content;
         this.deadline = deadline;
