@@ -79,7 +79,7 @@ const rankings = [
     id: "u9",
     name: "한클라우드",
     problemsSolved: 76,
-    score: 980,
+    score: 1200,
     rank: 8,
     questionsSubmitted: 3,
   },
@@ -131,7 +131,7 @@ export default function RankingPage() {
         <p className="text-gray-500">문제를 풀고 티어를 올려보세요!</p>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow-md border-2 border-blue-200 mb-10">
+      <div className="bg-blue-50 rounded-lg p-6 shadow-md border border-blue-200 mb-10">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-3xl font-bold">
