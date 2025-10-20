@@ -6,8 +6,13 @@ interface CategoryTabsProps {
   onSelect: (category: string) => void;
 }
 
-export default function CategoryTab({ categories, selected, onSelect }: CategoryTabsProps) {
-    return (
+export default function CategoryTab({
+  categories,
+  selected,
+  onSelect,
+}: CategoryTabsProps) {
+  return (
+    <>
       <div className="flex space-x-6 border-b border-gray-200 mb-6">
         {categories.map((category) => (
           <button
@@ -23,5 +28,6 @@ export default function CategoryTab({ categories, selected, onSelect }: Category
           </button>
         ))}
       </div>
-    );
-  }
+    </>
+  );
+}
