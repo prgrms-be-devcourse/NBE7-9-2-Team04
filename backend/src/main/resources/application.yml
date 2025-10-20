@@ -28,12 +28,30 @@ spring:
         enabled: true
 
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_ID}
+    password: ${EMAIL_PW}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+          ssl:
+            trust: smtp.gmail.com
+
 logging:
   level:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
-    com.backend : DEBUG
+    com.backend: DEBUG
 
 
 springdoc:
@@ -50,3 +68,8 @@ custom:
     refresh-token:
       expire-time: "#{72 * 60 * 60 * 1000}"       # 72시간 (3일)
     secretPattern: ${SECRET_PATTERN}
+
+toss:
+  payments:
+    base-url: "https://api.tosspayments.com/v1/payments"
+    secret-key: ${PAYMENT_SECRET_KEY}
