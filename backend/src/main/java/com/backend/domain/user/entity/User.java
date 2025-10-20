@@ -75,4 +75,12 @@ public class User extends BaseEntity {
             this.accountStatus = newStatus;
         }
     }
+
+    public boolean validateActiveStatus() {
+        return this.accountStatus == AccountStatus.ACTIVE;
+    }
+
+    public boolean validateLoginAvaliable() {
+        return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.SUSPENDED;
+    }
 }

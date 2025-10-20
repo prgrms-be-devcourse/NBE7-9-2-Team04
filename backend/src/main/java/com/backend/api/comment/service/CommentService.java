@@ -25,6 +25,10 @@ public class CommentService {
     @Transactional
     public Comment writeComment(User user, Long postId, String content) {
 
+        if (!user.validateActiveStatus()) {
+            throw new ErrorException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
+
         Post post = postService.findPostByIdOrThrow(postId);
 
         Comment comment = Comment.builder()

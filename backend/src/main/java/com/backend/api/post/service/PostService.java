@@ -20,6 +20,10 @@ public class PostService {
 
     @Transactional
     public PostResponse createPost(PostAddRequest request, User user) {
+        if (!user.validateActiveStatus()) {
+            throw new ErrorException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
+
         Post post = Post.builder()
                 .title(request.title())
                 .content(request.content())

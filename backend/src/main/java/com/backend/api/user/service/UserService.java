@@ -3,6 +3,7 @@ package com.backend.api.user.service;
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
+import com.backend.domain.user.entity.AccountStatus;
 import com.backend.domain.user.entity.Role;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
@@ -46,6 +47,15 @@ public class UserService {
     public User login(UserLoginRequest request){
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_EMAIL));
+
+        if(!user.validateLoginAvaliable()) {
+            if(user.getAccountStatus() == AccountStatus.BANNED) {
+                throw new ErrorException(ErrorCode.ACCOUNT_BANNED);
+            }
+            if(user.getAccountStatus() == AccountStatus.DEACTIVATED) {
+                throw new ErrorException(ErrorCode.ACCOUNT_DEACTIVATED);
+            }
+        }
 
         if(!passwordEncoder.matches(request.password(), user.getPassword())){
             throw new ErrorException(ErrorCode.WRONG_PASSWORD);
