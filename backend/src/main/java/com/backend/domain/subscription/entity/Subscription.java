@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,11 +40,30 @@ public class Subscription extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime endDate;
 
+    @Column(nullable = false)
+    private LocalDate nextBillingDate;
+
     //질문 가능 횟수
-    //무료 회원 3번
-    //유료 회원 5번
+    //무료 회원 5번
+    //유료 회원 8번
     @Column(nullable = false)
     private int questionLimit;
+
+
+    //구독 이름
+    @Column(nullable = false)
+    private String subscriptionName;
+
+    //구독 가격
+    @Column(nullable = false)
+    private Long price;
+
+    // Billing 정보 (결제 수단)
+    @Column(nullable = false, unique = true)
+    private String billingKey;
+
+    @Column(nullable = false, unique = true)
+    private String customerKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billing_key_id", nullable = false)
@@ -57,15 +77,14 @@ public class Subscription extends BaseEntity {
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
     private List<Payment> payments = new ArrayList<>();
 
-
-    public void activate(LocalDateTime endDate) {
-        this.endDate = endDate;
-        this.isActive = true;
-    }
-
-    public void deactivate() {
-        this.isActive = false;
-    }
+//    public void activate(LocalDateTime endDate) {
+//        this.endDate = endDate;
+//        this.isActive = true;
+//    }
+//
+//    public void deactivate() {
+//        this.isActive = false;
+//    }
 
 
 
