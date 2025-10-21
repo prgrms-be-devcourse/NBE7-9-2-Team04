@@ -137,7 +137,7 @@ export default function CsQuestionPage() {
         </div>
 
         {/* 오늘의 추천 문제 */}
-        <div className="border-2 border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 mb-10 shadow-sm">
+        <div className="border bg-blue-50 border-blue-200 rounded-lg p-6 mb-10 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <h2 className="text-sm font-semibold">오늘의 추천 문제</h2>
           </div>

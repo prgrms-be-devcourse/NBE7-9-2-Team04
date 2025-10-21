@@ -14,6 +14,9 @@ export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("user");
   const returnUrl = searchParams.get("returnUrl");
 
+  const ADMIN_EMAIL = "admin@naver.com";
+  const ADMIN_PASS = "adm1234";
+
   //백 연동 코드 추후 수정 예정. 임시로 넣어둠
   const handleLogin = async (
     e: React.FormEvent<HTMLFormElement>,
@@ -32,6 +35,19 @@ export default function LoginPage() {
       return;
     }
 
+    if (isAdmin) {
+      if (currentEmail === ADMIN_EMAIL && currentPassword === ADMIN_PASS) {
+        alert("관리자 로그인 성공 (임시)");
+        localStorage.setItem("isAdmin", "true"); // ✅ 관리자 로그인 상태 저장
+        window.location.href = "/admin"; // 관리자 페이지로 이동
+        return;
+      } else {
+        alert("관리자 계정 정보가 올바르지 않습니다.");
+        setIsLoading(false);
+        return;
+      }
+    }
+    
     try {
       const data = await fetchApi(apiPath, {
         method: "POST",
