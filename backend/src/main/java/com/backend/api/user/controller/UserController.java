@@ -39,7 +39,7 @@ public class UserController {
         rq.setCookie("refreshToken", refreshToken, (int) (jwtTokenProvider.getRefreshTokenExpireTime()));
 
         return ApiResponse.ok(
-                "로그인을 성공했습니다!",
+                "로그인을 성공했습니다.",
                 UserResponse.from(user));
     }
 
@@ -57,7 +57,7 @@ public class UserController {
     public ApiResponse<UserResponse> signup(@RequestBody UserSignupRequest request){
         User user = userService.signUp(request);
         return ApiResponse.ok(
-                "%d번 회원가입이 완료되었습니다.".formatted(user.getId()),
+                "회원가입이 완료되었습니다.",
                 UserResponse.from(user)
         );
     }

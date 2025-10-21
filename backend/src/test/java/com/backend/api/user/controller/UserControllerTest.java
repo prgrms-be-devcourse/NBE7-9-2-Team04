@@ -79,7 +79,7 @@ public class UserControllerTest {
                     .andExpect(handler().methodName("signup"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("%d번 회원가입이 완료되었습니다.".formatted(user.getId())))
+                    .andExpect(jsonPath("$.message").value("회원가입이 완료되었습니다."))
                     .andExpect(jsonPath("$.data.email").value(request.email()))
                     .andExpect(jsonPath("$.data.nickname").value(request.nickname()))
                     .andDo(print());
@@ -168,7 +168,7 @@ public class UserControllerTest {
                     .andExpect(handler().methodName("login"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("%d번 회원의 로그인을 성공했습니다.".formatted(user.getId())))
+                    .andExpect(jsonPath("$.message").value("로그인을 성공했습니다."))
                     .andExpect(jsonPath("$.data.id").value(user.getId()))
                     .andExpect(jsonPath("$.data.email").value(request.email()))
                     .andExpect(jsonPath("$.data.nickname").value(user.getNickname()))
