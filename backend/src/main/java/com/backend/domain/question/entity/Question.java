@@ -19,10 +19,10 @@ public class Question extends BaseEntity {
     private String content;
 
     @Column(nullable = true)
-    private Boolean isApproved = false; // 0: 미승인, 1: 승인
+    private Boolean isApproved; // 0: 미승인, 1: 승인
 
     @Column(nullable = false)
-    private Integer score = 0; // 기본값 0
+    private Integer score; // 기본값 0
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -30,6 +30,8 @@ public class Question extends BaseEntity {
 
     @Builder
     public Question(String title, String content, User author) {
+        this.isApproved = false;
+        this.score = 0;
         this.title = title;
         this.content = content;
         this.author = author;
