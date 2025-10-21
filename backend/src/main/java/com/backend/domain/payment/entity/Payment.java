@@ -50,8 +50,8 @@ public class Payment extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_id", unique = true) // FK 칼럼 생성
+    @ManyToOne(fetch = FetchType.LAZY) //한 구독에 결제는 여러번
+    @JoinColumn(name = "subscription_id", nullable = false)
     private Subscription subscription;
 
 }

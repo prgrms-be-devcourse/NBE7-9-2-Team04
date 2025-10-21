@@ -1,6 +1,7 @@
 package com.backend.domain.subscription.entity;
 
 
+import com.backend.domain.billing.entity.Billing;
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
@@ -11,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -42,16 +45,17 @@ public class Subscription extends BaseEntity {
     @Column(nullable = false)
     private int questionLimit;
 
-    // 빌링 키 (정기 결제 시 필요. 일단은 주석 처리)
-//    @Column(name = "billing_key", unique = true, length = 100)
-//    private String billingKey;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "billing_key_id", nullable = false)
+    private Billing billing; // 결제용 빌링키
+
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "subscription", fetch = FetchType.LAZY)
-    private Payment payment;
+    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
+    private List<Payment> payments = new ArrayList<>();
 
 
     public void activate(LocalDateTime endDate) {

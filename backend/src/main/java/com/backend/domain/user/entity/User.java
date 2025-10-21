@@ -1,6 +1,7 @@
 package com.backend.domain.user.entity;
 
 import com.backend.domain.resume.entity.Resume;
+import com.backend.domain.subscription.entity.Subscription;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -90,4 +91,7 @@ public class User extends BaseEntity {
     public boolean validateLoginAvaliable() {
         return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.SUSPENDED;
     }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Subscription subscription;
 }
