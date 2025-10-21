@@ -3,6 +3,8 @@ package com.backend.domain.question.entity;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

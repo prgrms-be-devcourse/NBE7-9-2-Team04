@@ -196,7 +196,7 @@ export default function RecruitmentPage() {
             >
               {premiumPosts.map((post) => (
                 <div key={post.id} className="w-full flex-shrink-0">
-                  <div className="border border-blue-200 bg-blue-50 p-8 rounded-lg flex justify-between min-h-[160px]">
+                  <div className="border border-blue-500 bg-blue-50 p-8 rounded-lg flex justify-between min-h-[160px]">
                     <div className="flex flex-col justify-between flex-1 pr-4">
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">

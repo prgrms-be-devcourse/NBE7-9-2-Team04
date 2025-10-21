@@ -8,152 +8,131 @@ import { fetchApi } from "@/lib/client";
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState({ user: "", admin: "" });
-  const [password, setPassword] = useState({ user: "", admin: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("user");
   const returnUrl = searchParams.get("returnUrl");
 
-  const ADMIN_EMAIL = "admin@naver.com";
-  const ADMIN_PASS = "adm1234";
-
-  //백 연동 코드 추후 수정 예정. 임시로 넣어둠
-  const handleLogin = async (
-    e: React.FormEvent<HTMLFormElement>,
-    isAdmin = false
-  ) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const currentEmail = isAdmin ? email.admin : email.user;
-    const currentPassword = isAdmin ? password.admin : password.user;
-    const apiPath = isAdmin ? "/api/v1/admin/login" : "/api/v1/users/login";
-
-    if (currentEmail.length < 2 || currentPassword.length < 2) {
-      alert("이메일과 비밀번호는 2자 이상 입력해주세요.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (isAdmin) {
-      if (currentEmail === ADMIN_EMAIL && currentPassword === ADMIN_PASS) {
-        alert("관리자 로그인 성공 (임시)");
-        localStorage.setItem("isAdmin", "true"); // ✅ 관리자 로그인 상태 저장
-        window.location.href = "/admin"; // 관리자 페이지로 이동
-        return;
-      } else {
-        alert("관리자 계정 정보가 올바르지 않습니다.");
-        setIsLoading(false);
-        return;
-      }
-    }
-    
     try {
-      const data = await fetchApi(apiPath, {
+      const apiResponse = await fetchApi(`/api/v1/users/login`, {
         method: "POST",
-        body: JSON.stringify({
-          email: currentEmail,
-          password: currentPassword,
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
-      const resultCode = String(data.resultCode);
+      if (apiResponse.status === "OK") {
+        alert(apiResponse.message);
 
-      if (resultCode.startsWith("200")) {
-        alert(data.msg || "로그인 성공");
-        window.location.href = returnUrl || "/";
+        window.dispatchEvent(new Event("loginSuccess")); //로그인 시 상단바 바로 바뀌도록 함
+
+        const user = apiResponse.data;
+
+        if (user.role === "ADMIN") {
+          router.push("/admin");
+        } else {
+          router.push(returnUrl || "/");
+        }
+        router.refresh();
       } else {
-        alert(data.msg || "로그인 실패");
+        alert(apiResponse.message);
       }
     } catch (err: any) {
-      alert(err.message || "로그인 중 오류가 발생했습니다.");
+      alert(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex mt-20 justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">로그인</h2>
-          <p className="text-gray-500 mt-2">
-            DevStation에 오신 것을 환영합니다
-          </p>
-        </div>
-
-        <div className="w-full bg-white rounded-lg shadow-lg border border-gray-200">
-          <div className="flex w-full border-b border-gray-200">
-            <div
-              className={`flex-1 py-2 text-center cursor-pointer border-b-2 ${
-                activeTab === "user"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-gray-200 text-gray-500"
-              }`}
-              onClick={() => setActiveTab("user")}
-            >
-              일반 로그인
-            </div>
-            <div
-              className={`flex-1 py-2 text-center cursor-pointer border-b-2 ${
-                activeTab === "admin"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-gray-200 text-gray-500"
-              }`}
-              onClick={() => setActiveTab("admin")}
-            >
-              관리자 로그인
-            </div>
+    <>
+      <div className="min-h-screen flex mt-20 justify-center p-4">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900">로그인</h2>
+            <p className="text-gray-500 mt-2">
+              DevStation에 오신 것을 환영합니다
+            </p>
           </div>
 
-          {activeTab === "user" && (
-            <div className="p-6">
-              <form
-                onSubmit={(e) => handleLogin(e, false)}
-                className="space-y-4"
+          <div className="w-full bg-white rounded-lg shadow-lg border border-gray-200">
+            <div className="flex w-full border-b border-gray-200">
+              <div
+                className={`flex-1 py-2 text-center cursor-pointer border-b-2 ${
+                  activeTab === "user"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-gray-200 text-gray-500"
+                }`}
+                onClick={() => setActiveTab("user")}
               >
+                일반 로그인
+              </div>
+              <div
+                className={`flex-1 py-2 text-center cursor-pointer border-b-2 ${
+                  activeTab === "admin"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-gray-200 text-gray-500"
+                }`}
+                onClick={() => setActiveTab("admin")}
+              >
+                관리자 로그인
+              </div>
+            </div>
+
+            <div className="p-6">
+              <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">일반 사용자</h3>
+                  <h3 className="text-xl font-semibold">
+                    {activeTab === "admin"
+                      ? "관리자 로그인"
+                      : "일반 사용자 로그인"}
+                  </h3>
+                  {activeTab === "admin" && (
+                    <p className="text-sm text-gray-500">
+                      관리자 계정으로 로그인하세요
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <label
-                      htmlFor="user-email"
+                      htmlFor="email"
                       className="text-sm font-medium block"
                     >
                       이메일
                     </label>
                     <input
-                      id="user-email"
+                      id="email"
                       type="email"
                       className="w-full p-2 border border-gray-300 rounded focus:border-blue-500"
-                      placeholder="user@example.com"
-                      value={email.user}
-                      onChange={(e) =>
-                        setEmail((prev) => ({ ...prev, user: e.target.value }))
+                      placeholder={
+                        activeTab === "admin"
+                          ? "admin@example.com"
+                          : "user@example.com"
                       }
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
+
                   <div className="space-y-1">
                     <label
-                      htmlFor="user-password"
+                      htmlFor="password"
                       className="text-sm font-medium block"
                     >
                       비밀번호
                     </label>
                     <input
-                      id="user-password"
+                      id="password"
                       type="password"
                       className="w-full p-2 border border-gray-300 rounded focus:border-blue-500"
-                      value={password.user}
-                      onChange={(e) =>
-                        setPassword((prev) => ({
-                          ...prev,
-                          user: e.target.value,
-                        }))
-                      }
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required
                     />
                   </div>
@@ -169,92 +148,24 @@ export default function LoginPage() {
                   >
                     {isLoading ? "로그인 중..." : "로그인"}
                   </button>
-                  <div className="text-sm text-center text-gray-500">
-                    계정이 없으신가요?{" "}
-                    <Link
-                      href="/auth/signup"
-                      className="text-blue-600 hover:underline"
-                    >
-                      회원가입
-                    </Link>
-                  </div>
+
+                  {activeTab === "user" && (
+                    <div className="text-sm text-center text-gray-500">
+                      계정이 없으신가요?{" "}
+                      <Link
+                        href="/auth/signup"
+                        className="text-blue-600 hover:underline"
+                      >
+                        회원가입
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </form>
             </div>
-          )}
-
-          {activeTab === "admin" && (
-            <div className="p-6">
-              <form
-                onSubmit={(e) => handleLogin(e, true)}
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">관리자</h3>
-                  <p className="text-sm text-gray-500">
-                    관리자 계정으로 로그인하세요
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label
-                      htmlFor="admin-email"
-                      className="text-sm font-medium block"
-                    >
-                      이메일
-                    </label>
-                    <input
-                      id="admin-email"
-                      type="email"
-                      className="w-full p-2 border border-gray-300 rounded focus:border-blue-500"
-                      placeholder="admin@example.com"
-                      value={email.admin}
-                      onChange={(e) =>
-                        setEmail((prev) => ({ ...prev, admin: e.target.value }))
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label
-                      htmlFor="admin-password"
-                      className="text-sm font-medium block"
-                    >
-                      비밀번호
-                    </label>
-                    <input
-                      id="admin-password"
-                      type="password"
-                      className="w-full p-2 border border-gray-300 rounded focus:border-blue-500"
-                      value={password.admin}
-                      onChange={(e) =>
-                        setPassword((prev) => ({
-                          ...prev,
-                          admin: e.target.value,
-                        }))
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className={`w-full py-2 font-medium rounded transition-colors bg-blue-600 text-white hover:bg-blue-700 ${
-                      isLoading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "로그인 중..." : "관리자 로그인"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

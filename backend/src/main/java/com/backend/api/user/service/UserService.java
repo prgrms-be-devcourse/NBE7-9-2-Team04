@@ -5,7 +5,6 @@ import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
 import com.backend.domain.user.entity.AccountStatus;
 import com.backend.domain.user.entity.Role;
-import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
@@ -14,8 +13,6 @@ import com.backend.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
