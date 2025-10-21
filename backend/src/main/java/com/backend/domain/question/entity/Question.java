@@ -5,13 +5,11 @@ import com.backend.global.entity.BaseEntity;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Question extends BaseEntity {
 
     @Column(nullable = false, length = 100)
@@ -34,6 +32,15 @@ public class Question extends BaseEntity {
     public Question(String title, String content, User author) {
         this.title = title;
         this.content = content;
+        this.author = author;
+    }
+
+    @Builder(builderMethodName = "allBuilder")
+    public Question(String title, String content, Boolean isApproved, Integer score, User author) {
+        this.title = title;
+        this.content = content;
+        this.isApproved = isApproved;
+        this.score = score;
         this.author = author;
     }
 
