@@ -66,6 +66,7 @@ import java.util.Optional;
                 post.getStatus(),
                 post.getPinStatus(),
                 post.getRecruitCount(),
+                post.getIntroduction(),
                 nickName
         );
     }
