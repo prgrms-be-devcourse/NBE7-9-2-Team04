@@ -1,6 +1,7 @@
 package com.backend.global.exception;
 
 import com.backend.global.dto.response.ApiResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,15 @@ public class GlobalExceptionHandler {
         log.warn("MethodArgumentNotValidException {}", e.getMessage());
         return new ResponseEntity<>(
                 ApiResponse.fail(HttpStatus.BAD_REQUEST,message)
+                , HttpStatus.BAD_REQUEST);
+    }
+
+    // JSON 직렬화/역직렬화 예외
+    @ExceptionHandler(JsonProcessingException.class)
+    public ResponseEntity<ApiResponse<?>> handleJsonProcessing(JsonProcessingException e) {
+        log.error("JSON 파싱 실패: {}", e.getMessage());
+        return new ResponseEntity<>(
+                ApiResponse.fail(HttpStatus.BAD_REQUEST,e.getMessage())
                 , HttpStatus.BAD_REQUEST);
     }
 
