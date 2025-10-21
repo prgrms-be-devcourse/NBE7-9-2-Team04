@@ -21,6 +21,9 @@ import java.util.Optional;
         @Schema(description = "한 줄 소개", example = "사이드 프로젝트 할 팀원 구합니다")
             String introduction,
 
+        @Schema(description = "내용", example = "백엔드 2명, 프론트엔드 2명 구합니다. 주제는")
+            String content,
+
         @Schema(description = "마감일", example = "2025-10-25T17:00:00")
             LocalDateTime deadline,
 
