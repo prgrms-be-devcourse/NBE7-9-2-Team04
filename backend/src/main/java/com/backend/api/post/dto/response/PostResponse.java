@@ -12,31 +12,37 @@ import java.util.Optional;
 
 // 게시글 응답
     public record PostResponse(
-            @Schema(description = "게시글 ID", example = "1")
+        @Schema(description = "게시글 ID", example = "1")
             Long postId,
 
-            @Schema(description = "제목", example = "첫번째 게시물")
+        @Schema(description = "제목", example = "첫번째 게시물")
             String title,
 
-            @Schema(description = "내용", example = "함께 팀 프로젝트를 진행할 백엔드 개발자 구합니다.")
+        @Schema(description = "한 줄 소개", example = "사이드 프로젝트 할 팀원 구합니다")
+            String introduction,
+
+        @Schema(description = "내용", example = "백엔드 2명, 프론트엔드 2명 구합니다. 주제는")
             String content,
 
-            @Schema(description = "마감일", example = "2025-10-25T17:00:00")
+        @Schema(description = "마감일", example = "2025-10-25T17:00:00")
             LocalDateTime deadline,
 
-            @Schema(description = "작성일", example = "2025-10-18T10:30:00")
+        @Schema(description = "작성일", example = "2025-10-18T10:30:00")
             LocalDateTime createDate,
 
-            @Schema(description = "수정일", example = "2025-10-18T10:50:00")
+        @Schema(description = "수정일", example = "2025-10-18T10:50:00")
             LocalDateTime modifyDate,
 
-            @Schema(description = "진행 상태", example = "IN_PROGRESS", allowableValues = {"ING", "CLOSED"})
+        @Schema(description = "진행 상태", example = "IN_PROGRESS", allowableValues = {"ING", "CLOSED"})
             PostStatus status,
 
-            @Schema(description = "상단 고정 여부", example = "UNPINNED", allowableValues = {"PINNED", "NOT_PINNED"})
+        @Schema(description = "상단 고정 여부", example = "UNPINNED", allowableValues = {"PINNED", "NOT_PINNED"})
             PinStatus pinStatus,
 
-            @Schema(description = "작성자의 닉네임", example = "개발자A")
+        @Schema(description = "모집 인원", example = "4")
+        Integer recruitCount,
+
+        @Schema(description = "작성자의 닉네임", example = "개발자A")
             String nickName // 작성자의 닉네임
     ) {
 
@@ -59,6 +65,7 @@ import java.util.Optional;
                 post.getModifyDate(),
                 post.getStatus(),
                 post.getPinStatus(),
+                post.getRecruitCount(),
                 nickName
         );
     }
