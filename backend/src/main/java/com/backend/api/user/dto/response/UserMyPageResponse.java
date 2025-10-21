@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Getter
 @AllArgsConstructor
@@ -36,7 +38,7 @@ public class UserMyPageResponse {
 
 
     @Getter
-    public class UserModify {
+    public static class UserModify {
         private String email;
         private String password;
         private String name;
@@ -44,5 +46,13 @@ public class UserMyPageResponse {
         private int age;
         private String github;
         private String image;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class SolvedProblem {
+        private String title;              // 문제 제목
+        private LocalDateTime modifyDate; // 수정일
     }
 }
