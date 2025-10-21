@@ -1,10 +1,7 @@
 package com.backend.domain.user.entity;
 
 import com.backend.domain.resume.entity.Resume;
-import com.backend.domain.subscription.entity.Subscription;
 import com.backend.global.entity.BaseEntity;
-import com.backend.global.exception.ErrorCode;
-import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
