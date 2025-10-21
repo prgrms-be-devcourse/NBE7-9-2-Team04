@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/posts")
@@ -33,7 +35,6 @@ public class PostController {
         );
     }
 
-
     @GetMapping("/{postId}")
     @Operation(summary = "특정 게시글 조회")
     public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
@@ -42,6 +43,17 @@ public class PostController {
         return ApiResponse.ok(
                 "%d번 게시글을 성공적으로 조회했습니다.".formatted(postId),
                 response
+        );
+    }
+
+    @GetMapping("/pinned")
+    @Operation(summary = "상단 고정 게시글 목록 조회")
+    public ApiResponse<List<PostResponse>> getPinnedPosts() {
+        List<PostResponse> postResponseList = postService.getPinnedPosts();
+
+        return ApiResponse.ok(
+                "상단 고정된 게시글을 성공적으로 조회했습니다.",
+                postResponseList
         );
     }
 
