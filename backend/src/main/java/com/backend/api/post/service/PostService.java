@@ -51,6 +51,15 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
+    public List<PostResponse> getAllPosts() {
+        List<Post> posts = postRepository.findAllByOrderByCreateDateDesc();
+
+        return posts.stream()
+                .map(PostResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<PostResponse> getPostsByUserId(Long userId) {
         User user = userService.getUser(userId);
         List<Post> myPosts = postRepository.findByUsersOrderByCreateDateDesc(user);

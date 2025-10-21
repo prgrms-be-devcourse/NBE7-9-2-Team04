@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/posts")
@@ -29,18 +31,6 @@ public class PostController {
 
         return ApiResponse.ok(
                 "%d번 게시글 등록을 완료했습니다.".formatted(response.postId()),
-                response
-        );
-    }
-
-
-    @GetMapping("/{postId}")
-    @Operation(summary = "특정 게시글 조회")
-    public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
-        PostResponse response = postService.getPost(postId);
-
-        return ApiResponse.ok(
-                "%d번 게시글을 성공적으로 조회했습니다.".formatted(postId),
                 response
         );
     }
@@ -72,5 +62,24 @@ public class PostController {
 
     private User getCurrentUser() {
         return rq.getUser();
+    }
+
+    @GetMapping("/{postId}")
+    @Operation(summary = "게시글 단건 조회")
+    public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
+        PostResponse response = postService.getPost(postId);
+
+        return ApiResponse.ok(
+                "%d번 게시글을 성공적으로 조회했습니다.".formatted(postId),
+                response
+        );
+    }
+
+    @GetMapping
+    @Operation(summary = "게시글 다건 조회")
+    public ApiResponse<List<PostResponse>> getAllPosts() {
+        List<PostResponse> posts = postService.getAllPosts();
+        return ApiResponse.ok(
+                "전체 게시글 조회 성공", posts);
     }
 }
