@@ -25,6 +25,8 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       EMAIL_ID: ${{ secrets.EMAIL_ID }}
       EMAIL_PW: ${{ secrets.EMAIL_PW }}
+      OPENAI_API_URL: ${{ secrets.OPENAI_API_URL }}
+      
 
     steps:
       - name: 리포지토리를 가져옵니다
