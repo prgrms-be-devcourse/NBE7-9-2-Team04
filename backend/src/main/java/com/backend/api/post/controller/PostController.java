@@ -12,6 +12,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.util.Collections;
+
 import java.util.List;
 
 @RestController
@@ -32,6 +35,29 @@ public class PostController {
         return ApiResponse.ok(
                 "%d번 게시글 등록을 완료했습니다.".formatted(response.postId()),
                 response
+        );
+    }
+
+
+    @GetMapping("/{postId}")
+    @Operation(summary = "특정 게시글 조회")
+    public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
+        PostResponse response = postService.getPost(postId);
+
+        return ApiResponse.ok(
+                "%d번 게시글을 성공적으로 조회했습니다.".formatted(postId),
+                response
+        );
+    }
+
+    @GetMapping("/pinned")
+    @Operation(summary = "상단 고정 게시글 목록 조회")
+    public ApiResponse<List<PostResponse>> getPinnedPosts() {
+        List<PostResponse> postResponseList = postService.getPinnedPosts();
+
+        return ApiResponse.ok(
+                "상단 고정된 게시글을 성공적으로 조회했습니다.",
+                postResponseList
         );
     }
 
