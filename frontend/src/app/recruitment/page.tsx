@@ -5,127 +5,13 @@ import Router from "next/navigation";
 import Link from "next/link";
 import Pagination from "@/components/pagination";
 import CategoryTab from "@/components/categoryTab";
+import { fetchApi } from "@/lib/client";
 
-//임시 데이터
-const premiumPosts = [
-  {
-    id: "p1",
-    title: "시니어 백엔드 개발자 구합니다 - 핀테크 스타트업",
-    description:
-      "5년 이상 경력의 백엔드 개발자를 찾습니다. Spring Boot, AWS 경험 필수",
-    category: "프로젝트",
-    deadline: "2025-11-30",
-    members: "4",
-    isPremium: true,
-    status: "모집중",
-  },
-  {
-    id: "p2",
-    title: "React 스터디 모집 - 주 2회 온라인",
-    description: "React 18 최신 기능을 함께 공부할 스터디원을 모집합니다",
-    category: "스터디",
-    deadline: "2025-11-15",
-    members: "4",
-    isPremium: true,
-    status: "모집중",
-  },
-  {
-    id: "p3",
-    title: "AI 챗봇 프로젝트 팀원 모집",
-    description: "OpenAI API를 활용한 챗봇 서비스 개발 프로젝트",
-    category: "프로젝트",
-    deadline: "2025-11-20",
-    members: "4",
-    isPremium: true,
-    status: "모집중",
-  },
-];
-
-//임시 데이터
-const regularPosts = [
-  {
-    id: "1",
-    title: "Next.js 14 프로젝트 팀원 모집",
-    description:
-      "Next.js 14 App Router를 활용한 커머스 사이트 제작 프로젝트입니다. 디자이너 1명, 프론트엔드 개발자 2명을 찾습니다.",
-    category: "프로젝트",
-    deadline: "2025-11-25",
-    members: "4",
-    author: "김개발",
-    createdAt: "2025-10-10",
-    status: "마감",
-  },
-  {
-    id: "2",
-    title: "알고리즘 스터디 모집 (백준 골드 이상)",
-    description:
-      "주 3회 온라인으로 진행되는 알고리즘 스터디입니다. 백준 골드 티어 이상만 지원 가능합니다.",
-    category: "스터디",
-    deadline: "2025-11-18",
-    members: "4",
-    author: "박알고",
-    createdAt: "2025-10-12",
-    status: "모집중",
-  },
-  {
-    id: "3",
-    title: "사이드 프로젝트 - 독서 기록 앱",
-    description:
-      "독서 기록 및 리뷰 공유 앱을 만들 팀원을 찾습니다. React Native 경험자 우대",
-    category: "프로젝트",
-    deadline: "2025-11-22",
-    members: "4",
-    author: "이독서",
-    createdAt: "2025-10-13",
-    status: "모집중",
-  },
-  {
-    id: "4",
-    title: "TypeScript 스터디 - 초급자 환영",
-    description: "TypeScript 기초부터 고급까지 함께 공부할 스터디원 모집합니다",
-    category: "스터디",
-    deadline: "2025-11-20",
-    members: "4",
-    author: "최타입",
-    createdAt: "2025-10-14",
-    status: "마감",
-  },
-  {
-    id: "5",
-    title: "게임 개발 프로젝트",
-    description: "Unity를 활용한 2D 플랫포머 게임 제작 프로젝트입니다",
-    category: "프로젝트",
-    deadline: "2025-12-01",
-    members: "4",
-    author: "정게임",
-    createdAt: "2025-10-15",
-    status: "마감",
-  },
-  {
-    id: "6",
-    title: "DevOps 스터디 모집",
-    description: "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
-    category: "스터디",
-    deadline: "2025-11-28",
-    members: "4",
-    author: "강데브",
-    createdAt: "2025-10-14",
-    status: "마감",
-  },
-  {
-    id: "7",
-    title: "DevOps 스터디 모집",
-    description: "Docker, Kubernetes, CI/CD를 함께 공부할 스터디원을 찾습니다",
-    category: "스터디",
-    deadline: "2025-11-28",
-    members: "4",
-    author: "강데브",
-    createdAt: "2025-10-14",
-    status: "마감",
-  },
-];
+import { Post } from "@/types/post";
 
 export default function RecruitmentPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [currentPage, setCurrentPage] = useState(1);
@@ -133,11 +19,36 @@ export default function RecruitmentPage() {
   const categories = ["전체", "프로젝트", "스터디"];
 
   useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const apiResponse = await fetchApi(`/api/v1/posts`, {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        setPosts(apiResponse.data ?? []);
+      } catch (err: any) {
+        console.error("게시글 불러오기 실패:", err);
+        alert(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  const premiumPosts = posts.filter((p) => p.pinStatus === "PINNED");
+  const regularPosts = posts.filter((p) => p.pinStatus === "NOT_PINNED");
+
+  //프리미엄 글 슬라이드
+  useEffect(() => {
+    if (premiumPosts.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % premiumPosts.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [premiumPosts.length]);
 
   const nextSlide = () =>
     setCurrentSlide((prev) => (prev + 1) % premiumPosts.length);
@@ -149,11 +60,16 @@ export default function RecruitmentPage() {
   const filteredPosts =
     selectedCategory === "전체"
       ? regularPosts
-      : regularPosts.filter((post) => post.category === selectedCategory);
+      : regularPosts.filter((post) =>
+          selectedCategory === "프로젝트"
+            ? post.categoryType === "PROJECT"
+            : post.categoryType === "STUDY"
+        );
 
+  // 모집 상태별 정렬
   const sortedPosts = [...filteredPosts].sort((a, b) => {
-    if (a.status === "모집중" && b.status !== "모집중") return -1;
-    if (a.status !== "모집중" && b.status === "모집중") return 1;
+    if (a.status === "ING" && b.status !== "ING") return -1;
+    if (a.status !== "ING" && b.status === "ING") return 1;
     return 0;
   });
 
@@ -195,7 +111,7 @@ export default function RecruitmentPage() {
               style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
               {premiumPosts.map((post) => (
-                <div key={post.id} className="w-full flex-shrink-0">
+                <div key={post.postId} className="w-full flex-shrink-0">
                   <div className="border border-blue-500 bg-blue-50 p-8 rounded-lg flex justify-between min-h-[160px]">
                     <div className="flex flex-col justify-between flex-1 pr-4">
                       <div className="space-y-2">
@@ -204,18 +120,18 @@ export default function RecruitmentPage() {
                             프리미엄
                           </span>
                           <span className="bg-gray-100 text-gray-700 text-xs font-medium rounded-full px-2.5 py-0.5">
-                            {post.category}
+                            {post.categoryType}
                           </span>
                         </div>
                         <h3 className="text-lg font-bold line-clamp-1">
                           {post.title}
                         </h3>
                         <p className="text-gray-700 text-sm line-clamp-2">
-                          {post.description}
+                          {post.introduction}
                         </p>
                       </div>
                       <div className="flex items-center gap-1 text-gray-700 text-sm mt-3">
-                        🧑‍🤝‍🧑 <span>{post.members}명</span>
+                        🧑‍🤝‍🧑 <span>{post.recruitCount}명</span>
                       </div>
                     </div>
 
@@ -224,7 +140,7 @@ export default function RecruitmentPage() {
                         ⏰ 마감: {post.deadline}
                       </div>
                       <Link
-                        href={`/recruitment/${post.id}`}
+                        href={`/recruitment/${post.postId}`}
                         className="bg-blue-500 text-white hover:bg-blue-600 text-sm px-4 py-2 rounded-md"
                       >
                         자세히 보기
@@ -275,52 +191,48 @@ export default function RecruitmentPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentPosts.map((post) => (
               <div
-                key={post.id}
+                key={post.postId}
                 className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition"
               >
                 <div className="flex items-center justify-between mb-2 text-sm">
                   <div className="flex items-center gap-1.5">
-                    {" "}
-                    {/* ✅ gap 줄이기 (기존 2 → 1.5) */}
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        post.category === "프로젝트"
+                        post.categoryType === "PROJECT"
                           ? "bg-indigo-50 text-indigo-700"
-                          : post.category === "스터디"
-                          ? "bg-green-50 text-green-700"
-                          : "bg-gray-50 text-gray-700"
+                          : "bg-green-50 text-green-700"
                       }`}
                     >
-                      {post.category}
+                      {post.categoryType === "PROJECT" ? "프로젝트" : "스터디"}
                     </span>
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        post.status === "모집중"
+                        post.status === "ING"
                           ? "bg-red-50 text-red-700"
                           : "bg-gray-100 text-gray-500"
                       }`}
                     >
-                      {post.status}
+                      {post.status === "ING" ? "모집중" : "마감"}
                     </span>
                   </div>
 
                   <span className="text-gray-500 text-xs">
-                    마감일 {post.deadline}
+                    마감일 {post.deadline?.split("T")[0]}
                   </span>
                 </div>
                 <h3 className="text-lg font-semibold mb-1 line-clamp-2">
                   {post.title}
                 </h3>
                 <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                  {post.description}
+                  {post.introduction}
                 </p>
 
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                  <span>🧑‍🤝‍🧑 {post.members}명</span>
+                  <span>🧑‍🤝‍🧑 {post.recruitCount}명</span>
                 </div>
 
                 <Link
-                  href={`/recruitment/${post.id}`}
+                  href={`/recruitment/${post.postId}`}
                   className="block text-center border border-gray-300 rounded-md py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
                 >
                   자세히 보기

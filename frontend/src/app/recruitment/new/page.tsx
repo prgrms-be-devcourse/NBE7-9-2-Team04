@@ -3,21 +3,44 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { CreatePost } from "@/types/post";
+import { fetchApi } from "@/lib/client";
 
+//구독한 회원 처리 필요함
+//일단은 fetch코드만 넣어둠둠
 export default function RecruitmentCreatePage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
+  
+  const [formData, setFormData] = useState<CreatePost>({
     title: "",
-    description: "",
-    category: "",
-    deadline: "",
-    maxMembers: "",
     content: "",
+    introduction: "",
+    deadline : "",
+    status :  "ING",
+    pinStatus : "NOT_PINNED",
+    recruitCount: 1,
+    categoryType: "PROJECT",  
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.replace("/recruitment");
+
+
+    try {
+      const apiResponse = await fetchApi(`/api/v1/posts`, {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+
+      if (apiResponse.status === "OK") {
+        alert(apiResponse.message);
+        router.replace("/recruitment"); // 로그인 페이지로 이동
+      } else {
+        alert(apiResponse.message);
+      }
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   return (
@@ -72,9 +95,9 @@ export default function RecruitmentCreatePage() {
               id="description"
               type="text"
               placeholder="한 줄로 프로젝트를 소개해주세요"
-              value={formData.description}
+              value={formData.introduction}
               onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+                setFormData({ ...formData, introduction: e.target.value })
               }
               required
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -91,9 +114,9 @@ export default function RecruitmentCreatePage() {
               </label>
               <select
                 id="category"
-                value={formData.category}
+                value={formData.categoryType}
                 onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
+                  setFormData({ ...formData, categoryType: e.target.value as "PROJECT" | "STUDY" })
                 }
                 required
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -135,9 +158,9 @@ export default function RecruitmentCreatePage() {
               id="maxMembers"
               type="number"
               placeholder="최대 모집 인원"
-              value={formData.maxMembers}
+              value={formData.recruitCount}
               onChange={(e) =>
-                setFormData({ ...formData, maxMembers: e.target.value })
+                setFormData({ ...formData, recruitCount: Number(e.target.value) })
               }
               required
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

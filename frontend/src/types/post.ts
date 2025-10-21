@@ -1,12 +1,13 @@
-export type createPost = {
+export type CreatePost = {
     
     title: string;
     content: string;
     introduction: string;
-    deadLine : string;
-    postStatus :  "ING" | "CLOSED";
-    pinStatus : "PINNED" | "NOT_PINNED";
-    recruitCount: number;       
+    deadline : string;
+    status :  "ING" | "CLOSED";
+    pinStatus? : "PINNED" | "NOT_PINNED";
+    recruitCount: number;     
+    categoryType: "PROJECT" | "STUDY";  
 };
 
 export type Post = {
@@ -14,12 +15,13 @@ export type Post = {
     title: string;
     introduction: string;
     content: string;
-    deadLine : string;
+    deadline : string;
     createDate : string;
     modifyDate : string;
-    postStatus :  "ING" | "CLOSED";
+    status :  "ING" | "CLOSED";
     pinStatus : "PINNED" | "NOT_PINNED";
     recruitCount: number;     
     nickName : string;
+    categoryType: "PROJECT" | "STUDY";
 
 }
