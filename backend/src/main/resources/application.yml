@@ -6,7 +6,6 @@ spring:
     password: ${DB_PASSWORD}
     hikari:
       auto-commit: false
-
   output:
     ansi:
       enabled: always
@@ -26,6 +25,9 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
 
 
 logging:
@@ -50,3 +52,6 @@ custom:
     refresh-token:
       expire-time: "#{72 * 60 * 60 * 1000}"       # 72시간 (3일)
     secretPattern: ${SECRET_PATTERN}
+
+openai:
+  url: ${OPENAI_API_URL}
