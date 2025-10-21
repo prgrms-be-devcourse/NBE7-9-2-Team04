@@ -47,11 +47,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private AccountStatus accountStatus = AccountStatus.ACTIVE; // 기본값 ACTIVE
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_id") // FK 컬럼명 명시
-    private Subscription subscription;
-
-
     @Builder
     public User(String email,
                 String password,
