@@ -86,4 +86,9 @@ public class QuestionService {
 
         return QuestionResponse.from(question);
     }
+
+    @Transactional
+    public void createListQuestion(List<Question> questions){
+        questionRepository.saveAll(questions);
+    }
 }
