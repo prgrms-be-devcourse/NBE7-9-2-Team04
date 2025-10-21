@@ -1,5 +1,6 @@
 package com.backend.domain.user.entity;
 
+import com.backend.domain.question.entity.Question;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,10 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class UserQuestion {
 
     @Id
@@ -18,9 +16,7 @@ public class UserQuestion {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
-
-    private String title;
-    private Long score;
+    @JoinColumn(name = "문제 제목")
+    private Question question;
     private LocalDateTime modifyDate;
 }

@@ -10,6 +10,5 @@ import java.time.LocalDateTime;
 public class UserMyPageQuestionRequest {
     private Long userId;
     private String title;
-    private Long score;
     private LocalDateTime modifyDate;
 }

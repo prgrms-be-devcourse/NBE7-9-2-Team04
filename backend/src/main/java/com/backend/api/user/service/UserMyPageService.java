@@ -62,7 +62,7 @@ public class UserMyPageService {
 
         return solvedQuestions.stream()
                 .map(q -> UserMyPageResponse.SolvedProblem.builder()
-                        .title(q.getTitle())
+                        .title(q.getQuestion().getTitle())
                         .modifyDate(q.getModifyDate())
                         .build())
                 .toList();
