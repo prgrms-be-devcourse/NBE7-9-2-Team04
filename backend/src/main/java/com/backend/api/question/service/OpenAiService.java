@@ -15,7 +15,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,6 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-@Slf4j
 public class OpenAiService {
 
     @Value("${openai.url}")
@@ -51,7 +50,7 @@ public class OpenAiService {
         AiQuestionRequest request = AiQuestionRequest.of(resume.getSkill(),resume.getPortfolioUrl());
 
         String connectionAi = connectionAi(request);
-        log.info(connectionAi);
+
         List<AiQuestionResponse> responses = parseChatGptResponse(connectionAi);
 
         List<Question> questions = listDtoToEntity(responses, user, resume);
@@ -62,9 +61,9 @@ public class OpenAiService {
 
     public List<AiQuestionResponse> parseChatGptResponse(String connectionAi) throws JsonProcessingException {
         ChatGptResponse responseDto = objectMapper.readValue(connectionAi, ChatGptResponse.class);
-        log.info(responseDto.choiceResponses().toString());
+
         String content = responseDto.choiceResponses().get(0).message().content();
-        log.info(content);
+
         String cleanJson = content
                 .replaceAll("```json", "")
                 .replaceAll("\\n","")
