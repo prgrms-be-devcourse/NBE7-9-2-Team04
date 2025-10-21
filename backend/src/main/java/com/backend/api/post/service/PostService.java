@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.backend.domain.subscription.repository.SubscriptionRepository;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -97,7 +98,13 @@ public class PostService {
 
     public List<PostResponse> getPinnedPosts() {
         List<Post> pinnedPosts = postRepository.findByPinStatusOrderByCreateDateDesc(PinStatus.PINNED);
-        return pinnedPosts.stream()
+
+        Collections.shuffle(pinnedPosts);
+        List<Post> limitedList = pinnedPosts.stream()
+                .limit(5)
+                .toList();
+
+        return limitedList.stream()
                 .map(PostResponse::from)
                 .toList();
     }
