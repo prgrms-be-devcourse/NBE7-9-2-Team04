@@ -65,7 +65,6 @@ import java.util.Optional;
                 post.getTitle(),
                 post.getIntroduction(),
                 post.getContent(),
-                post.getIntroduction(),
                 post.getDeadline(),
                 post.getCreateDate(),
                 post.getModifyDate(),

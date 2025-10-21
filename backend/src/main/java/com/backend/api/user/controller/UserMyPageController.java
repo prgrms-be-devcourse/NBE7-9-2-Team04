@@ -33,8 +33,6 @@ public class UserMyPageController {
     private UserMyPageQuestionRequest userMyPageQuestionRequest;
     private final CommentService commentService;
     private final AnswerService answerService;
-    private final CommentService commentService;
-    private final AnswerService answerService;
 
     @GetMapping("/me")
     @Operation(summary = "개인 정보 조회")
