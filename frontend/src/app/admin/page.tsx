@@ -231,7 +231,7 @@ export default function AdminUsersPage() {
                               }}
                               className="text-red-600"
                             >
-                              영구 차단
+                              영구 정지
                             </DropdownMenuItem>
                           </>
                         ) : (

@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState } from "react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -9,12 +9,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
   useDropdown,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 // ✅ Mock questions data
 const mockQuestions = [
@@ -58,48 +58,60 @@ const mockQuestions = [
     submittedBy: "이프론트",
     submittedAt: "2025-10-13",
   },
-]
+];
 
 export default function AdminQuestionsPage() {
-  const [questions, setQuestions] = useState(mockQuestions)
+  const [questions, setQuestions] = useState(mockQuestions);
 
   const handleApprove = (id: string) => {
-    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, status: "approved" } : q)))
-    alert("질문이 승인되었습니다.")
-  }
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, status: "approved" } : q))
+    );
+    alert("질문이 승인되었습니다.");
+  };
 
   const handleReject = (id: string) => {
-    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, status: "rejected" } : q)))
-    alert("질문이 거부되었습니다.")
-  }
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, status: "rejected" } : q))
+    );
+    alert("질문이 거부되었습니다.");
+  };
 
   const handleDelete = (id: string) => {
-    setQuestions((prev) => prev.filter((q) => q.id !== id))
-    alert("질문이 삭제되었습니다.")
-  }
-
+    setQuestions((prev) => prev.filter((q) => q.id !== id));
+    alert("질문이 삭제되었습니다.");
+  };
 
   const getStatusBadge = (status: string) => {
-    const base = "px-2 py-1 text-sm rounded"
+    const base = "px-2 py-1 text-sm rounded";
     switch (status) {
       case "approved":
-        return <span className={`${base} bg-green-100 text-green-700`}>승인됨</span>
+        return (
+          <span className={`${base} bg-green-100 text-green-700`}>승인됨</span>
+        );
       case "pending":
-        return <span className={`${base} bg-yellow-100 text-yellow-700`}>대기중</span>
+        return (
+          <span className={`${base} bg-yellow-100 text-yellow-700`}>
+            대기중
+          </span>
+        );
       case "rejected":
-        return <span className={`${base} bg-red-100 text-red-700`}>거부됨</span>
+        return (
+          <span className={`${base} bg-red-100 text-red-700`}>거부됨</span>
+        );
       default:
-        return null
+        return null;
     }
-  }
-
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-8 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold mb-2">📝 질문 관리</h1>
-        <p className="text-gray-500">CS 면접 질문을 관리하고 사용자 제출 질문을 승인합니다</p>
+        <p className="text-gray-500">
+          CS 면접 질문을 관리하고 사용자 제출 질문을 승인합니다
+        </p>
       </div>
 
       {/* Table */}
@@ -118,7 +130,7 @@ export default function AdminQuestionsPage() {
 
           <TableBody>
             {questions.map((q) => {
-              const { ref, open, setOpen } = useDropdown()
+              const { ref, open, setOpen } = useDropdown();
               return (
                 <TableRow key={q.id}>
                   {/* 질문 제목 */}
@@ -161,31 +173,27 @@ export default function AdminQuestionsPage() {
                           <>
                             <DropdownMenuItem
                               onClick={() => {
-                                handleApprove(q.id)
-                                setOpen(false)
+                                handleApprove(q.id);
+                                setOpen(false);
                               }}
                             >
                               승인
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
-                                handleReject(q.id)
-                                setOpen(false)
+                                handleReject(q.id);
+                                setOpen(false);
                               }}
                             >
                               거부
                             </DropdownMenuItem>
                           </>
                         )}
-                        <DropdownMenuItem
-                          onClick={() => alert("✏️ 수정 기능은 준비 중입니다.")}
-                        >
-                          수정
-                        </DropdownMenuItem>
+
                         <DropdownMenuItem
                           onClick={() => {
-                            handleDelete(q.id)
-                            setOpen(false)
+                            handleDelete(q.id);
+                            setOpen(false);
                           }}
                           className="text-red-600"
                         >
@@ -195,11 +203,11 @@ export default function AdminQuestionsPage() {
                     </div>
                   </TableCell>
                 </TableRow>
-              )
+              );
             })}
           </TableBody>
         </Table>
       </div>
     </div>
-  )
+  );
 }

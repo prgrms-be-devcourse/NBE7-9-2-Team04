@@ -42,6 +42,71 @@ const mockRecruitmentPosts = [
     status: "hidden",
     createdAt: "2025-10-13",
   },
+  {
+    id: "r4",
+    title: "알고리즘 스터디 모집",
+    author: "박알고",
+    category: "스터디",
+    status: "visible",
+    createdAt: "2025-10-12",
+  },
+  {
+    id: "r5",
+    title: "알고리즘 스터디 모집",
+    author: "박알고",
+    category: "스터디",
+    status: "visible",
+    createdAt: "2025-10-12",
+  },
+  {
+    id: "r6",
+    title: "알고리즘 스터디 모집",
+    author: "박알고",
+    category: "스터디",
+    status: "visible",
+    createdAt: "2025-10-12",
+  },
+  {
+    id: "r7",
+    title: "알고리즘 스터디 모집",
+    author: "박알고",
+    category: "스터디",
+    status: "visible",
+    createdAt: "2025-10-12",
+  },
+  {
+    id: "r8",
+    title: "알고리즘 스터디 모집",
+    author: "박알고",
+    category: "스터디",
+    status: "visible",
+    createdAt: "2025-10-12",
+  },
+  {
+    id: "r9",
+    title: "알고리즘 스터디 모집",
+    author: "박알고",
+    category: "스터디",
+    status: "visible",
+    createdAt: "2025-10-12",
+  },
+  {
+    id: "r10",
+    title: "알고리즘 스터디 모집",
+    author: "박알고",
+    category: "스터디",
+    status: "visible",
+    createdAt: "2025-10-12",
+  },
+  {
+    id: "r11",
+    title: "알고리즘 스터디 모집",
+    author: "박알고",
+    category: "스터디",
+    status: "visible",
+    createdAt: "2025-10-12",
+  },
+
 ]
 
 const mockQnAPosts = [
@@ -91,9 +156,9 @@ export default function AdminPostsPage() {
   const getStatusBadge = (status: string) => {
     const base = "px-2 py-1 text-sm rounded"
     return status === "visible" ? (
-      <span className={`${base} bg-green-100 text-green-700`}>표시중</span>
+      <span className={`${base} bg-green-100 text-green-700`}>진행중</span>
     ) : (
-      <span className={`${base} bg-gray-100 text-gray-700`}>숨김</span>
+      <span className={`${base} bg-gray-100 text-gray-700`}>마감</span>
     )
   }
 
@@ -189,7 +254,7 @@ export default function AdminPostsPage() {
                               setOpen(false)
                             }}
                           >
-                            숨김 처리
+                            마감 처리
                           </DropdownMenuItem>
                         ) : (
                           <DropdownMenuItem
