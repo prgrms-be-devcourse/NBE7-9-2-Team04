@@ -299,7 +299,7 @@ class QuestionControllerTest {
                             .title("운영체제 관련 질문")
                             .content("프로세스와 스레드의 차이를 설명해주세요.")
                             .author(testUser)
-                            .categoryType(QuestionCategoryType.OS) // ✅ SPRING → OS
+                            .categoryType(QuestionCategoryType.OS)
                             .build()
             );
             osQuestion.updateApproved(true);

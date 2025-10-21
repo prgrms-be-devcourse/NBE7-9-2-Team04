@@ -1,6 +1,7 @@
 package com.backend.api.post.dto.request;
 
 import com.backend.domain.post.entity.PinStatus;
+import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -43,6 +44,10 @@ public record PostAddRequest(
         @Schema(description = "모집 인원", example = "4")
         @NotNull(message = "모집 인원은 필수입니다.")
         @Min(value = 1, message = "모집 인원은 최소 1명 이상이어야 합니다.")
-        Integer recruitCount
+        Integer recruitCount,
+
+        @NotNull
+        @Schema(description = "카테고리 타입", example = "PROJECT")
+        PostCategoryType categoryType
 ) {
 }

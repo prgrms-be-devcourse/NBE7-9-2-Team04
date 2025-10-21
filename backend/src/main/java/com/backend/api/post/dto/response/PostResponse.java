@@ -2,6 +2,7 @@ package com.backend.api.post.dto.response;
 
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
+import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -43,7 +44,10 @@ import java.util.Optional;
         Integer recruitCount,
 
         @Schema(description = "작성자의 닉네임", example = "개발자A")
-            String nickName // 작성자의 닉네임
+            String nickName, // 작성자의 닉네임
+
+        @Schema(description = "카테고리 타입", example = "PROJECT")
+        PostCategoryType categoryType
     ) {
 
     public static PostResponse from(Post post) {
@@ -67,8 +71,8 @@ import java.util.Optional;
                 post.getStatus(),
                 post.getPinStatus(),
                 post.getRecruitCount(),
-                post.getIntroduction(),
-                nickName
+                nickName,
+                post.getPostCategoryType()
         );
     }
 }

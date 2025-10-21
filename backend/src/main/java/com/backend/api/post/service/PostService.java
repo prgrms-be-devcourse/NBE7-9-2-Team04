@@ -6,6 +6,7 @@ import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
+import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
@@ -45,6 +46,7 @@ public class PostService {
                 .pinStatus(request.pinStatus())
                 .recruitCount(request.recruitCount())
                 .users(user)
+                .postCategoryType(request.categoryType())
                 .build();
 
         Post savedPost = postRepository.save(post);
@@ -82,7 +84,7 @@ public class PostService {
         Post post = findPostByIdOrThrow(postId);
         validatePostOwner(post, user);
 
-        post.updatePost(request.title(), request.introduction(),request.content(), request.deadline(), request.status(), request.pinStatus(), request.recruitCount());
+        post.updatePost(request.title(), request.introduction(),request.content(), request.deadline(), request.status(), request.pinStatus(), request.recruitCount(), request.categoryType());
 
         return PostResponse.from(post);
     }
@@ -107,6 +109,17 @@ public class PostService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<PostResponse> getPostsByCategory(PostCategoryType categoryType) {
+        List<Post> posts = postRepository.findByPostCategoryType(categoryType);
+
+        if (posts.isEmpty()) {
+            throw new ErrorException(ErrorCode.POST_NOT_FOUND);
+        }
+
+        return posts.stream()
+      }
+          
     public List<PostResponse> getPinnedPosts() {
         List<Post> pinnedPosts = postRepository.findByPinStatusOrderByCreateDateDesc(PinStatus.PINNED);
 

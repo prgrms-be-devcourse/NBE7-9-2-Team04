@@ -56,7 +56,12 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    public void updatePost(String title, String introduction, @NotBlank(message = "내용은 필수입니다.") @Size(min = 10, message = "내용은 최소 10자 이상 입력해주세요.") String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount) {
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30, nullable = false)
+    private PostCategoryType postCategoryType;
+
+    public void updatePost(String title, String introduction, @NotBlank(message = "내용은 필수입니다.") @Size(min = 10, message = "내용은 최소 10자 이상 입력해주세요.") String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount, PostCategoryType postCategoryType) {
         this.title = title;
         this.introduction = introduction;
         this.content = content;
@@ -64,6 +69,7 @@ public class Post extends BaseEntity {
         this.status = status;
         this.pinStatus = pinStatus;
         this.recruitCount = recruitCount;
+        this.postCategoryType = postCategoryType;
     }
 
     public void updatePinStatus(PinStatus pinStatus) {
