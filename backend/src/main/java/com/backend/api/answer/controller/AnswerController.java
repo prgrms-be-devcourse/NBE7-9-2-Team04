@@ -82,9 +82,10 @@ public class AnswerController {
     @GetMapping("/{questionId}/answers")
     @Operation(summary = "답변 목록 조회")
     public ApiResponse<List<AnswerReadResponse>> readAnswers(
-            @PathVariable Long questionId
+            @PathVariable Long questionId,
+            @RequestParam(defaultValue = "1") int page
     ) {
-        List<AnswerReadResponse> answerReadResponseList = answerService.findAnswersByQuestionId(questionId);
+        List<AnswerReadResponse> answerReadResponseList = answerService.findAnswersByQuestionId(page, questionId);
 
         return ApiResponse.ok(
                 "%d번 질문의 답변 목록 조회 성공".formatted(questionId),

@@ -80,9 +80,10 @@ public class PostController {
             description = "특정 카테고리(ENUM)에 속한 게시글을 조회합니다. 예: /api/v1/posts/category/PROJECT"
     )
     public ApiResponse<List<PostResponse>> getPostsByCategory(
-            @PathVariable PostCategoryType categoryType
+            @PathVariable PostCategoryType categoryType,
+            @RequestParam(defaultValue = "1") int page
     ) {
-        List<PostResponse> posts = postService.getPostsByCategory(categoryType);
+        List<PostResponse> posts = postService.getPostsByCategory(page, categoryType);
         return ApiResponse.ok("카테고리별 게시글 조회 성공", posts);
     }
 
@@ -103,9 +104,13 @@ public class PostController {
 
     @GetMapping
     @Operation(summary = "게시글 다건 조회")
-    public ApiResponse<List<PostResponse>> getAllPosts() {
-        List<PostResponse> posts = postService.getAllPosts();
+    public ApiResponse<List<PostResponse>> getPosts(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        List<PostResponse> posts = postService.getPosts(page);
+
         return ApiResponse.ok(
-                "전체 게시글 조회 성공", posts);
+                "전체 게시글 조회 성공",
+                posts);
     }
 }

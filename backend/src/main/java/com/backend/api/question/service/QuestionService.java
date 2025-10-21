@@ -10,6 +10,9 @@ import com.backend.domain.user.entity.Role;
 import com.backend.global.exception.ErrorCode;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -96,24 +99,27 @@ public class QuestionService {
 
     //승인된 질문 전체 조회
     @Transactional(readOnly = true)
-    public List<QuestionResponse> getApprovedQuestions(QuestionCategoryType categoryType) {
-        List<Question> questions;
+    public List<QuestionResponse> getApprovedQuestions(int page, QuestionCategoryType categoryType) {
+        Page<Question> questionsPage;
+
+        Pageable pageable = PageRequest.of(page - 1, 9);
 
         if (categoryType == null) {
-            questions = questionRepository.findByIsApprovedTrue();
+            questionsPage = questionRepository.findByIsApprovedTrue(pageable);
         } else {
-            questions = questionRepository.findByCategoryTypeAndIsApprovedTrue(categoryType);
+            questionsPage = questionRepository.findByCategoryTypeAndIsApprovedTrue(pageable, categoryType);
         }
 
-        if (questions.isEmpty()) {
+        if (questionsPage.isEmpty()) {
             throw new ErrorException(ErrorCode.NOT_FOUND_QUESTION);
         }
 
-        return mapToResponseList(questions);
+        return mapToResponseList(questionsPage);
     }
 
-    private List<QuestionResponse> mapToResponseList(List<Question> questions) {
-        return questions.stream()
+    private List<QuestionResponse> mapToResponseList(Page<Question> questionsPage) {
+        return questionsPage.getContent()
+                .stream()
                 .map(QuestionResponse::from)
                 .toList();
     }

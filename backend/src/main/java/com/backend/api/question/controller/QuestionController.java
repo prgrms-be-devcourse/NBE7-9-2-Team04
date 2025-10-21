@@ -44,8 +44,10 @@ public class QuestionController {
 
     @GetMapping
     @Operation(summary = "전체 질문 조회", description = "승인된 모든 질문을 조회합니다.")
-    public ApiResponse<List<QuestionResponse>> getAllApprovedQuestions() {
-        List<QuestionResponse> questions = questionService.getApprovedQuestions(null);
+    public ApiResponse<List<QuestionResponse>> getAllApprovedQuestions(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        List<QuestionResponse> questions = questionService.getApprovedQuestions(page, null);
         return ApiResponse.ok("질문 목록 조회 성공", questions);
     }
 
@@ -53,9 +55,10 @@ public class QuestionController {
     @Operation(summary = "카테고리별 질문 조회",
             description = "특정 카테고리(ENUM)에 속한 승인된 질문을 조회합니다. 예: /api/v1/questions/category/DATABASE")
     public ApiResponse<List<QuestionResponse>> getApprovedQuestionsByCategory(
-            @PathVariable QuestionCategoryType categoryType
+            @PathVariable QuestionCategoryType categoryType,
+            @RequestParam(defaultValue = "1") int page
     ) {
-        List<QuestionResponse> questions = questionService.getApprovedQuestions(categoryType);
+        List<QuestionResponse> questions = questionService.getApprovedQuestions(page, categoryType);
         return ApiResponse.ok("카테고리별 질문 조회 성공", questions);
     }
 

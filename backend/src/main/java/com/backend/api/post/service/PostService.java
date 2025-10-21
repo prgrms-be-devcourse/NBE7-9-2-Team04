@@ -12,12 +12,16 @@ import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.backend.domain.subscription.repository.SubscriptionRepository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,20 +65,28 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> getAllPosts() {
-        List<Post> posts = postRepository.findAllByOrderByCreateDateDesc();
+    public List<PostResponse> getPosts(int page) {
+        if (page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 9);
 
-        return posts.stream()
+        Page<Post> postPage  = postRepository.findAllByOrderByCreateDateDesc(pageable);
+
+        return postPage.getContent()
+                .stream()
                 .map(PostResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> getPostsByUserId(Long userId) {
+    public List<PostResponse> getPostsByUserId(int page, Long userId) {
         User user = userService.getUser(userId);
-        List<Post> myPosts = postRepository.findByUsersOrderByCreateDateDesc(user);
 
-        return myPosts.stream()
+        if (page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15);
+        Page<Post> myPostsPage = postRepository.findByUsersOrderByCreateDateDesc(pageable, user);
+
+        return myPostsPage.getContent()
+                .stream()
                 .map(PostResponse::from)
                 .toList();
     }
@@ -110,14 +122,18 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> getPostsByCategory(PostCategoryType categoryType) {
-        List<Post> posts = postRepository.findByPostCategoryType(categoryType);
+    public List<PostResponse> getPostsByCategory(int page, PostCategoryType categoryType) {
+        if (page < 1) page = 1;
 
-        if (posts.isEmpty()) {
+        Pageable pageable = PageRequest.of(page -1, 9);
+        Page<Post> postsPage = postRepository.findByPostCategoryTypeOrderByCreateDateDesc(pageable, categoryType);
+
+        if (postsPage.isEmpty()) {
             throw new ErrorException(ErrorCode.POST_NOT_FOUND);
         }
 
-        return posts.stream()
+        return postsPage.getContent()
+                .stream()
                 .map(PostResponse::from)
                 .toList();
       }

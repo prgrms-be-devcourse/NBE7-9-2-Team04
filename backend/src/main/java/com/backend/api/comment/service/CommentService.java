@@ -1,6 +1,8 @@
 package com.backend.api.comment.service;
 
+import com.backend.api.comment.dto.response.CommentMypageResponse;
 import com.backend.api.comment.dto.response.CommentResponse;
+import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.post.service.PostService;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.comment.entity.Comment;
@@ -11,10 +13,14 @@ import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,22 +75,32 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    public List<CommentResponse> getCommentsByPostId(Long postId) {
+    public List<CommentResponse> getCommentsByPostId(int page, Long postId) {
         postService.findPostByIdOrThrow(postId);
-        return commentRepository.findByPostIdOrderByCreateDateDesc(postId)
+
+        if (page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15);
+
+        Page<Comment> commentPage  = commentRepository.findByPostIdOrderByCreateDateDesc(pageable, postId);
+
+        return commentPage.getContent()
                 .stream()
                 .map(CommentResponse::new)
                 .toList();
     }
 
-    public List<CommentResponse> getCommentsByUserId(Long userId) {
+    public List<CommentMypageResponse> getCommentsByUserId(int page, Long userId) {
         userService.getUser(userId);
         if(!rq.getUser().getId().equals(userId)) {
             throw new ErrorException(ErrorCode.COMMENT_INVALID_USER);
         }
-        return commentRepository.findByAuthorIdOrderByCreateDateDesc(userId)
+
+        if (page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15);
+
+        return commentRepository.findByAuthorIdOrderByCreateDateDesc(pageable, userId).getContent()
                 .stream()
-                .map(CommentResponse::new)
+                .map(CommentMypageResponse::new)
                 .toList();
     }
 }

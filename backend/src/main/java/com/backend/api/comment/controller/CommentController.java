@@ -79,9 +79,10 @@ public class CommentController {
     @GetMapping("/{postId}/comments")
     @Operation(summary = "댓글 목록 조회")
     public ApiResponse<List<CommentResponse>> readComments(
-            @PathVariable Long postId
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "1") int page
     ) {
-        List<CommentResponse> commentResponseList = commentService.getCommentsByPostId(postId);
+        List<CommentResponse> commentResponseList = commentService.getCommentsByPostId(page, postId);
 
         return ApiResponse.ok(
                 "%d번 게시글의 댓글 목록 조회 성공".formatted(postId),

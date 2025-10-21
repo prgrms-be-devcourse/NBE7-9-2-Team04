@@ -1,5 +1,6 @@
 package com.backend.api.user.controller;
 
+import com.backend.api.comment.dto.response.CommentMypageResponse;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.service.AnswerService;
@@ -61,8 +62,11 @@ public class UserMyPageController {
 
     @GetMapping("/{userId}/posts")
     @Operation(summary = "사용자가 작성한 모집글 목록 조회")
-    public ApiResponse<List<PostResponse>> getUserPosts(@PathVariable Long userId) {
-        List<PostResponse> userPosts = postService.getPostsByUserId(userId);
+    public ApiResponse<List<PostResponse>> getUserPosts(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        List<PostResponse> userPosts = postService.getPostsByUserId(page, userId);
         return ApiResponse.ok(
                 "사용자가 작성한 모집글 목록 조회를 완료했습니다.",
                 userPosts
@@ -71,10 +75,11 @@ public class UserMyPageController {
 
     @GetMapping("/{userId}/comments")
     @Operation(summary = "사용자가 작성한 댓글 목록 조회")
-    public ApiResponse<List<CommentResponse>> getUserComments(
-            @PathVariable Long userId
+    public ApiResponse<List<CommentMypageResponse>> getUserComments(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int page
     ) {
-        List<CommentResponse> userComments = commentService.getCommentsByUserId(userId);
+        List<CommentMypageResponse> userComments = commentService.getCommentsByUserId(page, userId);
         return ApiResponse.ok(
                 "사용자가 작성한 댓글 목록 조회를 완료했습니다.",
                 userComments
@@ -93,9 +98,10 @@ public class UserMyPageController {
     @GetMapping("/{userId}/answers")
     @Operation(summary = "사용자가 작성한 면접 답변 목록 조회")
     public ApiResponse<List<AnswerReadResponse>> getUserAnswers(
-            @PathVariable Long userId
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int page
     ) {
-        List<AnswerReadResponse> userAnswers = answerService.findAnswersByUserId(userId);
+        List<AnswerReadResponse> userAnswers = answerService.findAnswersByUserId(page, userId);
         return ApiResponse.ok(
                 "사용자가 작성한 면접 답변 목록 조회를 완료했습니다.",
                 userAnswers

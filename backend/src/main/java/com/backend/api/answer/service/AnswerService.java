@@ -13,6 +13,8 @@ import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,9 +76,13 @@ public class AnswerService {
         answerRepository.delete(answer);
     }
 
-    public List<AnswerReadResponse> findAnswersByQuestionId(Long questionId) {
+    public List<AnswerReadResponse> findAnswersByQuestionId(int page, Long questionId) {
         questionService.findByIdOrThrow(questionId);
-        return answerRepository.findByQuestionIdAndIsPublicTrueOrderByCreateDateDesc(questionId)
+
+        if(page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15);
+
+        return answerRepository.findByQuestionIdAndIsPublicTrueOrderByCreateDateDesc(pageable, questionId)
                 .stream()
                 .map(AnswerReadResponse::new)
                 .toList();
@@ -95,14 +101,17 @@ public class AnswerService {
         return answer;
     }
 
-    public List<AnswerReadResponse> findAnswersByUserId(Long userId) {
+    public List<AnswerReadResponse> findAnswersByUserId(int page, Long userId) {
         userService.getUser(userId);
 
         if(!rq.getUser().getId().equals(userId)) {
             throw new ErrorException(ErrorCode.ANSWER_INVALID_USER);
         }
 
-        return answerRepository.findByAuthorIdOrderByCreateDateDesc(userId)
+        Pageable pageable = PageRequest.of(page - 1, 15);
+
+        return answerRepository.findByAuthorIdOrderByCreateDateDesc(pageable, userId)
+                .getContent()
                 .stream()
                 .map(AnswerReadResponse::new)
                 .toList();
