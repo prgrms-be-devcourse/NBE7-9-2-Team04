@@ -46,10 +46,6 @@ public class Subscription extends BaseEntity {
 //    @Column(name = "billing_key", unique = true, length = 100)
 //    private String billingKey;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
     @OneToOne(mappedBy = "subscription", fetch = FetchType.LAZY)
     private Payment payment;
 

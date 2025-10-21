@@ -1,6 +1,7 @@
 package com.backend.domain.user.entity;
 
 import com.backend.domain.resume.entity.Resume;
+import com.backend.domain.subscription.entity.Subscription;
 import com.backend.global.entity.BaseEntity;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -38,7 +39,6 @@ public class User extends BaseEntity {
     @Column(length = 255, nullable = true)
     private String image;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -46,6 +46,11 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AccountStatus accountStatus = AccountStatus.ACTIVE; // 기본값 ACTIVE
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id") // FK 컬럼명 명시
+    private Subscription subscription;
+
 
     @Builder
     public User(String email,
