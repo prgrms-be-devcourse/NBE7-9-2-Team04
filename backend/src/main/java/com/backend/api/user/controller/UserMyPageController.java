@@ -81,25 +81,6 @@ public class UserMyPageController {
                 "사용자가 작성한 댓글 목록 조회를 완료했습니다.",
                 userComments
         );
-        return ApiResponse.ok("개인 정보 수정이 완료되었습니다.", response);
-
-    }
-
-    @GetMapping("/{userId}")
-    @Operation(summary = "마이페이지 상세 정보 조회")
-    public ApiResponse<UserMyPageResponse> detailInformation(@PathVariable Long userId) {
-        UserMyPageResponse response = userMyPageService.getInformation(userId);
-        return ApiResponse.ok("사용자 상세 정보 조회를 완료했습니다.", response);
-    }
-
-    @GetMapping("/{userId}/posts")
-    @Operation(summary = "사용자가 작성한 모집글 목록 조회")
-    public ApiResponse<List<PostResponse>> getUserPosts(@PathVariable Long userId) {
-        List<PostResponse> userPosts = postService.getPostsByUserId(userId);
-        return ApiResponse.ok(
-                "사용자가 작성한 모집글 목록 조회를 완료했습니다.",
-                userPosts
-        );
     }
 
     @GetMapping
@@ -110,17 +91,6 @@ public class UserMyPageController {
         return ApiResponse.ok(solvedList);
     }
 
-    @GetMapping("/{userId}/comments")
-    @Operation(summary = "사용자가 작성한 댓글 목록 조회")
-    public ApiResponse<List<CommentResponse>> getUserComments(
-            @PathVariable Long userId
-    ) {
-        List<CommentResponse> userComments = commentService.getCommentsByUserId(userId);
-        return ApiResponse.ok(
-                "사용자가 작성한 댓글 목록 조회를 완료했습니다.",
-                userComments
-        );
-    }
 
     @GetMapping("/{userId}/answers")
     @Operation(summary = "사용자가 작성한 면접 답변 목록 조회")
@@ -133,17 +103,4 @@ public class UserMyPageController {
                 userAnswers
         );
     }
-
-    @GetMapping("/{userId}/answers")
-    @Operation(summary = "사용자가 작성한 면접 답변 목록 조회")
-    public ApiResponse<List<AnswerReadResponse>> getUserAnswers(
-            @PathVariable Long userId
-    ) {
-        List<AnswerReadResponse> userAnswers = answerService.findAnswersByUserId(userId);
-        return ApiResponse.ok(
-                "사용자가 작성한 면접 답변 목록 조회를 완료했습니다.",
-                userAnswers
-        );
-    }
-
 }
