@@ -2,11 +2,13 @@ package com.backend.api.post.controller;
 
 import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
+import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
+import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
@@ -53,6 +55,12 @@ class PostControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
+    private AnswerRepository answerRepository;
+
     private User testUser;
     private User otherUser;
     private Post savedPost;
@@ -63,7 +71,9 @@ class PostControllerTest {
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
 
+        answerRepository.deleteAll();
         postRepository.deleteAll();
+        questionRepository.deleteAll();
         userRepository.deleteAll();
 
         testUser = User.builder()
@@ -167,7 +177,7 @@ class PostControllerTest {
         void fail2() throws Exception {
             // given
             PostAddRequest request = new PostAddRequest(
-                    "", // 제목 누락
+                    null, // 제목 누락
                     "내용은 10자 이상으로 충분합니다.",
                     "한 줄 소개도 10자 이상으로 충분합니다.",
                     FIXED_DEADLINE,
@@ -189,7 +199,7 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("제목은 2자 이상 255자 이하로 입력해주세요."))
+                    .andExpect(jsonPath("$.message").value("제목은 필수입니다."))
                     .andDo(print());
         }
 
@@ -451,7 +461,7 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("%d번 게시글을 성공적으로 조회했습니다." .formatted(postId)))
+                    .andExpect(jsonPath("$.message").value("%d번 게시글을 성공적으로 조회했습니다.".formatted(postId)))
                     .andExpect(jsonPath("$.data.postId").value(postId))
                     .andExpect(jsonPath("$.data.title").value("기존 제목"))
                     .andExpect(jsonPath("$.data.introduction").value("기존 한줄 소개입니다. 10자 이상."))
@@ -502,6 +512,7 @@ class PostControllerTest {
                     .status(PostStatus.ING)
                     .pinStatus(PinStatus.NOT_PINNED)
                     .recruitCount(2)
+                    .postCategoryType(PostCategoryType.PROJECT)
                     .build();
             postRepository.save(anotherPost);
 
@@ -515,8 +526,8 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
-                    .andExpect(jsonPath("$.data.length()").value(3))
+                    .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공"))
+                    .andExpect(jsonPath("$.data.length()").value(2))
                     .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
                     .andDo(print());
         }
@@ -561,6 +572,13 @@ class PostControllerTest {
                         get("/api/v1/posts/category/{categoryType}", "PROJECT")
                                 .accept(MediaType.APPLICATION_JSON)
                 );
+
+                resultActions
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.status").value("OK"))
+                        .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
+                        .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
+                        .andDo(print());
             }
 
             @Test
