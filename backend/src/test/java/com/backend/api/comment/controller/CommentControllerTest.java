@@ -3,6 +3,7 @@ package com.backend.api.comment.controller;
 
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.PinStatus;
+import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
@@ -81,29 +82,32 @@ public class CommentControllerTest {
 
         Post post1 = Post.builder()
                 .title("제목")
-                .content("내용")
+                .introduction("소개")
+                .content("내용12321321321321")
                 .deadline(LocalDateTime.now().plusDays(7))
                 .status(PostStatus.ING)
                 .pinStatus(PinStatus.NOT_PINNED)
+                .recruitCount(5)
                 .users(userRepository.findById(1L).orElseThrow())
+                .postCategoryType(PostCategoryType.PROJECT)
                 .build();
         postRepository.save(post1);
 
         Comment comment1 = Comment.builder()
                 .content("1번 댓글")
-                .author(userRepository.findById(1L).orElseThrow())
+                .author(userRepository.findById(2L).orElseThrow())
                 .post(post1)
                 .build();
 
         Comment comment2 = Comment.builder()
                 .content("2번 댓글")
-                .author(userRepository.findById(2L).orElseThrow())
+                .author(userRepository.findById(3L).orElseThrow())
                 .post(post1)
                 .build();
 
         Comment comment3 = Comment.builder()
                 .content("3번 댓글")
-                .author(userRepository.findById(1L).orElseThrow())
+                .author(userRepository.findById(2L).orElseThrow())
                 .post(post1)
                 .build();
 
@@ -114,7 +118,7 @@ public class CommentControllerTest {
 
     @BeforeEach
     void setupAuth() {
-        User user = userRepository.findById(1L).get();
+        User user = userRepository.findById(2L).get();
         CustomUserDetails userDetails = new CustomUserDetails(user);
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
@@ -181,7 +185,7 @@ public class CommentControllerTest {
         long targetPostId = 1; // 동적으로 생성된 게시글 ID 사용
         long targetCommentId = 1; // 동적으로 생성된 댓글 ID 사용
         String content = "수정한 댓글"; // 수정할 내용
-        long expectedAuthorId = 1; // 예상 작성자 ID
+        long expectedAuthorId = 2; // 예상 작성자 ID
         String expectedAuthorNickname = "gildong"; // 예상 작성자 닉네임
 
         // 초기 modifyDate 값 캡처 (수정되기 전의 시간)
@@ -331,7 +335,7 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.data[0].createDate").exists())
                 .andExpect(jsonPath("$.data[0].modifyDate").exists())
                 .andExpect(jsonPath("$.data[0].content").value("3번 댓글"))
-                .andExpect(jsonPath("$.data[0].authorId").value(1))
+                .andExpect(jsonPath("$.data[0].authorId").value(2))
                 .andExpect(jsonPath("$.data[0].authorNickName").value("gildong"))
                 .andExpect(jsonPath("$.data[0].postId").value(1));
 
