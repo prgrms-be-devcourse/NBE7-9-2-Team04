@@ -2,8 +2,6 @@ package com.backend.domain.user.entity;
 
 import com.backend.domain.resume.entity.Resume;
 import com.backend.global.entity.BaseEntity;
-import com.backend.global.exception.ErrorCode;
-import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,7 +35,6 @@ public class User extends BaseEntity {
 
     @Column(length = 255, nullable = true)
     private String image;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

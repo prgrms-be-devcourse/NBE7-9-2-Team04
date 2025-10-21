@@ -73,11 +73,4 @@ public class Question extends BaseEntity {
         this.categoryType = categoryType;
     }
 
-    public Answer getAnswerByIdOrThrow(Long answerId) {
-        return answers.stream()
-                .filter(a -> a.getId().equals(answerId))
-                .findFirst()
-                .orElseThrow(() -> new ErrorException(ErrorCode.ANSWER_NOT_FOUND));
-    }
-
 }
