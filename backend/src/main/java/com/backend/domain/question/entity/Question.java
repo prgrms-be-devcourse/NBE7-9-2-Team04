@@ -10,6 +10,8 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class Question extends BaseEntity {
 
     @Column(nullable = false, length = 100)
@@ -19,32 +21,17 @@ public class Question extends BaseEntity {
     private String content;
 
     @Column(nullable = true)
-    private Boolean isApproved; // 0: 미승인, 1: 승인
+    @Builder.Default
+    private Boolean isApproved = false; // 0: 미승인, 1: 승인
 
     @Column(nullable = false)
-    private Integer score; // 기본값 0
+    @Builder.Default
+    private Integer score = 0; // 기본값 0
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
 
-    @Builder
-    public Question(String title, String content, User author) {
-        this.isApproved = false;
-        this.score = 0;
-        this.title = title;
-        this.content = content;
-        this.author = author;
-    }
-
-    @Builder(builderMethodName = "allBuilder")
-    public Question(String title, String content, Boolean isApproved, Integer score, User author) {
-        this.title = title;
-        this.content = content;
-        this.isApproved = isApproved;
-        this.score = score;
-        this.author = author;
-    }
 
     public void setApproved(Boolean isApproved) {
         this.isApproved = isApproved;

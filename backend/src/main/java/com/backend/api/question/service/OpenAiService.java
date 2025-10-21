@@ -59,7 +59,7 @@ public class OpenAiService {
         return AiQuestionResponse.toDtoList(questions);
     }
 
-    public List<AiQuestionResponse> parseChatGptResponse(String connectionAi) throws JsonProcessingException {
+    private List<AiQuestionResponse> parseChatGptResponse(String connectionAi) throws JsonProcessingException {
         ChatGptResponse responseDto = objectMapper.readValue(connectionAi, ChatGptResponse.class);
 
         String content = responseDto.choiceResponses().get(0).message().content();
@@ -72,7 +72,7 @@ public class OpenAiService {
         return objectMapper.readValue(cleanJson, new TypeReference<>() {});
     }
 
-    public String connectionAi(AiQuestionRequest request){
+    private String connectionAi(AiQuestionRequest request){
         return restClient.post()
                 .uri(apiUrl)
                 .header("Authorization", "Bearer " + apiKey)
@@ -81,9 +81,9 @@ public class OpenAiService {
                 .body(String.class);
     }
 
-    private List<Question> listDtoToEntity(List<AiQuestionResponse> responses, User user, Resume resume){
+    public List<Question> listDtoToEntity(List<AiQuestionResponse> responses, User user, Resume resume){
         return responses.stream()
-                .map(dto -> Question.allBuilder()
+                .map(dto -> Question.builder()
                         .title(resume.getPortfolioUrl())
                         .content(Optional.ofNullable(dto.content())
                                 .filter(s -> !s.isBlank())
