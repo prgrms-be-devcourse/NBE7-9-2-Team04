@@ -34,10 +34,9 @@ export default function PaymentCheckoutPage() {
   async function requestBillingAuth() {
     await payment.requestBillingAuth({
       method: "CARD",
-      successUrl: window.location.origin + "/success", // 요청이 성공하면 리다이렉트되는 URL
-      failUrl: window.location.origin + "/fail", // 요청이 실패하면 리다이렉트되는 URL
-      customerEmail: "customer123@gmail.com",
-      customerName: "김토스",
+      successUrl: window.location.origin + "/mypage/premium/success", // 요청이 성공하면 리다이렉트되는 URL
+      failUrl: window.location.origin + "/mypage/premium//fail", // 요청이 실패하면 리다이렉트되는 URL
+      customerKey: "customer123@gmail.com",
 
     });
   }
