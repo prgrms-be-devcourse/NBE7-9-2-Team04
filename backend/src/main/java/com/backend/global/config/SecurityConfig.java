@@ -66,7 +66,7 @@ public class SecurityConfig {
 
                 )
 
-                //인증 안한 사람 접근 시 예외 처리
+                //인증 안한 사람 접근 시 커스텀 예외 처리
                 .exceptionHandling(
                         exceptionHandling -> exceptionHandling
                                 .authenticationEntryPoint((request, response, authenticationException) -> {
