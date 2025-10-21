@@ -3,6 +3,7 @@ package com.backend.api.question.service;
 import com.backend.api.question.dto.request.AdminQuestionAddRequest;
 import com.backend.api.question.dto.request.AdminQuestionUpdateRequest;
 import com.backend.api.question.dto.response.QuestionResponse;
+import com.backend.api.user.service.UserService;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
@@ -22,6 +23,7 @@ import java.util.List;
 public class AdminQuestionService {
 
     private final QuestionRepository questionRepository;
+    private final UserService userService;
 
     // 관리자 권한 검증
     private void validateAdminAuthority(User user) {
@@ -53,6 +55,7 @@ public class AdminQuestionService {
                 .title(request.title())
                 .content(request.content())
                 .author(user)
+                .categoryType(request.categoryType())
                 .build();
 
         if (request.isApproved() != null) {
@@ -83,7 +86,8 @@ public class AdminQuestionService {
                 request.title(),
                 request.content(),
                 request.isApproved(),
-                request.score()
+                request.score(),
+                request.categoryType()
         );
     }
 

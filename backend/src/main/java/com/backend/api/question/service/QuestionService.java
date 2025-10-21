@@ -4,6 +4,7 @@ import com.backend.api.question.dto.request.QuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.question.entity.QuestionCategoryType;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.global.exception.ErrorCode;
@@ -66,8 +67,10 @@ public class QuestionService {
                 .title(request.title())
                 .content(request.content())
                 .author(user)
+                .categoryType(request.categoryType())
                 .build();
     }
+
 
     private Question saveQuestion(Question question) {
         return questionRepository.save(question);
@@ -79,19 +82,28 @@ public class QuestionService {
         validateUserAuthority(user);
         Question question = findByIdOrThrow(questionId);
         validateQuestionAuthor(question, user);
-
         updateQuestionContent(question, request);
         return QuestionResponse.from(question);
     }
 
     private void updateQuestionContent(Question question, QuestionUpdateRequest request) {
-        question.updateUserQuestion(request.title(), request.content());
+        question.updateUserQuestion(
+                request.title(),
+                request.content(),
+                request.categoryType()
+        );
     }
 
     //승인된 질문 전체 조회
     @Transactional(readOnly = true)
-    public List<QuestionResponse> getApprovedQuestions() {
-        List<Question> questions = questionRepository.findByIsApprovedTrue();
+    public List<QuestionResponse> getApprovedQuestions(QuestionCategoryType categoryType) {
+        List<Question> questions;
+
+        if (categoryType == null) {
+            questions = questionRepository.findByIsApprovedTrue();
+        } else {
+            questions = questionRepository.findByCategoryTypeAndIsApprovedTrue(categoryType);
+        }
 
         if (questions.isEmpty()) {
             throw new ErrorException(ErrorCode.NOT_FOUND_QUESTION);

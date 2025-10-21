@@ -3,6 +3,7 @@ package com.backend.api.question.controller;
 import com.backend.api.question.dto.request.QuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.question.entity.QuestionCategoryType;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
@@ -70,6 +71,7 @@ class QuestionControllerTest {
                 .title("기존 제목")
                 .content("기존 내용")
                 .author(testUser)
+                .categoryType(QuestionCategoryType.ALGORITHM)
                 .build();
 
         savedQuestion = questionRepository.save(question);
@@ -85,7 +87,7 @@ class QuestionControllerTest {
             QuestionAddRequest request = new QuestionAddRequest(
                     "Spring Boot란?",
                     "Spring Boot의 핵심 개념과 장점을 설명해주세요.",
-                    null // 카테고리 미구현으로 null 처리
+                    QuestionCategoryType.DATABASE
             );
 
             mockMvc.perform(post("/api/v1/questions")
@@ -98,6 +100,25 @@ class QuestionControllerTest {
                     .andExpect(jsonPath("$.data.content").value("Spring Boot의 핵심 개념과 장점을 설명해주세요."))
                     .andExpect(jsonPath("$.data.authorId").value(testUser.getId()))
                     .andExpect(jsonPath("$.data.authorNickname").value("tester"))
+                    .andExpect(jsonPath("$.data.categoryType").value("DATABASE"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("질문 생성 성공 - 카테고리 선택 안함(null)")
+        void success2() throws Exception {
+            QuestionAddRequest request = new QuestionAddRequest(
+                    "Java란?",
+                    "JVM과 JRE의 차이에 대해 설명해주세요.",
+                    null
+            );
+
+            mockMvc.perform(post("/api/v1/questions")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.data.categoryType").doesNotExist())
                     .andDo(print());
         }
 
@@ -149,7 +170,7 @@ class QuestionControllerTest {
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "수정된 제목",
                     "수정된 내용",
-                    null // 카테고리 미구현으로 null 처리
+                    QuestionCategoryType.OS
             );
 
             mockMvc.perform(put("/api/v1/questions/{questionId}", questionId)
@@ -160,6 +181,7 @@ class QuestionControllerTest {
                     .andExpect(jsonPath("$.message").value("질문이 수정되었습니다."))
                     .andExpect(jsonPath("$.data.title").value("수정된 제목"))
                     .andExpect(jsonPath("$.data.content").value("수정된 내용"))
+                    .andExpect(jsonPath("$.data.categoryType").value("OS"))
                     .andDo(print());
         }
 
@@ -233,18 +255,20 @@ class QuestionControllerTest {
                             .title("승인된 질문")
                             .content("승인된 질문 내용")
                             .author(testUser)
+                            .categoryType(QuestionCategoryType.NETWORK)
                             .build()
             );
-            approvedQuestion.setApproved(true);
+            approvedQuestion.updateApproved(true);
 
             Question unapprovedQuestion = questionRepository.save(
                     Question.builder()
                             .title("미승인 질문")
                             .content("미승인 질문 내용")
                             .author(testUser)
+                            .categoryType(QuestionCategoryType.NETWORK)
                             .build()
             );
-            unapprovedQuestion.setApproved(false);
+            unapprovedQuestion.updateApproved(false);
 
             mockMvc.perform(get("/api/v1/questions")
                             .contentType(MediaType.APPLICATION_JSON))
@@ -266,6 +290,41 @@ class QuestionControllerTest {
                     .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
                     .andDo(print());
         }
+
+        @Test
+        @DisplayName("카테고리별 질문 조회 성공")
+        void success2() throws Exception {
+            Question osQuestion = questionRepository.save(
+                    Question.builder()
+                            .title("운영체제 관련 질문")
+                            .content("프로세스와 스레드의 차이를 설명해주세요.")
+                            .author(testUser)
+                            .categoryType(QuestionCategoryType.OS) // ✅ SPRING → OS
+                            .build()
+            );
+            osQuestion.updateApproved(true);
+
+            // DATABASE 카테고리 질문
+            Question dbQuestion = questionRepository.save(
+                    Question.builder()
+                            .title("DB 관련 질문")
+                            .content("인덱스가 언제 비효율적인가요?")
+                            .author(testUser)
+                            .categoryType(QuestionCategoryType.DATABASE)
+                            .build()
+            );
+            dbQuestion.updateApproved(true);
+
+            // OS 카테고리만 필터링 요청
+            mockMvc.perform(get("/api/v1/questions/category/{categoryType}", "OS")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("카테고리별 질문 조회 성공"))
+                    .andExpect(jsonPath("$.data[0].categoryType").value("OS"))
+                    .andExpect(jsonPath("$.data.length()").value(1)) // OS만 1건 반환
+                    .andDo(print());
+        }
     }
 
     @Nested
@@ -282,7 +341,7 @@ class QuestionControllerTest {
                             .author(testUser)
                             .build()
             );
-            question.setApproved(true);
+            question.updateApproved(true);
 
             mockMvc.perform(get("/api/v1/questions/{questionId}", question.getId())
                             .contentType(MediaType.APPLICATION_JSON))
@@ -318,7 +377,7 @@ class QuestionControllerTest {
                             .author(testUser)
                             .build()
             );
-            question.setApproved(false);
+            question.updateApproved(false);
 
             mockMvc.perform(get("/api/v1/questions/{questionId}", question.getId())
                             .contentType(MediaType.APPLICATION_JSON))

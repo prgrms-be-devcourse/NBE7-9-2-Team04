@@ -5,6 +5,7 @@ import com.backend.api.question.dto.request.QuestionApproveRequest;
 import com.backend.api.question.dto.request.QuestionScoreRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.question.entity.QuestionCategoryType;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
@@ -73,6 +74,7 @@ public class AdminQuestionControllerTest {
                 .title("기존 제목")
                 .content("기존 내용")
                 .author(testUser)
+                .categoryType(QuestionCategoryType.DATABASE)
                 .build();
 
         savedQuestion = questionRepository.save(question);
@@ -88,7 +90,7 @@ public class AdminQuestionControllerTest {
             AdminQuestionAddRequest request = new AdminQuestionAddRequest(
                     "Spring Boot란?",
                     "Spring Boot의 핵심 개념과 장점을 설명해주세요.",
-                    null, // 카테고리 미구현으로 null 처리
+                    QuestionCategoryType.OS,
                     true,
                     5
 
@@ -106,6 +108,7 @@ public class AdminQuestionControllerTest {
                     .andExpect(jsonPath("$.data.isApproved").value(true))
                     .andExpect(jsonPath("$.data.authorId").value(testUser.getId()))
                     .andExpect(jsonPath("$.data.authorNickname").value("admin"))
+                    .andExpect(jsonPath("$.data.categoryType").value("OS"))
                     .andDo(print());
         }
 
@@ -181,7 +184,7 @@ public class AdminQuestionControllerTest {
             QuestionUpdateRequest request = new QuestionUpdateRequest(
                     "관리자 수정 제목",
                     "관리자 수정 내용",
-                    null // 카테고리 미구현으로 null 처리
+                    QuestionCategoryType.DATABASE
             );
 
             mockMvc.perform(put("/api/v1/admin/questions/{questionId}", questionId)
@@ -194,6 +197,7 @@ public class AdminQuestionControllerTest {
                     .andExpect(jsonPath("$.data.content").value("관리자 수정 내용"))
                     .andExpect(jsonPath("$.data.authorId").value(testUser.getId()))
                     .andExpect(jsonPath("$.data.authorNickname").value("admin"))
+                    .andExpect(jsonPath("$.data.categoryType").value("DATABASE"))
                     .andDo(print());
         }
 
@@ -389,7 +393,7 @@ public class AdminQuestionControllerTest {
                             .author(testUser)
                             .build()
             );
-            approved.setApproved(true);
+            approved.updateApproved(true);
 
             Question unapproved = questionRepository.save(
                     Question.builder()
@@ -398,7 +402,7 @@ public class AdminQuestionControllerTest {
                             .author(testUser)
                             .build()
             );
-            unapproved.setApproved(false);
+            unapproved.updateApproved(false);
 
             mockMvc.perform(get("/api/v1/admin/questions")
                             .contentType(MediaType.APPLICATION_JSON))
@@ -439,7 +443,7 @@ public class AdminQuestionControllerTest {
                             .author(testUser)
                             .build()
             );
-            question.setApproved(false);
+            question.updateApproved(false);
 
             mockMvc.perform(get("/api/v1/admin/questions/{questionId}", question.getId())
                             .contentType(MediaType.APPLICATION_JSON))

@@ -1,11 +1,10 @@
 package com.backend.api.question.dto.response;
 
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.question.entity.QuestionCategoryType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public record QuestionResponse(
         @Schema(description = "질문 ID", example = "1")
@@ -29,8 +28,8 @@ public record QuestionResponse(
         @Schema(description = "작성자 닉네임", example = "user123")
         String authorNickname,
 
-        @Schema(description = "카테고리 ID 목록", example = "[1, 2]")
-        List<Long> categoryIds,
+        @Schema(description = "카테고리 타입", example = "SPRING")
+        QuestionCategoryType categoryType,
 
         @Schema(description = "작성일", example = "2025-10-13T11:00:00")
         LocalDateTime createdDate,
@@ -46,9 +45,9 @@ public record QuestionResponse(
                 question.getContent(),
                 question.getIsApproved(),
                 question.getScore(),
-                question.getAuthor() != null ? question.getAuthor().getId() : null,
-                question.getAuthor() != null ? question.getAuthor().getNickname() : null,
-                null,
+                question.getAuthor().getId(),
+                question.getAuthor().getNickname(),
+                question.getCategoryType(),
                 question.getCreateDate(),
                 question.getModifyDate()
         );
