@@ -4,6 +4,7 @@ import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.post.service.PostService;
+import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -68,6 +71,18 @@ public class PostController {
         postService.deletePost(postId, user);
 
         return ApiResponse.ok("게시글 삭제가 완료되었습니다.", null);
+    }
+
+    @GetMapping("/category/{categoryType}")
+    @Operation(
+            summary = "카테고리별 게시글 조회",
+            description = "특정 카테고리(ENUM)에 속한 게시글을 조회합니다. 예: /api/v1/posts/category/PROJECT"
+    )
+    public ApiResponse<List<PostResponse>> getPostsByCategory(
+            @PathVariable PostCategoryType categoryType
+    ) {
+        List<PostResponse> posts = postService.getPostsByCategory(categoryType);
+        return ApiResponse.ok("카테고리별 게시글 조회 성공", posts);
     }
 
     private User getCurrentUser() {

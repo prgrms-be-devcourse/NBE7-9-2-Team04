@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Getter
@@ -72,12 +71,4 @@ public class Question extends BaseEntity {
     public void changeCategory(QuestionCategoryType categoryType) {
         this.categoryType = categoryType;
     }
-
-    public Answer getAnswerByIdOrThrow(Long answerId) {
-        return answers.stream()
-                .filter(a -> a.getId().equals(answerId))
-                .findFirst()
-                .orElseThrow(() -> new ErrorException(ErrorCode.ANSWER_NOT_FOUND));
-    }
-
 }
