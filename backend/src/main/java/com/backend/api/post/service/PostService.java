@@ -4,6 +4,7 @@ import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.user.service.UserService;
+import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.repository.PostRepository;
@@ -13,7 +14,9 @@ import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.backend.domain.subscription.repository.SubscriptionRepository;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -22,11 +25,16 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserService userService;
+    private final SubscriptionRepository subscriptionRepository;
 
     @Transactional
     public PostResponse createPost(PostAddRequest request, User user) {
         if (!user.validateActiveStatus()) {
             throw new ErrorException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
+
+        if(request.pinStatus() == PinStatus.PINNED && !subscriptionRepository.existsByUserAndIsActiveTrue(user)) {
+            throw new ErrorException(ErrorCode.PIN_POST_FORBIDDEN);
         }
 
         Post post = Post.builder()
@@ -50,6 +58,15 @@ public class PostService {
         Post post = findPostByIdOrThrow(postId);
 
         return PostResponse.from(post);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponse> getAllPosts() {
+        List<Post> posts = postRepository.findAllByOrderByCreateDateDesc();
+
+        return posts.stream()
+                .map(PostResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -101,6 +118,17 @@ public class PostService {
         }
 
         return posts.stream()
+      }
+          
+    public List<PostResponse> getPinnedPosts() {
+        List<Post> pinnedPosts = postRepository.findByPinStatusOrderByCreateDateDesc(PinStatus.PINNED);
+
+        Collections.shuffle(pinnedPosts);
+        List<Post> limitedList = pinnedPosts.stream()
+                .limit(5)
+                .toList();
+
+        return limitedList.stream()
                 .map(PostResponse::from)
                 .toList();
     }

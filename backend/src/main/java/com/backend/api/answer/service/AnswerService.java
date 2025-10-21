@@ -83,8 +83,8 @@ public class AnswerService {
     }
 
     public Answer findAnswer (Long questionId, Long answerId) {
-        Question question = questionService.findByIdOrThrow(questionId);
-        Answer answer = question.getAnswerByIdOrThrow(answerId);
+        questionService.findByIdOrThrow(questionId);
+        Answer answer = this.findByIdOrThrow(answerId);
 
         if(!answer.isPublic()) {
             if (!answer.getAuthor().getId().equals(rq.getUser().getId())) {

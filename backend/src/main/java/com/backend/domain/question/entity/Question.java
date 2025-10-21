@@ -71,4 +71,5 @@ public class Question extends BaseEntity {
     public void changeCategory(QuestionCategoryType categoryType) {
         this.categoryType = categoryType;
     }
+
 }

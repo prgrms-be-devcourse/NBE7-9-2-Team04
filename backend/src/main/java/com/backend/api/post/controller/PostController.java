@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+
 import java.util.List;
 
 @RestController
@@ -36,15 +38,14 @@ public class PostController {
         );
     }
 
-
-    @GetMapping("/{postId}")
-    @Operation(summary = "특정 게시글 조회")
-    public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
-        PostResponse response = postService.getPost(postId);
+    @GetMapping("/pinned")
+    @Operation(summary = "상단 고정 게시글 목록 조회")
+    public ApiResponse<List<PostResponse>> getPinnedPosts() {
+        List<PostResponse> postResponseList = postService.getPinnedPosts();
 
         return ApiResponse.ok(
-                "%d번 게시글을 성공적으로 조회했습니다.".formatted(postId),
-                response
+                "상단 고정된 게시글을 성공적으로 조회했습니다.",
+                postResponseList
         );
     }
 
@@ -87,5 +88,24 @@ public class PostController {
 
     private User getCurrentUser() {
         return rq.getUser();
+    }
+
+    @GetMapping("/{postId}")
+    @Operation(summary = "게시글 단건 조회")
+    public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
+        PostResponse response = postService.getPost(postId);
+
+        return ApiResponse.ok(
+                "%d번 게시글을 성공적으로 조회했습니다.".formatted(postId),
+                response
+        );
+    }
+
+    @GetMapping
+    @Operation(summary = "게시글 다건 조회")
+    public ApiResponse<List<PostResponse>> getAllPosts() {
+        List<PostResponse> posts = postService.getAllPosts();
+        return ApiResponse.ok(
+                "전체 게시글 조회 성공", posts);
     }
 }

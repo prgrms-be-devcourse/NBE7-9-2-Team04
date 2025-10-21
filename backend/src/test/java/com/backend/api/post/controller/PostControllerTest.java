@@ -78,8 +78,8 @@ class PostControllerTest {
 
         Post post = Post.builder()
                 .title("기존 제목")
-                .content("기존 게시글의 내용입니다.")
-                .introduction("기존 한줄 소개")
+                .introduction("기존 한줄 소개입니다. 10자 이상.")
+                .content("기존 프로젝트 모집글 내용입니다. 10자 이상.")
                 .users(testUser)
                 .deadline(FIXED_DEADLINE)
                 .status(PostStatus.ING)
@@ -102,8 +102,8 @@ class PostControllerTest {
             // PostAddRequest의 파라미터 순서: title, content, introduction (content와 introduction이 바뀜)
             PostAddRequest request = new PostAddRequest(
                     "새로운 게시물",
-                    "새로운 내용입니다.",
-                    "새로운 한 줄 소개입니다.",
+                    "새로운 프로젝트 모집글 내용입니다. 10자 이상.",
+                    "새로운 한 줄 소개입니다. 10자 이상.",
                     FIXED_DEADLINE,
                     PostStatus.ING,
                     PinStatus.NOT_PINNED,
@@ -123,7 +123,7 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.data.introduction").value("새로운 한 줄 소개입니다."))
+                    .andExpect(jsonPath("$.data.introduction").value("새로운 한 줄 소개입니다. 10자 이상."))
                     .andExpect(jsonPath("$.data.title").value("새로운 게시물"))
                     .andExpect(jsonPath("$.data.recruitCount").value(5))
                     .andDo(print());
@@ -136,8 +136,8 @@ class PostControllerTest {
             // given
             PostAddRequest request = new PostAddRequest(
                     "첫번째 게시물",
-                    "열정적인 팀원을 찾습니다.",
-                    "함께 팀 프로젝트를 진행할 백엔드 개발자 구합니다.",
+                    "함께 팀 프로젝트를 진행할 백엔드 개발자 구합니다. 10자 이상.",
+                    "열정적인 팀원을 찾습니다. 10자 이상.",
                     FIXED_DEADLINE,
                     PostStatus.ING,
                     PinStatus.NOT_PINNED,
@@ -168,8 +168,8 @@ class PostControllerTest {
             // given
             PostAddRequest request = new PostAddRequest(
                     "", // 제목 누락
-                    "한 줄 소개는 있습니다.",
-                    "내용은 있습니다.",
+                    "내용은 10자 이상으로 충분합니다.",
+                    "한 줄 소개도 10자 이상으로 충분합니다.",
                     FIXED_DEADLINE,
                     PostStatus.ING,
                     PinStatus.NOT_PINNED,
@@ -189,7 +189,7 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").exists()) // 제목 관련 에러 메시지 중 하나가 나옴
+                    .andExpect(jsonPath("$.message").value("제목은 2자 이상 255자 이하로 입력해주세요."))
                     .andDo(print());
         }
 
@@ -201,7 +201,7 @@ class PostControllerTest {
             PostAddRequest request = new PostAddRequest(
                     "제목은 있습니다.",
                     "", // 내용 누락
-                    "한 줄 소개도 있습니다.",
+                    "한 줄 소개는 10자 이상으로 충분합니다.",
                     FIXED_DEADLINE,
                     PostStatus.ING,
                     PinStatus.NOT_PINNED,
@@ -235,7 +235,15 @@ class PostControllerTest {
         @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
-            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 한 줄 소개", "수정된 내용입니다.", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED, 10, PostCategoryType.PROJECT);
+            PostUpdateRequest request = new PostUpdateRequest(
+                    "수정된 제목",
+                    "수정된 한 줄 소개입니다. 10자 이상.",
+                    "수정된 내용입니다. 10자 이상.",
+                    FIXED_DEADLINE,
+                    PostStatus.CLOSED,
+                    PinStatus.PINNED,
+                    10
+            );
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -250,8 +258,8 @@ class PostControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.data.title").value("수정된 제목"))
-                    .andExpect(jsonPath("$.data.introduction").value("수정된 한 줄 소개"))
-                    .andExpect(jsonPath("$.data.content").value("수정된 내용입니다."))
+                    .andExpect(jsonPath("$.data.introduction").value("수정된 한 줄 소개입니다. 10자 이상."))
+                    .andExpect(jsonPath("$.data.content").value("수정된 내용입니다. 10자 이상."))
                     .andExpect(jsonPath("$.data.status").value(PostStatus.CLOSED.name()))
                     .andExpect(jsonPath("$.data.pinStatus").value(PinStatus.PINNED.name()))
                     .andExpect(jsonPath("$.data.recruitCount").value(10))
@@ -264,7 +272,15 @@ class PostControllerTest {
         @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_post_not_found() throws Exception {
             // given
-            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 한 줄 소개", "수정된 내용입니다.", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED, 10, PostCategoryType.PROJECT);
+            PostUpdateRequest request = new PostUpdateRequest(
+                    "수정된 제목",
+                    "수정된 한 줄 소개입니다. 10자 이상.",
+                    "수정된 내용입니다. 10자 이상.",
+                    FIXED_DEADLINE,
+                    PostStatus.CLOSED,
+                    PinStatus.PINNED,
+                    10
+            );
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -287,7 +303,15 @@ class PostControllerTest {
         @WithUserDetails(value = "other@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_not_owner() throws Exception {
             // given
-            PostUpdateRequest request = new PostUpdateRequest("수정된 제목", "수정된 한 줄 소개", "수정된 내용입니다.", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED, 10, PostCategoryType.PROJECT);
+            PostUpdateRequest request = new PostUpdateRequest(
+                    "수정된 제목",
+                    "수정된 한 줄 소개입니다. 10자 이상.",
+                    "수정된 내용입니다. 10자 이상.",
+                    FIXED_DEADLINE,
+                    PostStatus.CLOSED,
+                    PinStatus.PINNED,
+                    10
+            );
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -310,7 +334,15 @@ class PostControllerTest {
         @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_title_blank() throws Exception {
             // given
-            PostUpdateRequest request = new PostUpdateRequest("", "수정된 한 줄 소개", "수정된 내용입니다.", FIXED_DEADLINE, PostStatus.CLOSED, PinStatus.PINNED, 10, PostCategoryType.PROJECT);
+            PostUpdateRequest request = new PostUpdateRequest(
+                    "", // 제목 누락
+                    "수정된 한 줄 소개입니다. 10자 이상.",
+                    "수정된 내용입니다. 10자 이상.",
+                    FIXED_DEADLINE,
+                    PostStatus.CLOSED,
+                    PinStatus.PINNED,
+                    10
+            );
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -418,8 +450,8 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.message").value("%d번 게시글을 성공적으로 조회했습니다.".formatted(postId)))
                     .andExpect(jsonPath("$.data.postId").value(postId))
                     .andExpect(jsonPath("$.data.title").value("기존 제목"))
-                    .andExpect(jsonPath("$.data.introduction").value("기존 한줄 소개"))
-                    .andExpect(jsonPath("$.data.content").value("기존 게시글의 내용입니다.")) // 수정됨
+                    .andExpect(jsonPath("$.data.introduction").value("기존 한줄 소개입니다. 10자 이상."))
+                    .andExpect(jsonPath("$.data.content").value("기존 프로젝트 모집글 내용입니다. 10자 이상."))
                     .andExpect(jsonPath("$.data.recruitCount").value(4))
                     .andDo(print());
         }
@@ -445,6 +477,44 @@ class PostControllerTest {
                     .andDo(print());
         }
     }
+   @Nested
+   @DisplayName("게시글 다건 조회 API")
+    class GetAllPostsApiTest {
+
+        @Test
+        @DisplayName("게시글 다건 조회 성공")
+        @WithAnonymousUser
+        void success() throws Exception {
+            // given
+            // @BeforeEach에서 이미 1개의 게시글(savedPost)이 생성됨
+            // 테스트를 위해 1개 더 추가
+            Post anotherPost = Post.builder()
+                    .title("두 번째 게시글")
+                    .introduction("두 번째 한줄 소개입니다. 10자 이상.")
+                    .content("두 번째 내용입니다. 10자 이상.")
+                    .users(otherUser)
+                    .deadline(FIXED_DEADLINE)
+                    .status(PostStatus.ING)
+                    .pinStatus(PinStatus.NOT_PINNED)
+                    .recruitCount(2)
+                    .build();
+            postRepository.save(anotherPost);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    get("/api/v1/posts")
+                            .accept(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
+                    .andExpect(jsonPath("$.data.length()").value(3))
+                    .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
+                    .andDo(print());
+        }
 
     @Nested
     @DisplayName("카테고리별 게시글 조회 API")
@@ -484,18 +554,6 @@ class PostControllerTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     get("/api/v1/posts/category/{categoryType}", "PROJECT")
-                            .accept(MediaType.APPLICATION_JSON)
-            );
-
-            // then
-            resultActions
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
-                    .andExpect(jsonPath("$.data.length()").value(3))
-                    .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
-                    .andDo(print());
-        }
 
         @Test
         @DisplayName("카테고리별 게시글 조회 성공 - STUDY")
@@ -543,6 +601,17 @@ class PostControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
                     .andExpect(jsonPath("$.message").value("존재하지 않는 게시글입니다."))
+                    .andDo(print());
+        }
+    }
+}
+                    .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공"))
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(2))
+                    .andExpect(jsonPath("$.data[0].postId").value(anotherPost.getId()))
+                    .andExpect(jsonPath("$.data[0].title").value("두 번째 게시글"))
+                    .andExpect(jsonPath("$.data[1].postId").value(savedPost.getId()))
+                    .andExpect(jsonPath("$.data[1].title").value("기존 제목"))
                     .andDo(print());
         }
     }

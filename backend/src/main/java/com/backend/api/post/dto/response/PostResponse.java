@@ -34,10 +34,10 @@ import java.util.Optional;
         @Schema(description = "수정일", example = "2025-10-18T10:50:00")
             LocalDateTime modifyDate,
 
-        @Schema(description = "진행 상태", example = "IN_PROGRESS", allowableValues = {"ING", "CLOSED"})
+        @Schema(description = "진행 상태", example = "ING", allowableValues = {"ING", "CLOSED"})
             PostStatus status,
 
-        @Schema(description = "상단 고정 여부", example = "UNPINNED", allowableValues = {"PINNED", "NOT_PINNED"})
+        @Schema(description = "상단 고정 여부", example = "NOT_PINNED", allowableValues = {"PINNED", "NOT_PINNED"})
             PinStatus pinStatus,
 
         @Schema(description = "모집 인원", example = "4")
