@@ -1,12 +1,10 @@
 package com.backend.api.question.dto.request;
 
+import com.backend.domain.question.entity.QuestionCategoryType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
-
-import java.util.List;
+import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "관리자 질문 수정 요청")
 public record AdminQuestionUpdateRequest (
@@ -23,5 +21,9 @@ public record AdminQuestionUpdateRequest (
 
         @Min(value = 0, message = "점수는 0 이상이어야 합니다.")
         @Schema(description = "질문 점수", example = "5")
-        Integer score
-) {}
+        Integer score,
+
+        @Schema(description = "수정할 카테고리 타입", example = "DATABASE")
+                QuestionCategoryType categoryType
+) {
+}

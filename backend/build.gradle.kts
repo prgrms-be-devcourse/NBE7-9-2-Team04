@@ -32,17 +32,22 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	testRuntimeOnly("com.h2database:h2")
+    testImplementation("com.h2database:h2")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+    implementation ("org.springframework.boot:spring-boot-starter-mail")
 
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	implementation("org.springframework.ai:spring-ai-starter-model-openai")
+
+
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+
 
 }
 extra["springAiVersion"] = "1.1.0-M1"

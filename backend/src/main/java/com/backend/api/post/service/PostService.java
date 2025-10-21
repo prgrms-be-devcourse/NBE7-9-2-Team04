@@ -4,7 +4,9 @@ import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.user.service.UserService;
+import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
+import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
@@ -12,8 +14,10 @@ import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.backend.domain.subscription.repository.SubscriptionRepository;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,19 +25,28 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserService userService;
+    private final SubscriptionRepository subscriptionRepository;
 
     @Transactional
-    public PostResponse createPost(PostAddRequest request, Long userId) {
+    public PostResponse createPost(PostAddRequest request, User user) {
+        if (!user.validateActiveStatus()) {
+            throw new ErrorException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
 
-        User user = userService.getUser(userId);
+        if(request.pinStatus() == PinStatus.PINNED && !subscriptionRepository.existsByUserAndIsActiveTrue(user)) {
+            throw new ErrorException(ErrorCode.PIN_POST_FORBIDDEN);
+        }
 
         Post post = Post.builder()
                 .title(request.title())
+                .introduction(request.introduction())
                 .content(request.content())
                 .deadline(request.deadline())
                 .status(request.status())
                 .pinStatus(request.pinStatus())
+                .recruitCount(request.recruitCount())
                 .users(user)
+                .postCategoryType(request.categoryType())
                 .build();
 
         Post savedPost = postRepository.save(post);
@@ -42,40 +55,83 @@ public class PostService {
     }
 
     public PostResponse getPost(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+        Post post = findPostByIdOrThrow(postId);
 
         return PostResponse.from(post);
     }
 
-    public Optional<Post> findById(Long id) {
-        return postRepository.findById(id);
+    @Transactional(readOnly = true)
+    public List<PostResponse> getAllPosts() {
+        List<Post> posts = postRepository.findAllByOrderByCreateDateDesc();
+
+        return posts.stream()
+                .map(PostResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponse> getPostsByUserId(Long userId) {
+        User user = userService.getUser(userId);
+        List<Post> myPosts = postRepository.findByUsersOrderByCreateDateDesc(user);
+
+        return myPosts.stream()
+                .map(PostResponse::from)
+                .toList();
     }
 
     @Transactional
-    public PostResponse updatePost(Long postId, PostUpdateRequest request, Long userId) {
+    public PostResponse updatePost(Long postId, PostUpdateRequest request, User user) {
+        Post post = findPostByIdOrThrow(postId);
+        validatePostOwner(post, user);
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
-
-        if (!post.getUsers().getId().equals(userId)) {
-            throw new ErrorException(ErrorCode.FORBIDDEN);
-        }
-        post.updatePost(request.title(), request.content(), request.deadline(), request.status(), request.pinStatus());
+        post.updatePost(request.title(), request.introduction(),request.content(), request.deadline(), request.status(), request.pinStatus(), request.recruitCount(), request.categoryType());
 
         return PostResponse.from(post);
     }
 
     @Transactional
-    public void deletePost(Long postId, Long userId) {
-
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
-
-        if (!post.getUsers().getId().equals(userId)) {
-            throw new ErrorException(ErrorCode.FORBIDDEN);
-        }
+    public void deletePost(Long postId, User user) {
+        Post post = findPostByIdOrThrow(postId);
+        validatePostOwner(post, user);
 
         postRepository.delete(post);
+    }
+
+
+    public Post findPostByIdOrThrow(Long postId) { // 중복 로직 헬퍼 메서드1
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    private void validatePostOwner(Post post, User user) { // 중복 로직 헬퍼 메서드2
+        if (!post.getUsers().getId().equals(user.getId())) {
+            throw new ErrorException(ErrorCode.FORBIDDEN);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponse> getPostsByCategory(PostCategoryType categoryType) {
+        List<Post> posts = postRepository.findByPostCategoryType(categoryType);
+
+        if (posts.isEmpty()) {
+            throw new ErrorException(ErrorCode.POST_NOT_FOUND);
+        }
+
+        return posts.stream()
+                .map(PostResponse::from)
+                .toList();
+      }
+          
+    public List<PostResponse> getPinnedPosts() {
+        List<Post> pinnedPosts = postRepository.findByPinStatusOrderByCreateDateDesc(PinStatus.PINNED);
+
+        Collections.shuffle(pinnedPosts);
+        List<Post> limitedList = pinnedPosts.stream()
+                .limit(5)
+                .toList();
+
+        return limitedList.stream()
+                .map(PostResponse::from)
+                .toList();
     }
 }

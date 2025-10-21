@@ -15,17 +15,29 @@ public enum ErrorCode {
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "로그인된 사용자가 없습니다."),
+    USER_STATUS_NOT_BLANK(HttpStatus.BAD_REQUEST, "유저 상태는 공백일 수 없습니다."),
+    DUPLICATE_STATUS(HttpStatus.BAD_REQUEST, "동일한 상태로 변경할 수 없습니다."),
+    INVALID_USER_ROLE(HttpStatus.FORBIDDEN, "권한이 없는 사용자입니다."),
+    ACCOUNT_SUSPENDED(HttpStatus.FORBIDDEN, "정지 상태인 계정입니다."),
+    ACCOUNT_DEACTIVATED(HttpStatus.FORBIDDEN, "비활성화된 계정입니다."),
+    ACCOUNT_BANNED(HttpStatus.FORBIDDEN, "영구 정지된 계정입니다."),
+    SELF_INFORMATION(HttpStatus.UNAUTHORIZED, "본인 정보만 수정할 수 있습니다."),
 
     //token
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Refresh Token입니다."),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "Refresh Token을 찾을 수 없습니다."),
+
+    //Category
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
+    INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리입니다."),
 
 
     // Post & Comment
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-    COMMENT_INVALID_USER(HttpStatus.FORBIDDEN, "권한이 없는 사용자입니다."),
+    COMMENT_INVALID_USER(HttpStatus.FORBIDDEN, "해당 댓글에 대한 권한이 없는 사용자입니다."),
+    PIN_POST_FORBIDDEN(HttpStatus.FORBIDDEN, "게시물 상단 고정 권한이 없습니다."),
 
     //Question
     QUESTION_TITLE_NOT_BLANK(HttpStatus.BAD_REQUEST, "질문 제목은 공백일 수 없습니다."),
@@ -37,11 +49,22 @@ public enum ErrorCode {
     QUESTION_NOT_APPROVED(HttpStatus.FORBIDDEN, "승인되지 않은 질문입니다."),
     NOT_FOUND_CONTENT(HttpStatus.NOT_FOUND,"질문 내용을 찾을 수 없습니다."),
 
+    // Answer
+    ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답변입니다."),
+    ANSWER_NOT_PUBLIC(HttpStatus.FORBIDDEN, "비공개 답변입니다."),
+    ANSWER_INVALID_USER(HttpStatus.FORBIDDEN, "해당 답변에 대한 권한이 없는 사용자입니다."),
+
     // resume
     DUPLICATE_RESUME(HttpStatus.BAD_REQUEST, "이미 등록된 이력서가 있습니다."),
     NOT_FOUND_RESUME(HttpStatus.NOT_FOUND, "이력서를 찾을 수 없습니다."),
-    INVALID_USER(HttpStatus.FORBIDDEN, "이력서 수정 권한이 없습니다.");
+    INVALID_USER(HttpStatus.FORBIDDEN, "이력서 수정 권한이 없습니다."),
 
+
+    //payment
+    PAYMENT_APPROVE_FAILED(HttpStatus.BAD_REQUEST, "결제 승인을 실패했습니다"),
+    PAYMENT_LOAD_FAILED(HttpStatus.BAD_REQUEST, "결제 조회를 실패했습니다"),
+    PAYMENT_CANCEL_FAILED(HttpStatus.BAD_REQUEST, "결제 취소를 실패했습니다"),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다");
 
     private final HttpStatus httpStatus;
     private final String message;
