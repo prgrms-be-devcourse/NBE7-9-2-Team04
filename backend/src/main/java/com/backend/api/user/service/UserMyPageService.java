@@ -58,7 +58,7 @@ public class UserMyPageService {
 
     public List<UserMyPageResponse.SolvedProblem> getSolvedProblems(Long userId) {
 
-        List<UserQuestion> solvedQuestions = userQuestionRepository.findByUserId(userId);
+        List<UserQuestion> solvedQuestions = userQuestionRepository.findByUser_Id(userId);
 
         return solvedQuestions.stream()
                 .map(q -> UserMyPageResponse.SolvedProblem.builder()
