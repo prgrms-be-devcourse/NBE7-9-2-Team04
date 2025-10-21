@@ -1,4 +1,4 @@
-export function fetchApi(url: string, options?: RequestInit) {
+export async function fetchApi(url: string, options?: RequestInit) {
 
     // 쿠키 자동 포함 
     // 백엔드 ApiResponse로 수정 필요
@@ -11,15 +11,29 @@ export function fetchApi(url: string, options?: RequestInit) {
       options.headers = headers;
     }
   
-    console.log("fetch url:", `${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`, options);
+    const fullUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`;
+    console.log("fetch url:", fullUrl, options);
   
-    return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`, options).then(
-      async (res) => {
-        if (!res.ok) {
-          const rsData = await res.json();
-          throw new Error(rsData.msg || "요청 실패");
-        }
-        return res.json();
-      }
-    );
+    const res = await fetch(fullUrl, options);
+    const apiResponse = await res.json();
+  
+    if (!res.ok) {
+      throw new Error(apiResponse.message || "요청 실패");
+    }
+  
+    // ApiResponse<T> 구조 그대로 반환
+    return apiResponse;
+
   }
+
+      // console.log("fetch url:", `${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`, options);
+  
+    // return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`, options).then(
+    //   async (res) => {
+    //     if (!res.ok) {
+    //       const apiResponse = await res.json();
+    //       throw new Error(apiResponse.message || "요청 실패");
+    //     }
+    //     return res.json();
+    //   }
+    // );

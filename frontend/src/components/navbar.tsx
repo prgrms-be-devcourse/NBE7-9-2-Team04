@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { fetchApi } from "@/lib/client";
+import path from "path";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -11,18 +13,48 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("");
 
+  const fetchUser = async () => {
+    try {
+      const res = await fetchApi("/api/v1/users/check", { method: "GET" });
+
+      if ((res.status === "OK" || res.resultCode?.includes("OK")) && res.data) {
+        setIsLoggedIn(true);
+        setUserName(res.data.name);
+        setIsAdmin(res.data.role === "ADMIN");
+      } else {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+      }
+    } catch {
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+    }
+  };
+
   useEffect(() => {
-    // 백엔드 연동 전이므로 임시 유저 상태로 간주
-    const storedAdmin = localStorage.getItem("isAdmin") === "true";
-    setIsAdmin(storedAdmin);
-    setIsLoggedIn(true); // 임시
+    fetchUser();
+
+    // 로그인 이벤트 리스너. 상단바 바로 바뀌게함함
+    const handleLoginSuccess = () => fetchUser();
+    window.addEventListener("loginSuccess", handleLoginSuccess);
+
+    return () => {
+      window.removeEventListener("loginSuccess", handleLoginSuccess);
+    };
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const apiResponse = await fetchApi("/api/v1/users/logout", {
+        method: "DELETE",
+      });
+      alert(apiResponse.message || "로그아웃 성공");
+    } catch (_) {}
     setIsLoggedIn(false);
     setIsAdmin(false);
     setUserName("");
     router.push("/");
+    router.refresh();
   };
 
   // 관리자 전용 상단바
@@ -122,21 +154,6 @@ export default function Navbar() {
                   🏆 랭킹
                 </Link>
               </li>
-
-              {isLoggedIn && isAdmin && (
-                <li>
-                  <Link
-                    href="/admin"
-                    className={`inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 ${
-                      pathname?.startsWith("/admin")
-                        ? "bg-blue-100 text-blue-800"
-                        : ""
-                    }`}
-                  >
-                    🛡️ 관리자
-                  </Link>
-                </li>
-              )}
             </ul>
           </nav>
         </div>
@@ -144,6 +161,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
+              <span className="text-gray-700 font-medium">{userName}님</span>
               <Link
                 href="/mypage"
                 className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 p-2"
