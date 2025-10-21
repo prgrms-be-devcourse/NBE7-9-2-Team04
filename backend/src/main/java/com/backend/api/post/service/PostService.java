@@ -118,6 +118,8 @@ public class PostService {
         }
 
         return posts.stream()
+                .map(PostResponse::from)
+                .toList();
       }
           
     public List<PostResponse> getPinnedPosts() {
