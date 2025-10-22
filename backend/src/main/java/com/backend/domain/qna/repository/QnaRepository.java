@@ -1,4 +1,7 @@
 package com.backend.domain.qna.repository;
 
-public interface QnaRepository {
+import com.backend.domain.qna.entity.Qna;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface QnaRepository extends JpaRepository<Qna, Long> {
 }

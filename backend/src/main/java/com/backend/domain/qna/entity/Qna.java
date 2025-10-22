@@ -44,4 +44,18 @@ public class Qna extends BaseEntity {
         this.categoryType = categoryType;
         this.isAnswered = false;
     }
+
+    public void updateQna(String title,
+                          String content,
+                          QnaCategoryType categoryType)
+    {
+        this.title = title;
+        this.content = content;
+        this.categoryType = categoryType;
+    }
+
+    public void registerAnswer(String answer) {
+        this.adminAnswer = answer;
+        this.isAnswered = true;
+    }
 }
