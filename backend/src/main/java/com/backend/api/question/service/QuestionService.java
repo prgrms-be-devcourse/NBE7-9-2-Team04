@@ -2,6 +2,7 @@ package com.backend.api.question.service;
 
 import com.backend.api.question.dto.request.QuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
+import com.backend.api.question.dto.response.QuestionPageResponse;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.entity.QuestionCategoryType;
@@ -10,6 +11,10 @@ import com.backend.domain.user.entity.Role;
 import com.backend.global.exception.ErrorCode;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -96,24 +101,31 @@ public class QuestionService {
 
     //승인된 질문 전체 조회
     @Transactional(readOnly = true)
-    public List<QuestionResponse> getApprovedQuestions(QuestionCategoryType categoryType) {
-        List<Question> questions;
+    public QuestionPageResponse<QuestionResponse> getApprovedQuestions(int page, QuestionCategoryType categoryType) {
+        Page<Question> questionsPage;
+
+        if (page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 9, Sort.by("createDate").descending());
 
         if (categoryType == null) {
-            questions = questionRepository.findByIsApprovedTrue();
+            questionsPage = questionRepository.findByIsApprovedTrue(pageable);
         } else {
-            questions = questionRepository.findByCategoryTypeAndIsApprovedTrue(categoryType);
+            questionsPage = questionRepository.findByCategoryTypeAndIsApprovedTrue(categoryType, pageable);
         }
 
-        if (questions.isEmpty()) {
+        if (questionsPage.isEmpty()) {
             throw new ErrorException(ErrorCode.NOT_FOUND_QUESTION);
         }
 
-        return mapToResponseList(questions);
+        List<QuestionResponse> questions = mapToResponseList(questionsPage);
+
+        return QuestionPageResponse.from(questionsPage, questions);
+
     }
 
-    private List<QuestionResponse> mapToResponseList(List<Question> questions) {
-        return questions.stream()
+    private List<QuestionResponse> mapToResponseList(Page<Question> questionsPage) {
+        return questionsPage.getContent()
+                .stream()
                 .map(QuestionResponse::from)
                 .toList();
     }
