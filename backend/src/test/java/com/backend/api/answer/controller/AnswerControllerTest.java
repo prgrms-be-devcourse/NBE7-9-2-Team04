@@ -86,28 +86,28 @@ public class AnswerControllerTest {
         Question question1 = Question.builder()
                 .title("첫 번째 질문 제목")
                 .content("첫 번째 질문 내용")
-                .author(userRepository.findById(2L).orElseThrow())
+                .author(userRepository.findById(1L).orElseThrow())
                 .build();
         questionRepository.save(question1);
 
         com.backend.domain.answer.entity.Answer answer1 = com.backend.domain.answer.entity.Answer.builder()
                 .content("첫 번째 답변 내용")
                 .isPublic(true)
-                .author(userRepository.findById(2L).orElseThrow())
+                .author(userRepository.findById(1L).orElseThrow())
                 .question(question1)
                 .build();
 
         com.backend.domain.answer.entity.Answer answer2 = com.backend.domain.answer.entity.Answer.builder()
                 .content("두 번째 답변 내용")
                 .isPublic(false)
-                .author(userRepository.findById(3L).orElseThrow())
+                .author(userRepository.findById(2L).orElseThrow())
                 .question(question1)
                 .build();
 
         com.backend.domain.answer.entity.Answer answer3 = com.backend.domain.answer.entity.Answer.builder()
                 .content("세 번째 답변 내용")
                 .isPublic(true)
-                .author(userRepository.findById(3L).orElseThrow())
+                .author(userRepository.findById(2L).orElseThrow())
                 .question(question1)
                 .aiScore(10)
                 .feedback("좋은 답변입니다.")
@@ -121,7 +121,7 @@ public class AnswerControllerTest {
     // 인증 설정
     @BeforeEach
     void setupAuth() {
-        User user = userRepository.findById(2L).get();
+        User user = userRepository.findById(1L).get();
         CustomUserDetails userDetails = new CustomUserDetails(user);
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
@@ -313,7 +313,7 @@ public class AnswerControllerTest {
             long targetQuestionId = 1; // 동적으로 생성된 질문 ID 사용
             long targetAnswerId = 1; // 동적으로 생성된 답변 ID 사용
             String content = "수정된 답변 내용입니다."; // 수정할 내용
-            long expectedAuthorId = 2; // 예상 작성자 ID
+            long expectedAuthorId = 1; // 예상 작성자 ID
             String expectedAuthorNickname = "gildong"; // 예상 작성자 닉네임
 
             // 초기 modifyDate 값 캡처 (수정되기 전의 시간)
@@ -507,19 +507,19 @@ public class AnswerControllerTest {
 
             resultActions
                     .andExpect(jsonPath("$.length()").value(3))
-                    .andExpect(jsonPath("$.data[*].id", containsInRelativeOrder(3, 1)))
-                    .andExpect(jsonPath("$.data[0].id").value(3))
-                    .andExpect(jsonPath("$.data[0].createDate").exists())
-                    .andExpect(jsonPath("$.data[0].modifyDate").exists())
-                    .andExpect(jsonPath("$.data[0].content").value("세 번째 답변 내용"))
-                    .andExpect(jsonPath("$.data[0].aiScore").value(10))
-                    .andExpect(jsonPath("$.data[0].isPublic").value(true))
-                    .andExpect(jsonPath("$.data[0].feedback").value("좋은 답변입니다."))
-                    .andExpect(jsonPath("$.data[0].authorId").value(3))
-                    .andExpect(jsonPath("$.data[0].authorNickName").value("gilddong"))
-                    .andExpect(jsonPath("$.data[0].questionId").value(1))
-                    .andExpect(jsonPath("$.data[*].isPublic").value(Matchers.not(Matchers.hasItem(false))))
-                    .andExpect(jsonPath("$.data[*].id").value(Matchers.not(Matchers.hasItem(2))));
+                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(3, 1)))
+                    .andExpect(jsonPath("$.data.answers[0].id").value(3))
+                    .andExpect(jsonPath("$.data.answers[0].createDate").exists())
+                    .andExpect(jsonPath("$.data.answers[0].modifyDate").exists())
+                    .andExpect(jsonPath("$.data.answers[0].content").value("세 번째 답변 내용"))
+                    .andExpect(jsonPath("$.data.answers[0].aiScore").value(10))
+                    .andExpect(jsonPath("$.data.answers[0].isPublic").value(true))
+                    .andExpect(jsonPath("$.data.answers[0].feedback").value("좋은 답변입니다."))
+                    .andExpect(jsonPath("$.data.answers[0].authorId").value(2))
+                    .andExpect(jsonPath("$.data.answers[0].authorNickName").value("gilddong"))
+                    .andExpect(jsonPath("$.data.answers[0].questionId").value(1))
+                    .andExpect(jsonPath("$.data.answers[*].isPublic").value(Matchers.not(Matchers.hasItem(false))))
+                    .andExpect(jsonPath("$.data.answers[*].id").value(Matchers.not(Matchers.hasItem(2))));
         }
 
         @Test
@@ -574,7 +574,7 @@ public class AnswerControllerTest {
                     .andExpect(jsonPath("$.data.aiScore").value(Matchers.nullValue()))
                     .andExpect(jsonPath("$.data.isPublic").value(true))
                     .andExpect(jsonPath("$.data.feedback").value(Matchers.nullValue()))
-                    .andExpect(jsonPath("$.data.authorId").value(2))
+                    .andExpect(jsonPath("$.data.authorId").value(1))
                     .andExpect(jsonPath("$.data.authorNickName").value("gildong"))
                     .andExpect(jsonPath("$.data.questionId").value(1));
         }
