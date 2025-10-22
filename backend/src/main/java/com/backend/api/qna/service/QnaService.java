@@ -4,6 +4,7 @@ import com.backend.api.qna.dto.request.QnaAddRequest;
 import com.backend.api.qna.dto.request.QnaUpdateRequest;
 import com.backend.api.qna.dto.response.QnaResponse;
 import com.backend.domain.qna.entity.Qna;
+import com.backend.domain.qna.entity.QnaCategoryType;
 import com.backend.domain.qna.repository.QnaRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
@@ -13,6 +14,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -94,5 +97,24 @@ public class QnaService {
         validateQnaAuthor(qna, user);
 
         qnaRepository.delete(qna);
+    }
+
+    public List<QnaResponse> getQnaAll(User user) {
+        List<Qna> qnaList = qnaRepository.findAll();
+        return qnaList.stream()
+                .map(QnaResponse::from)
+                .toList();
+    }
+
+    public QnaResponse getQna(Long qnaId, User user) {
+        Qna qna = findByIdOrThrow(qnaId);
+        return QnaResponse.from(qna);
+    }
+
+    public List<QnaResponse> getQnaByCategory(User user, QnaCategoryType categoryType) {
+        List<Qna> qnaList = qnaRepository.findByCategoryType(categoryType);
+        return qnaList.stream()
+                .map(QnaResponse::from)
+                .toList();
     }
 }

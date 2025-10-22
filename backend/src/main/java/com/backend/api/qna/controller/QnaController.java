@@ -4,6 +4,7 @@ import com.backend.api.qna.dto.request.QnaAddRequest;
 import com.backend.api.qna.dto.request.QnaUpdateRequest;
 import com.backend.api.qna.dto.response.QnaResponse;
 import com.backend.api.qna.service.QnaService;
+import com.backend.domain.qna.entity.QnaCategoryType;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/Qna")
@@ -45,5 +48,26 @@ public class QnaController {
             @PathVariable Long qnaId ) {
         qnaService.deleteQna(qnaId, rq.getUser());
         return ApiResponse.ok("Qna가 삭제되었습니다.", null);
+    }
+
+    @GetMapping
+    @Operation(summary = "Qna 전체 조회", description = "사용자가 모든 Qna를 조회합니다.")
+    public ApiResponse<List<QnaResponse>> getMyQnaList() {
+        List<QnaResponse> qnaList = qnaService.getQnaAll(rq.getUser());
+        return ApiResponse.ok("Qna 목록 조회 성공", qnaList);
+    }
+
+    @GetMapping("/{qnaId}")
+    @Operation(summary = "Qna 단건 조회", description = "사용자가 특정 Qna를 조회합니다.")
+    public ApiResponse<QnaResponse> getMyQna(@PathVariable Long qnaId) {
+        QnaResponse response = qnaService.getQna(qnaId, rq.getUser());
+        return ApiResponse.ok("%d번 Qna 조회 성공".formatted(qnaId), response);
+    }
+
+    @GetMapping("/category/{categoryType}")
+    @Operation(summary = "카테고리별 Qna 조회", description = "사용자가 특정 카테고리의 Qna를 조회합니다.")
+    public ApiResponse<List<QnaResponse>> getMyQnaByCategory(@PathVariable QnaCategoryType categoryType) {
+        List<QnaResponse> qnaList = qnaService.getQnaByCategory(rq.getUser(), categoryType);
+        return ApiResponse.ok("%s 카테고리 Qna 조회 성공".formatted(categoryType.name()), qnaList);
     }
 }
