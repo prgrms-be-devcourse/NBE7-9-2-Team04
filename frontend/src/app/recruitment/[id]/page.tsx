@@ -69,6 +69,7 @@ export default function RecruitmentDetailPage() {
       );
       if (res.status === "OK" && Array.isArray(res.data.comments)) {
         const formatted = res.data.comments.map((c: any) => ({
+          ...res.data,
           commentId: c.id,
           author: c.authorNickName,
           authorId: c.authorId, 
