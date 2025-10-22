@@ -43,6 +43,15 @@ public enum ErrorCode {
     COMMENT_INVALID_USER(HttpStatus.FORBIDDEN, "해당 댓글에 대한 권한이 없는 사용자입니다."),
     PIN_POST_FORBIDDEN(HttpStatus.FORBIDDEN, "게시물 상단 고정 권한이 없습니다."),
 
+    //Qna
+    QNA_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 Q&A를 찾을 수 없습니다."),
+    QNA_ACCESS_DENIED(HttpStatus.FORBIDDEN, "자신의 문의만 수정하거나 삭제할 수 있습니다."),
+    QNA_ALREADY_ANSWERED(HttpStatus.BAD_REQUEST, "이미 답변이 등록된 Q&A입니다."),
+    QNA_CATEGORY_INVALID(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리입니다."),
+    QNA_CONTENT_NOT_BLANK(HttpStatus.BAD_REQUEST, "문의 내용은 비워둘 수 없습니다."),
+    QNA_TITLE_NOT_BLANK(HttpStatus.BAD_REQUEST, "문의 제목은 비워둘 수 없습니다."),
+    QNA_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "Q&A 답변 등록 권한이 없습니다."),
+
     //Question
     QUESTION_TITLE_NOT_BLANK(HttpStatus.BAD_REQUEST, "질문 제목은 공백일 수 없습니다."),
     QUESTION_CONTENT_NOT_BLANK(HttpStatus.BAD_REQUEST, "질문 내용은 공백일 수 없습니다."),
