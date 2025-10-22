@@ -82,7 +82,7 @@ public class CommentService {
         if (page < 1) page = 1;
         Pageable pageable = PageRequest.of(page - 1, 20);
 
-        Page<Comment> commentsPage  = commentRepository.findByPostId(pageable, postId);
+        Page<Comment> commentsPage  = commentRepository.findByPostId(postId, pageable);
 
         List<CommentResponse> comments = commentsPage.getContent()
                 .stream()
@@ -100,7 +100,7 @@ public class CommentService {
 
         if (page < 1) page = 1;
         Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
-        Page<Comment> userCommentsPage = commentRepository.findByAuthorId(pageable, userId);
+        Page<Comment> userCommentsPage = commentRepository.findByAuthorId(userId, pageable);
 
         List<CommentMypageResponse> userComments = userCommentsPage.getContent()
                 .stream()

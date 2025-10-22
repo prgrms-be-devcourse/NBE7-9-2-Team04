@@ -85,7 +85,7 @@ public class AnswerService {
 
         if(page < 1) page = 1;
         Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
-        Page<Answer> answersPage = answerRepository.findByQuestionIdAndIsPublicTrue(pageable, questionId);
+        Page<Answer> answersPage = answerRepository.findByQuestionIdAndIsPublicTrue(questionId, pageable);
 
         List<AnswerReadResponse> answers = answersPage.getContent()
                 .stream()
@@ -117,7 +117,7 @@ public class AnswerService {
 
         if(page < 1) page = 1;
         Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
-        Page<Answer> answersPage = answerRepository.findByAuthorId(pageable, userId);
+        Page<Answer> answersPage = answerRepository.findByAuthorId(userId, pageable);
 
         List<AnswerReadResponse> answers = answersPage
                 .getContent()
