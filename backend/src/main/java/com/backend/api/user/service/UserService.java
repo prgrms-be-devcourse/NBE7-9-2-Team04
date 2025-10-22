@@ -3,6 +3,9 @@ package com.backend.api.user.service;
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
+import com.backend.domain.subscription.entity.Subscription;
+import com.backend.domain.subscription.entity.SubscriptionType;
+import com.backend.domain.subscription.repository.SubscriptionRepository;
 import com.backend.domain.user.entity.AccountStatus;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
@@ -14,6 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -21,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final SubscriptionRepository subscriptionRepository;
 
     public User signUp(UserSignupRequest request) {
 
@@ -40,7 +48,25 @@ public class UserService {
                 .role(Role.USER)
                 .build();
 
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        Subscription basicSubscription = Subscription.builder()
+                .user(user)
+                .subscriptionType(SubscriptionType.BASIC)
+                .subscriptionName("BASIC")
+                .isActive(true)                     // 기본 회원은 활성화된 상태로 시작
+                .price(0L)                          // 무료
+                .questionLimit(5)                   // 무료 사용자는 질문 제한 5회
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now())        // BASIC은 실질적 만료 개념 X
+                .nextBillingDate(LocalDate.now())    // 유료 전환 시점 기준으로 계산됨
+                .customerKey(UUID.randomUUID().toString()) // Toss에서 사용할 유저별 key
+                .billingKey(null)                    // 아직 유료결제X → null
+                .build();
+
+        subscriptionRepository.save(basicSubscription);
+
+        return user;
     }
 
     public User login(UserLoginRequest request){

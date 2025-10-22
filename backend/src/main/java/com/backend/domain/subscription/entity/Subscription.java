@@ -1,7 +1,6 @@
 package com.backend.domain.subscription.entity;
 
 
-
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
@@ -15,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
@@ -59,9 +59,10 @@ public class Subscription extends BaseEntity {
     private Long price;
 
     // Billing 정보 (결제 수단)
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String billingKey;
 
+    //가입 시점에서 생성
     @Column(nullable = false, unique = true)
     private String customerKey;
 
@@ -72,13 +73,25 @@ public class Subscription extends BaseEntity {
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
     private List<Payment> payments = new ArrayList<>();
 
-    public void updateBillingInfo(String billingKey, String customerKey) {
+    public void activatePremium(String billingKey) {
         this.billingKey = billingKey;
-        this.customerKey = customerKey;
         this.isActive = true;
+        this.subscriptionType = SubscriptionType.PREMIUM;
+        this.subscriptionName = "PREMIUM";
+        this.price = 9900L;
+        this.questionLimit = 8;
         this.startDate = LocalDateTime.now();
-        this.endDate = this.startDate.plusMonths(1); // 기본 1개월 구독
+        this.endDate = this.startDate.plusMonths(1);
+        this.nextBillingDate = LocalDate.now().plusMonths(1);
     }
+
+    @PrePersist
+    public void generateCustomerKey() {
+        if (this.customerKey == null) {
+            this.customerKey = UUID.randomUUID().toString();
+        }
+    }
+
 
 //    public void activate(LocalDateTime endDate) {
 //        this.endDate = endDate;

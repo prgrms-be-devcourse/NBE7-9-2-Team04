@@ -13,7 +13,7 @@ export default function SuccessPage() {
     if (customerKey && authKey) {
       (async () => {
         try {
-          const apiResponse = await fetchApi("/api/v1/billing/issue", {
+          const apiResponse = await fetchApi(`/api/v1/billing/confirm`, {
             method: "POST",
             body: JSON.stringify({
               customerKey,
