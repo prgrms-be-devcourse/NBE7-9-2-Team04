@@ -1,6 +1,6 @@
 package com.backend.api.payment.controller;
 
-import com.backend.api.payment.dto.reponse.PaymentResponse;
+import com.backend.api.payment.dto.response.PaymentResponse;
 import com.backend.api.payment.dto.request.PaymentRequest;
 import com.backend.api.payment.service.PaymentService;
 import com.backend.global.dto.response.ApiResponse;

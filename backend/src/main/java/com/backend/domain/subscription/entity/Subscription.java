@@ -1,7 +1,7 @@
 package com.backend.domain.subscription.entity;
 
 
-import com.backend.domain.billing.entity.Billing;
+
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
@@ -65,17 +65,20 @@ public class Subscription extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String customerKey;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "billing_key_id", nullable = false)
-    private Billing billing; // 결제용 빌링키
-
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
     private List<Payment> payments = new ArrayList<>();
+
+    public void updateBillingInfo(String billingKey, String customerKey) {
+        this.billingKey = billingKey;
+        this.customerKey = customerKey;
+        this.isActive = true;
+        this.startDate = LocalDateTime.now();
+        this.endDate = this.startDate.plusMonths(1); // 기본 1개월 구독
+    }
 
 //    public void activate(LocalDateTime endDate) {
 //        this.endDate = endDate;

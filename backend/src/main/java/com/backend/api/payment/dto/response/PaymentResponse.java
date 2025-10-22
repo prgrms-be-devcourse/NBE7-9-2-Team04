@@ -1,4 +1,4 @@
-package com.backend.api.payment.dto.reponse;
+package com.backend.api.payment.dto.response;
 
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.payment.entity.PaymentStatus;
