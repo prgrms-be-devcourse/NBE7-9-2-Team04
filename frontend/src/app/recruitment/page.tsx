@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { fetchApi } from "@/lib/client";
 import Router from "next/navigation";
 import Link from "next/link";
 import Pagination from "@/components/pagination";
@@ -126,12 +127,29 @@ const regularPosts = [
 ];
 
 export default function RecruitmentPage() {
+  const [pinnedPosts, setPinnedPosts] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 9;
   const categories = ["전체", "프로젝트", "스터디"];
-
+  
+  const fetchPinnedPosts = async () => {
+    try{
+      const res = await fetchApi(`api/v1/posts/pinned`);
+      if (res.status ==="OK" && res.data){
+        const formatted = res.data.comments.map((p: any) => ({
+          postId: p.postId
+        }));
+        setPinnedPosts(formatted);
+      }
+      } else {
+        console.error("게시글 불러오기 실패", res.message);
+      }
+    } catch (err) {
+      console.error("게시글 불러오기 실패", err);
+    } 
+  }
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % premiumPosts.length);
