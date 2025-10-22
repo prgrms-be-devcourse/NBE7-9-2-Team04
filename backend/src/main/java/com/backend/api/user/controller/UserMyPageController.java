@@ -8,6 +8,7 @@ import com.backend.api.comment.service.CommentService;
 import com.backend.api.post.service.PostService;
 import com.backend.api.user.dto.request.UserMyPageQuestionRequest;
 import com.backend.api.user.dto.response.UserMyPageResponse;
+import com.backend.api.user.service.RankingService;
 import com.backend.api.user.service.UserMyPageService;
 import com.backend.api.user.service.UserService;
 import com.backend.global.Rq.Rq;
@@ -34,14 +35,19 @@ public class UserMyPageController {
     private final CommentService commentService;
     private final AnswerService answerService;
 
-    @GetMapping("/me")
+    @GetMapping
+    public UserMyPageResponse getUserInfo(@PathVariable Long userId) {
+        return userMyPageService.getInformation(userId);
+    }
+
+    @GetMapping("/{userId}/info")
     @Operation(summary = "개인 정보 조회")
     public ApiResponse<UserMyPageResponse> detailInformation() {
         Long userId = rq.getUser().getId();
         return ApiResponse.ok(userMyPageService.getInformation(userId));
     }
 
-    @PutMapping("/me")
+    @PutMapping("/{userId}/info")
     @Operation(summary = "개인 정보 수정")
     public ApiResponse<UserMyPageResponse> updateUser(
             @RequestBody UserMyPageResponse.UserModify modify) {
@@ -81,7 +87,7 @@ public class UserMyPageController {
         );
     }
 
-    @GetMapping
+    @GetMapping("/{userId}")
     @Operation(summary = "해결한 문제")
     public ApiResponse<List<UserMyPageResponse.SolvedProblem>> solvedProblemList() {
         Long userId = rq.getUser().getId();

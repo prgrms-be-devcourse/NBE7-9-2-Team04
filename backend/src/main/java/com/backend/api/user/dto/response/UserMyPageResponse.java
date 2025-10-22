@@ -1,16 +1,16 @@
 package com.backend.api.user.dto.response;
 
-import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
-import com.backend.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Builder
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class UserMyPageResponse {
 
@@ -22,8 +22,12 @@ public class UserMyPageResponse {
     private int age;
     private String github;
     private String image;
+    private Integer rank;
+    private Integer solvedCount;
+    private Integer totalScore;
 
-    public static UserMyPageResponse fromEntity(User users){
+
+    public static UserMyPageResponse fromEntity(User users, Integer rank, Integer solvedCount, Integer totalScore){
         return UserMyPageResponse.builder()
                 .userId(users.getId())
                 .email(users.getEmail())
@@ -33,6 +37,9 @@ public class UserMyPageResponse {
                 .age(users.getAge())
                 .github(users.getGithub())
                 .image(users.getImage())
+                .rank(rank)
+                .solvedCount(solvedCount)
+                .totalScore(totalScore)
                 .build();
     }
 

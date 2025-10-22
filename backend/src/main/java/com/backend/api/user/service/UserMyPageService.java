@@ -1,5 +1,6 @@
 package com.backend.api.user.service;
 
+import com.backend.api.user.dto.response.RankingResponse;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.entity.UserQuestion;
@@ -25,6 +26,7 @@ public class UserMyPageService {
     private final PasswordEncoder passwordEncoder;
     private final Rq rq;
     private final UserQuestionRepository userQuestionRepository;
+    private final RankingService rankingService;
 
 
     public UserMyPageResponse modifyUser(Long userId, UserMyPageResponse.UserModify modify) {
@@ -45,14 +47,29 @@ public class UserMyPageService {
         }
 
         User saved = userRepository.save(user);
-        return UserMyPageResponse.fromEntity(saved);
+
+        RankingResponse rankingResponse = rankingService.getRankingForCurrentUser();
+
+        return UserMyPageResponse.fromEntity(
+                saved,
+                rankingResponse.getMyRank(),
+                rankingResponse.getSolvedCount(),
+                rankingResponse.getTotalScore()
+        );
     }
 
     public UserMyPageResponse getInformation(Long userId){
         User users = userRepository.findById(userId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
 
-        return UserMyPageResponse.fromEntity(users);
+        RankingResponse rankingResponse = rankingService.getRankingForCurrentUser();
+
+        return UserMyPageResponse.fromEntity(
+                users,
+                rankingResponse.getMyRank(),
+                rankingResponse.getSolvedCount(),
+                rankingResponse.getTotalScore()
+        );
     }
 
 
