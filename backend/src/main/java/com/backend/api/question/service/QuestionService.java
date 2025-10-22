@@ -137,4 +137,9 @@ public class QuestionService {
         validateApprovedQuestion(question);
         return QuestionResponse.from(question);
     }
+
+    @Transactional
+    public void createListQuestion(List<Question> questions){
+        questionRepository.saveAll(questions);
+    }
 }

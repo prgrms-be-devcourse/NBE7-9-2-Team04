@@ -22,6 +22,10 @@ public enum ErrorCode {
     ACCOUNT_DEACTIVATED(HttpStatus.FORBIDDEN, "비활성화된 계정입니다."),
     ACCOUNT_BANNED(HttpStatus.FORBIDDEN, "영구 정지된 계정입니다."),
     SELF_INFORMATION(HttpStatus.UNAUTHORIZED, "본인 정보만 수정할 수 있습니다."),
+    INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 인증 코드입니다."),
+    EXPIRED_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "인증 코드가 만료되었습니다."),
+    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다."),
+    EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다."),
 
     //token
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Refresh Token입니다."),
@@ -47,6 +51,8 @@ public enum ErrorCode {
     QUESTION_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 질문입니다."),
     ALREADY_APPROVED_QUESTION(HttpStatus.BAD_REQUEST, "이미 승인된 질문입니다."),
     QUESTION_NOT_APPROVED(HttpStatus.FORBIDDEN, "승인되지 않은 질문입니다."),
+    NOT_FOUND_CONTENT(HttpStatus.NOT_FOUND,"질문 내용을 찾을 수 없습니다."),
+    AI_QUESTION_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "정해진 AI 질문 횟수를 모두 사용했습니다."),
 
     // Answer
     ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답변입니다."),

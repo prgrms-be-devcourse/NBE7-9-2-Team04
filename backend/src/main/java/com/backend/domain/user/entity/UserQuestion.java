@@ -16,11 +16,13 @@ public class UserQuestion {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")  // DB 컬럼명
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "문제 제목")
     private Question question;
     private LocalDateTime modifyDate;
+
+    private String title;
 }

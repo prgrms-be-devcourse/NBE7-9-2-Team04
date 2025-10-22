@@ -1,6 +1,5 @@
 package com.backend.domain.subscription.entity;
 
-
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
@@ -37,8 +36,8 @@ public class Subscription extends BaseEntity {
     private LocalDateTime endDate;
 
     //질문 가능 횟수
-    //무료 회원 3번
-    //유료 회원 5번
+    //무료 회원 5번
+    //유료 회원 8번
     @Column(nullable = false)
     private int questionLimit;
 
@@ -47,12 +46,11 @@ public class Subscription extends BaseEntity {
 //    private String billingKey;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     @OneToOne(mappedBy = "subscription", fetch = FetchType.LAZY)
     private Payment payment;
-
 
     public void activate(LocalDateTime endDate) {
         this.endDate = endDate;
@@ -63,6 +61,9 @@ public class Subscription extends BaseEntity {
         this.isActive = false;
     }
 
-
+    // 구독 유효성 검증
+    public boolean isValid() {
+        return this.isActive && this.endDate.isAfter(LocalDateTime.now());
+    }
 
 }
