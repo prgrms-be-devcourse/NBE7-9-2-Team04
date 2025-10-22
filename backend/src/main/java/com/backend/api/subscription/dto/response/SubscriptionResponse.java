@@ -23,10 +23,10 @@ public record SubscriptionResponse(
         @Schema(description = "구독 가격", example = "9900")
         Long price,
 
-        @Schema(description = "구독 시작 날짜", example = "2025-10-22T03:00:00")
+        @Schema(description = "구독 시작 날짜", example = "2025-10-23T03:00:00")
         LocalDateTime startDate,
 
-        @Schema(description = "구독 만료 날짜", example = "2025-11-22T03:00:00")
+        @Schema(description = "구독 만료 날짜", example = "2025-11-23T03:00:00")
         LocalDateTime endDate,
 
         @Schema(description = "다음 결제 예정일", example = "2025-11-22")

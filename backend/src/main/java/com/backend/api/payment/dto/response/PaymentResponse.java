@@ -33,7 +33,13 @@ public record PaymentResponse(
         LocalDateTime requestedAt,
 
         @Schema(description = "결제 수정 시간", example = "2025-10-13T12:00:00")
-        LocalDateTime approvedAt
+        LocalDateTime approvedAt,
+
+        @Schema(description = "연결된 구독 ID", example = "5")
+        Long subscriptionId,
+
+        @Schema(description = "사용자 이메일", example = "test@naver.com")
+        String userEmail
 ) {
 
     public static PaymentResponse from(Payment payment) {
@@ -46,7 +52,9 @@ public record PaymentResponse(
                 payment.getMethod(),
                 payment.getStatus(),
                 payment.getCreateDate(),
-                payment.getApprovedAt()
+                payment.getApprovedAt(),
+                payment.getSubscription() != null ? payment.getSubscription().getId() : null,
+                payment.getUser() != null ? payment.getUser().getEmail() : null
         );
     }
 

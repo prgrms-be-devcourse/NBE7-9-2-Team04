@@ -23,8 +23,10 @@ public class BillingController {
     @PostMapping("/confirm")
     @Operation(summary = "토스 빌링키 발급", description = "authKey와 customerKey를 이용해 토스 빌링키를 발급받고 구독 상태를 업데이트합니다.")
     public ApiResponse<BillingResponse> issueBillingKey(@RequestBody BillingRequest request) {
+
         BillingResponse response = billingService.issueBillingKey(request);
         return ApiResponse.ok("빌링키가 발급되었습니다.", response);
     }
+
 
 }

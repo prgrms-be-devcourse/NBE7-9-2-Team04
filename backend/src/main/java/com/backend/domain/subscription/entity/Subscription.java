@@ -5,10 +5,7 @@ import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,21 +20,18 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Subscription extends BaseEntity {
 
-    //구독 유형
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SubscriptionType subscriptionType;
 
-    //구독 활성화 여부
     @Column(nullable = false)
     private boolean isActive;
 
-    //구독 시작 날짜
     @Column(nullable = false)
     private LocalDateTime startDate;
 
-    //구독 만료 날짜
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime endDate;
 
     @Column(nullable = false)
@@ -50,19 +44,16 @@ public class Subscription extends BaseEntity {
     private int questionLimit;
 
 
-    //구독 이름
     @Column(nullable = false)
     private String subscriptionName;
 
-    //구독 가격
     @Column(nullable = false)
     private Long price;
 
-    // Billing 정보 (결제 수단)
+
     @Column(nullable = true, unique = true)
     private String billingKey;
 
-    //가입 시점에서 생성
     @Column(nullable = false, unique = true)
     private String customerKey;
 
@@ -92,16 +83,20 @@ public class Subscription extends BaseEntity {
         }
     }
 
+    public void updateNextBillingDate(LocalDate nextDate) {
+        this.nextBillingDate = nextDate;
+    }
 
-//    public void activate(LocalDateTime endDate) {
-//        this.endDate = endDate;
-//        this.isActive = true;
-//    }
-//
-//    public void deactivate() {
-//        this.isActive = false;
-//    }
+    public void deactivate() {
+        this.isActive = false;
+    }
 
+    public void setBillingKey(String billingKey) {
+        this.billingKey = billingKey;
+    }
 
+    public void setQuestionLimit(int questionLimit) {
+        this.questionLimit = questionLimit;
+    }
 
 }

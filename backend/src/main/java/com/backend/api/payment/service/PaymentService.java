@@ -1,15 +1,13 @@
 package com.backend.api.payment.service;
 
 
+import com.backend.api.payment.dto.request.PaymentRequest;
 import com.backend.api.payment.dto.response.PaymentConfirmResponse;
 import com.backend.api.payment.dto.response.PaymentResponse;
-import com.backend.api.payment.dto.request.PaymentRequest;
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.payment.entity.PaymentStatus;
 import com.backend.domain.payment.repository.PaymentRepository;
-import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
-import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -22,13 +20,12 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
-
+//2차 때 사용 x
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final UserRepository userRepository; //삭제 예정
     private final WebClient webClient;
     private final Rq rq;
 
@@ -36,7 +33,7 @@ public class PaymentService {
     //결제 승인
     @Transactional
     public PaymentResponse confirmPayment(PaymentRequest request){
-        User user = getOrCreateUser(); // 잠시 임시 유저로 테스트
+        User user = rq.getUser();
         PaymentConfirmResponse response = webClient.post()
                 .uri("/confirm") // 결제 승인 API 호출
                 .bodyValue(request)
@@ -67,29 +64,6 @@ public class PaymentService {
 
     }
 
-
-    //임시 유저. 삭제 예정
-    private User getOrCreateUser() {
-        try {
-            return rq.getUser();
-        } catch (Exception e) {
-
-            return userRepository.findByEmail("test@local.com")
-                    .orElseGet(() -> {
-                        User tempUser = User.builder()
-                                .email("test@local.com")
-                                .password("test1234")
-                                .name("테스트유저")
-                                .nickname("tester")
-                                .age(25)
-                                .github("https://github.com/tester")
-                                .role(Role.USER)
-                                .build();
-                        return userRepository.save(tempUser);
-                    });
-        }
-    }
-
     public PaymentResponse geyPaymentByKey(String paymentKey) {
         Payment payment = paymentRepository.findByPaymentKey(paymentKey)
                 .orElseThrow(() -> new ErrorException(ErrorCode.PAYMENT_NOT_FOUND));
@@ -103,7 +77,5 @@ public class PaymentService {
 
         return PaymentResponse.from(payment);
     }
-
-    //결제 취소 로직 추가해야함
 
 }
