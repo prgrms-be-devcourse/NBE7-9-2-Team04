@@ -4,7 +4,9 @@ import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.user.entity.VerificationCode;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.domain.user.repository.VerificationCodeRepository;
 import com.backend.global.security.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
@@ -22,6 +24,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,6 +53,9 @@ public class UserControllerTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private VerificationCodeRepository verificationCodeRepository;
+
     @Nested
     @DisplayName("회원가입 API")
     class t1 {
@@ -56,8 +63,21 @@ public class UserControllerTest {
         @Test
         @DisplayName("정상 작동")
         void success() throws Exception {
+            // given
+            String email = "signup1@naver.com";
+
+            //이메일 인증 완료 상태를 DB에 저장
+            verificationCodeRepository.save(
+                    VerificationCode.builder()
+                            .email(email)
+                            .code("ABC123")
+                            .verified(true)
+                            .expiresAt(LocalDateTime.now().plusMinutes(5))
+                            .build()
+            );
+
             UserSignupRequest request = new UserSignupRequest(
-                    "signup1@naver.com",
+                    email,
                     "test1234",
                     "test",
                     "signupNick",
@@ -66,12 +86,14 @@ public class UserControllerTest {
                     null
             );
 
+            // when
             ResultActions resultActions = mockMvc.perform(
                     post("/api/v1/users/signup")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
             );
 
+            // then
             User user = userRepository.findByEmail(request.email()).orElseThrow();
 
             resultActions
@@ -120,6 +142,44 @@ public class UserControllerTest {
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.status").value("CONFLICT"))
                     .andExpect(jsonPath("$.message").value("이미 존재하는 이메일입니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("이메일 인증 미완료 상태에서 회원가입 실패")
+        void fail_notVerifiedEmail() throws Exception {
+            String email = "signup3@naver.com";
+
+            //인증코드는 있지만 verified=false 인 상태
+            verificationCodeRepository.save(
+                    VerificationCode.builder()
+                            .email(email)
+                            .code("XYZ999")
+                            .verified(false)
+                            .expiresAt(LocalDateTime.now().plusMinutes(5))
+                            .build()
+            );
+
+            UserSignupRequest request = new UserSignupRequest(
+                    email,
+                    "test1234",
+                    "test",
+                    "signupNick3",
+                    27,
+                    "https://github.com/signup3",
+                    null
+            );
+
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/users/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            resultActions
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("이메일 인증이 완료되지 않았습니다."))
                     .andDo(print());
         }
     }
