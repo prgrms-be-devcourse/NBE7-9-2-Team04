@@ -99,10 +99,7 @@ public class User extends BaseEntity {
         return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.SUSPENDED;
     }
 
-    /**
-     * 사용자의 현재 구독 상태에 따라 AI 질문 생성 가능 횟수를 반환합니다.
-     * 유효한 프리미엄 구독이 있으면 8회, 없으면 5회를 반환합니다.
-     */
+
     public int getAiQuestionLimit() {
         if (this.subscription.isValid()) {
             return 8; // 프리미엄 구독 시 8회
