@@ -1,6 +1,8 @@
 package com.backend.domain.user.entity;
 
 import com.backend.domain.resume.entity.Resume;
+import com.backend.domain.subscription.entity.Subscription;
+import com.backend.domain.subscription.entity.SubscriptionType;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,6 +46,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private AccountStatus accountStatus = AccountStatus.ACTIVE; // 기본값 ACTIVE
 
+    @Column(nullable = false)
+    private int aiQuestionUsedCount = 0; // AI 질문 사용 횟수
+
     @Builder
     public User(String email,
                 String password,
@@ -65,6 +70,9 @@ public class User extends BaseEntity {
     }
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Resume resume;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Subscription subscription;
 
     public void updateUser(String email, String password, String name,
                            String nickname, int age, String github, String image) {
@@ -89,5 +97,17 @@ public class User extends BaseEntity {
 
     public boolean validateLoginAvaliable() {
         return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.SUSPENDED;
+    }
+
+
+    public int getAiQuestionLimit() {
+        if (this.subscription.isValid()) {
+            return 8; // 프리미엄 구독 시 8회
+        }
+        return 5; // 기본(베이직) 구독 시 5회
+    }
+
+    public void incrementAiQuestionUsedCount() {
+        this.aiQuestionUsedCount++;
     }
 }
