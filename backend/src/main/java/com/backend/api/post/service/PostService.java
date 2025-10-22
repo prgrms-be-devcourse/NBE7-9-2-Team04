@@ -2,6 +2,7 @@ package com.backend.api.post.service;
 
 import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
+import com.backend.api.post.dto.response.PostPageResponse;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.post.entity.PinStatus;
@@ -15,13 +16,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.backend.domain.subscription.repository.SubscriptionRepository;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,30 +66,35 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> getPosts(int page) {
+    public PostPageResponse<PostResponse> getAllPosts(int page) {
         if (page < 1) page = 1;
-        Pageable pageable = PageRequest.of(page - 1, 9);
+        Pageable pageable = PageRequest.of(page - 1, 9, Sort.by("createDate").descending());
 
-        Page<Post> postPage  = postRepository.findAllByOrderByCreateDateDesc(pageable);
+        Page<Post> postsPage  = postRepository.findAll(pageable);
 
-        return postPage.getContent()
+        List<PostResponse> posts = postsPage.getContent()
                 .stream()
                 .map(PostResponse::from)
                 .toList();
+
+        return PostPageResponse.from(postsPage, posts);
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> getPostsByUserId(int page, Long userId) {
+    public PostPageResponse<PostResponse> getPostsByUserId(int page, Long userId) {
         User user = userService.getUser(userId);
 
         if (page < 1) page = 1;
-        Pageable pageable = PageRequest.of(page - 1, 15);
-        Page<Post> myPostsPage = postRepository.findByUsersOrderByCreateDateDesc(pageable, user);
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Page<Post> myPostsPage = postRepository.findByUsers(pageable, user);
 
-        return myPostsPage.getContent()
+        List<PostResponse> myPosts =  myPostsPage
+                .getContent()
                 .stream()
                 .map(PostResponse::from)
                 .toList();
+
+        return PostPageResponse.from(myPostsPage, myPosts);
     }
 
     @Transactional
@@ -122,20 +128,22 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> getPostsByCategory(int page, PostCategoryType categoryType) {
+    public PostPageResponse<PostResponse> getPostsByCategory(int page, PostCategoryType categoryType) {
         if (page < 1) page = 1;
 
-        Pageable pageable = PageRequest.of(page -1, 9);
-        Page<Post> postsPage = postRepository.findByPostCategoryTypeOrderByCreateDateDesc(pageable, categoryType);
+        Pageable pageable = PageRequest.of(page -1, 9, Sort.by("createDate").descending());
+        Page<Post> postsPage = postRepository.findByPostCategoryType(pageable, categoryType);
 
         if (postsPage.isEmpty()) {
             throw new ErrorException(ErrorCode.POST_NOT_FOUND);
         }
 
-        return postsPage.getContent()
+        List<PostResponse> posts =  postsPage.getContent()
                 .stream()
                 .map(PostResponse::from)
                 .toList();
+
+        return PostPageResponse.from(postsPage, posts);
       }
           
     public List<PostResponse> getPinnedPosts() {

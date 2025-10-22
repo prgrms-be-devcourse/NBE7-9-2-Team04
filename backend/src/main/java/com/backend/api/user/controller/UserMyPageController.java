@@ -1,16 +1,16 @@
 package com.backend.api.user.controller;
 
+import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.comment.dto.response.CommentMypageResponse;
-import com.backend.api.post.dto.response.PostResponse;
+import com.backend.api.post.dto.response.PostPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.service.AnswerService;
-import com.backend.api.comment.dto.response.CommentResponse;
+import com.backend.api.comment.dto.response.CommentPageResponse;
 import com.backend.api.comment.service.CommentService;
+import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.post.service.PostService;
-import com.backend.api.user.dto.request.UserMyPageQuestionRequest;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.service.UserMyPageService;
-import com.backend.api.user.service.UserService;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,11 +27,9 @@ import java.util.List;
 @Tag(name = "Users", description = "마이페이지 관련 API")
 public class UserMyPageController {
 
-    private final UserService userService;
     private final PostService postService;
     private final UserMyPageService userMyPageService;
     private final Rq rq;
-    private UserMyPageQuestionRequest userMyPageQuestionRequest;
     private final CommentService commentService;
     private final AnswerService answerService;
 
@@ -62,27 +60,28 @@ public class UserMyPageController {
 
     @GetMapping("/{userId}/posts")
     @Operation(summary = "사용자가 작성한 모집글 목록 조회")
-    public ApiResponse<List<PostResponse>> getUserPosts(
+    public ApiResponse<PostPageResponse<PostResponse>> getUserPosts(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<PostResponse> userPosts = postService.getPostsByUserId(page, userId);
+        PostPageResponse<PostResponse> userPostsPage = postService.getPostsByUserId(page, userId);
         return ApiResponse.ok(
                 "사용자가 작성한 모집글 목록 조회를 완료했습니다.",
-                userPosts
+                userPostsPage
         );
     }
 
     @GetMapping("/{userId}/comments")
     @Operation(summary = "사용자가 작성한 댓글 목록 조회")
-    public ApiResponse<List<CommentMypageResponse>> getUserComments(
+    public ApiResponse<CommentPageResponse<CommentMypageResponse>> getUserComments(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<CommentMypageResponse> userComments = commentService.getCommentsByUserId(page, userId);
+        CommentPageResponse<CommentMypageResponse> userCommentsPage = commentService.getCommentsByUserId(page, userId);
+
         return ApiResponse.ok(
                 "사용자가 작성한 댓글 목록 조회를 완료했습니다.",
-                userComments
+                userCommentsPage
         );
     }
 
@@ -97,14 +96,14 @@ public class UserMyPageController {
 
     @GetMapping("/{userId}/answers")
     @Operation(summary = "사용자가 작성한 면접 답변 목록 조회")
-    public ApiResponse<List<AnswerReadResponse>> getUserAnswers(
+    public ApiResponse<AnswerPageResponse<AnswerReadResponse>> getUserAnswers(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<AnswerReadResponse> userAnswers = answerService.findAnswersByUserId(page, userId);
+        AnswerPageResponse<AnswerReadResponse> userAnswersPage = answerService.findAnswersByUserId(page, userId);
         return ApiResponse.ok(
                 "사용자가 작성한 면접 답변 목록 조회를 완료했습니다.",
-                userAnswers
+                userAnswersPage
         );
     }
 }

@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface UserQuestionRepository extends JpaRepository<UserQuestion, Long> {
-    List<UserQuestion> findByUserId(Long userId);
+    List<UserQuestion> findByUser_Id(Long userId);
 }

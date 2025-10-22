@@ -2,10 +2,10 @@ package com.backend.api.question.controller;
 
 import com.backend.api.question.dto.request.QuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
+import com.backend.api.question.dto.response.QuestionPageResponse;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.api.question.service.QuestionService;
 import com.backend.domain.question.entity.QuestionCategoryType;
-import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,22 +44,22 @@ public class QuestionController {
 
     @GetMapping
     @Operation(summary = "전체 질문 조회", description = "승인된 모든 질문을 조회합니다.")
-    public ApiResponse<List<QuestionResponse>> getAllApprovedQuestions(
+    public ApiResponse<QuestionPageResponse<QuestionResponse>> getAllApprovedQuestions(
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<QuestionResponse> questions = questionService.getApprovedQuestions(page, null);
-        return ApiResponse.ok("질문 목록 조회 성공", questions);
+        QuestionPageResponse<QuestionResponse> questionsPage = questionService.getApprovedQuestions(page, null);
+        return ApiResponse.ok("질문 목록 조회 성공", questionsPage);
     }
 
     @GetMapping("/category/{categoryType}")
     @Operation(summary = "카테고리별 질문 조회",
             description = "특정 카테고리(ENUM)에 속한 승인된 질문을 조회합니다. 예: /api/v1/questions/category/DATABASE")
-    public ApiResponse<List<QuestionResponse>> getApprovedQuestionsByCategory(
+    public ApiResponse<QuestionPageResponse<QuestionResponse>> getApprovedQuestionsByCategory(
             @PathVariable QuestionCategoryType categoryType,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<QuestionResponse> questions = questionService.getApprovedQuestions(page, categoryType);
-        return ApiResponse.ok("카테고리별 질문 조회 성공", questions);
+        QuestionPageResponse<QuestionResponse> questionsPage = questionService.getApprovedQuestions(page, categoryType);
+        return ApiResponse.ok("카테고리별 질문 조회 성공", questionsPage);
     }
 
     @GetMapping("/{questionId}")

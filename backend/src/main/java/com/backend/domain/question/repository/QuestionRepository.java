@@ -12,6 +12,5 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     Page<Question> findByIsApprovedTrue(Pageable pageable);
 
-    Page<Question> findByCategoryTypeAndIsApprovedTrue(Pageable pageable, QuestionCategoryType categoryType);
-
+    Page<Question> findByCategoryTypeAndIsApprovedTrue(QuestionCategoryType categoryType, Pageable pageable);
 }

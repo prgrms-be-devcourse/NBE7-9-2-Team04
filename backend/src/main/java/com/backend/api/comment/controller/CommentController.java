@@ -1,9 +1,9 @@
 package com.backend.api.comment.controller;
 
 import com.backend.api.comment.dto.request.CommentRequest;
+import com.backend.api.comment.dto.response.CommentPageResponse;
 import com.backend.api.comment.dto.response.CommentResponse;
 import com.backend.api.comment.service.CommentService;
-import com.backend.api.post.service.PostService;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
@@ -13,8 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -78,15 +76,15 @@ public class CommentController {
 
     @GetMapping("/{postId}/comments")
     @Operation(summary = "댓글 목록 조회")
-    public ApiResponse<List<CommentResponse>> readComments(
+    public ApiResponse<CommentPageResponse<CommentResponse>> readComments(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<CommentResponse> commentResponseList = commentService.getCommentsByPostId(page, postId);
+        CommentPageResponse<CommentResponse> commentsPage = commentService.getCommentsByPostId(page, postId);
 
         return ApiResponse.ok(
                 "%d번 게시글의 댓글 목록 조회 성공".formatted(postId),
-                commentResponseList
+                commentsPage
         );
     }
 

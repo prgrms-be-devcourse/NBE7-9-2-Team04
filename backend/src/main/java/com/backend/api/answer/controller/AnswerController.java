@@ -3,6 +3,7 @@ package com.backend.api.answer.controller;
 import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.dto.request.AnswerUpdateRequest;
 import com.backend.api.answer.dto.response.AnswerCreateResponse;
+import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.dto.response.AnswerUpdateResponse;
 import com.backend.api.answer.service.AnswerService;
@@ -81,15 +82,15 @@ public class AnswerController {
 
     @GetMapping("/{questionId}/answers")
     @Operation(summary = "답변 목록 조회")
-    public ApiResponse<List<AnswerReadResponse>> readAnswers(
+    public ApiResponse<AnswerPageResponse<AnswerReadResponse>> readAnswers(
             @PathVariable Long questionId,
             @RequestParam(defaultValue = "1") int page
     ) {
-        List<AnswerReadResponse> answerReadResponseList = answerService.findAnswersByQuestionId(page, questionId);
+        AnswerPageResponse<AnswerReadResponse> answersPage = answerService.findAnswersByQuestionId(page, questionId);
 
         return ApiResponse.ok(
                 "%d번 질문의 답변 목록 조회 성공".formatted(questionId),
-                answerReadResponseList
+                answersPage
         );
     }
 
