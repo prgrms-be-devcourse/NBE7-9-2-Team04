@@ -15,7 +15,7 @@ export default function SuccessPage() {
     if (customerKey && authKey) {
       (async () => {
         try {
-          const apiResponse = await fetchApi(`/api/v1/billing/confirm`, {
+          await fetchApi(`/api/v1/billing/confirm`, {
             method: "POST",
             body: JSON.stringify({
               customerKey,
@@ -24,7 +24,7 @@ export default function SuccessPage() {
           });
 
           setMessage(
-            "카드 등록 및 결제가 완료되었습니다.<br/> 다음 결제일은 오늘로부터 30일 뒤에 자동으로 진행됩니다."
+            "카드 등록 및 결제가 완료되었습니다.<br/> 다음 결제일은 오늘로부터 한 달 뒤에 자동으로 진행됩니다."
           );
 
           // 3초 후 자동 이동
