@@ -14,7 +14,7 @@ export default function PaymentCheckoutPage() {
   const [customerKey, setCustomerKey] = useState<string | null>(null);
   const router = useRouter();
 
-  // ✅ 1️⃣ 서버에서 customerKey 불러오기
+  // 서버에서 customerKey 불러오기
   useEffect(() => {
     async function initCustomerKey() {
       try {
@@ -49,11 +49,19 @@ export default function PaymentCheckoutPage() {
   //카드 등록하기 버튼 누르면 결제창 띄우기
 
   async function requestBillingAuth() {
-    await payment.requestBillingAuth({
-      method: "CARD",
-      successUrl: window.location.origin + "/mypage/premium/success", // 요청이 성공하면 리다이렉트되는 URL
-      failUrl: window.location.origin + "/mypage/premium/fail", // 요청이 실패하면 리다이렉트되는 URL
-    });
+    try {
+      await payment.requestBillingAuth({
+        method: "CARD",
+        successUrl: window.location.origin + "/mypage/premium/success",
+        failUrl: window.location.origin + "/mypage/premium/fail",
+      });
+    } catch (err: any) {
+      if (err?.code === "USER_CANCEL" || err?.message?.includes("취소")) {
+        return;
+      }
+
+      alert("카드 등록창이 정상적으로 열리지 않았습니다. 다시 시도해주세요.");
+    }
   }
 
   return (
@@ -81,7 +89,3 @@ export default function PaymentCheckoutPage() {
     </>
   );
 }
-
-// function generateRandomString() {
-//   return window.btoa(Math.random().toString()).slice(0, 20);
-// }
