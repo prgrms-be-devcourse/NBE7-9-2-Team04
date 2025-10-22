@@ -2,17 +2,23 @@ package com.backend.api.answer.service;
 
 import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.dto.request.AnswerUpdateRequest;
+import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.question.service.QuestionService;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,12 +80,19 @@ public class AnswerService {
         answerRepository.delete(answer);
     }
 
-    public List<AnswerReadResponse> findAnswersByQuestionId(Long questionId) {
+    public AnswerPageResponse<AnswerReadResponse> findAnswersByQuestionId(int page, Long questionId) {
         questionService.findByIdOrThrow(questionId);
-        return answerRepository.findByQuestionIdAndIsPublicTrueOrderByCreateDateDesc(questionId)
+
+        if(page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Page<Answer> answersPage = answerRepository.findByQuestionIdAndIsPublicTrue(pageable, questionId);
+
+        List<AnswerReadResponse> answers = answersPage.getContent()
                 .stream()
                 .map(AnswerReadResponse::new)
                 .toList();
+
+        return new AnswerPageResponse<>(answersPage, answers);
     }
 
     public Answer findAnswer (Long questionId, Long answerId) {
@@ -95,17 +108,24 @@ public class AnswerService {
         return answer;
     }
 
-    public List<AnswerReadResponse> findAnswersByUserId(Long userId) {
+    public AnswerPageResponse<AnswerReadResponse> findAnswersByUserId(int page, Long userId) {
         userService.getUser(userId);
-
-        if(!rq.getUser().getId().equals(userId)) {
+        User currentUser = rq.getUser();
+        if(!currentUser.getId().equals(userId) && !currentUser.getRole().equals(Role.ADMIN)) {
             throw new ErrorException(ErrorCode.ANSWER_INVALID_USER);
         }
 
-        return answerRepository.findByAuthorIdOrderByCreateDateDesc(userId)
+        if(page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Page<Answer> answersPage = answerRepository.findByAuthorId(pageable, userId);
+
+        List<AnswerReadResponse> answers = answersPage
+                .getContent()
                 .stream()
                 .map(AnswerReadResponse::new)
                 .toList();
+
+        return new AnswerPageResponse<>(answersPage, answers);
     }
 
 }

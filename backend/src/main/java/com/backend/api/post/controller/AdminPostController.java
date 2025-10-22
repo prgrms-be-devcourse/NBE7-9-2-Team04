@@ -2,9 +2,9 @@ package com.backend.api.post.controller;
 
 import com.backend.api.post.dto.request.AdminPostPinRequest;
 import com.backend.api.post.dto.request.AdminPostStatusRequest;
+import com.backend.api.post.dto.response.PostPageResponse;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.post.service.AdminPostService;
-import com.backend.domain.post.entity.Post;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,9 +24,11 @@ public class AdminPostController {
 
     @GetMapping
     @Operation(summary = "전체 게시글 조회", description = "관리자가 모든 게시글을 조회합니다.")
-    public ApiResponse<List<PostResponse>> getAllPosts() {
-        List<PostResponse> posts = adminPostService.getAllPosts(rq.getUser());
-        return ApiResponse.ok("전체 게시글 조회 성공", posts);
+    public ApiResponse<PostPageResponse<PostResponse>> getAllPosts(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        PostPageResponse<PostResponse> postsPage = adminPostService.getAllPosts(page, rq.getUser());
+        return ApiResponse.ok("전체 게시글 조회 성공", postsPage);
     }
 
     @GetMapping("/{postId}")

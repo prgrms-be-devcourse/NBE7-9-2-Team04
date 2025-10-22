@@ -2,12 +2,17 @@ package com.backend.api.user.service;
 
 import com.backend.api.user.dto.request.AdminUserStatusUpdateRequest;
 import com.backend.api.user.dto.response.AdminUserResponse;
+import com.backend.api.user.dto.response.UserPageResponse;
 import com.backend.domain.user.entity.AccountStatus;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,20 +44,26 @@ public class AdminUserService {
     }
 
     // 전체 사용자 조회
-    public List<AdminUserResponse> getAllUsers(User admin) {
+    public UserPageResponse<AdminUserResponse> getAllUsers(int page, User admin) {
         validateAdminAuthority(admin);
-        List<User> users = userRepository.findAll();
 
-        if (users.isEmpty()) {
+        if (page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Page<User> usersPage = userRepository.findAll(pageable);
+
+        if (usersPage.isEmpty()) {
             throw new ErrorException(ErrorCode.NOT_FOUND_USER);
         }
 
-        return mapToResponseList(users);
+        List<AdminUserResponse> users = mapToResponseList(usersPage);
+
+        return UserPageResponse.from(usersPage, users);
     }
 
     // 사용자 목록을 응답 DTO 리스트로 매핑
-    private List<AdminUserResponse> mapToResponseList(List<User> users) {
-        return users.stream()
+    private List<AdminUserResponse> mapToResponseList(Page<User> usersPage) {
+        return usersPage.getContent()
+                .stream()
                 .map(AdminUserResponse::from)
                 .toList();
     }

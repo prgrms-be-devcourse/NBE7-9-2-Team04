@@ -507,19 +507,19 @@ public class AnswerControllerTest {
 
             resultActions
                     .andExpect(jsonPath("$.length()").value(3))
-                    .andExpect(jsonPath("$.data[*].id", containsInRelativeOrder(3, 1)))
-                    .andExpect(jsonPath("$.data[0].id").value(3))
-                    .andExpect(jsonPath("$.data[0].createDate").exists())
-                    .andExpect(jsonPath("$.data[0].modifyDate").exists())
-                    .andExpect(jsonPath("$.data[0].content").value("세 번째 답변 내용"))
-                    .andExpect(jsonPath("$.data[0].aiScore").value(10))
-                    .andExpect(jsonPath("$.data[0].isPublic").value(true))
-                    .andExpect(jsonPath("$.data[0].feedback").value("좋은 답변입니다."))
-                    .andExpect(jsonPath("$.data[0].authorId").value(2))
-                    .andExpect(jsonPath("$.data[0].authorNickName").value("gilddong"))
-                    .andExpect(jsonPath("$.data[0].questionId").value(1))
-                    .andExpect(jsonPath("$.data[*].isPublic").value(Matchers.not(Matchers.hasItem(false))))
-                    .andExpect(jsonPath("$.data[*].id").value(Matchers.not(Matchers.hasItem(2))));
+                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(3, 1)))
+                    .andExpect(jsonPath("$.data.answers[0].id").value(3))
+                    .andExpect(jsonPath("$.data.answers[0].createDate").exists())
+                    .andExpect(jsonPath("$.data.answers[0].modifyDate").exists())
+                    .andExpect(jsonPath("$.data.answers[0].content").value("세 번째 답변 내용"))
+                    .andExpect(jsonPath("$.data.answers[0].aiScore").value(10))
+                    .andExpect(jsonPath("$.data.answers[0].isPublic").value(true))
+                    .andExpect(jsonPath("$.data.answers[0].feedback").value("좋은 답변입니다."))
+                    .andExpect(jsonPath("$.data.answers[0].authorId").value(2))
+                    .andExpect(jsonPath("$.data.answers[0].authorNickName").value("gilddong"))
+                    .andExpect(jsonPath("$.data.answers[0].questionId").value(1))
+                    .andExpect(jsonPath("$.data.answers[*].isPublic").value(Matchers.not(Matchers.hasItem(false))))
+                    .andExpect(jsonPath("$.data.answers[*].id").value(Matchers.not(Matchers.hasItem(2))));
         }
 
         @Test
