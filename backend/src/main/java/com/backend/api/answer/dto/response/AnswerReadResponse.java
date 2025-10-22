@@ -14,12 +14,8 @@ public record AnswerReadResponse(
         LocalDateTime modifyDate,
         @Schema(description = "면접 답변 내용", example = "이것은 면접 답변입니다.")
         String content,
-        @Schema(description = "AI 점수", example = "100")
-        Integer aiScore,
         @Schema(description = "답변 공개 여부", example = "true")
         boolean isPublic,
-        @Schema(description = "피드백", example = "이것은 피드백 내용입니다.")
-        String feedback,
         @Schema(description = "작성자 ID", example = "1")
         Long authorId,
         @Schema(description = "작성자 닉네임", example = "user123")
@@ -33,9 +29,7 @@ public record AnswerReadResponse(
                 answer.getCreateDate(),
                 answer.getModifyDate(),
                 answer.getContent(),
-                answer.getAiScore(),
                 answer.isPublic(),
-                answer.getFeedback(),
                 answer.getAuthor().getId(),
                 answer.getAuthor().getNickname(),
                 answer.getQuestion().getId()
