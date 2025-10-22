@@ -4,7 +4,6 @@ package com.backend.api.billing.service;
 import com.backend.api.billing.dto.request.BillingRequest;
 import com.backend.api.billing.dto.response.BillingPaymentResponse;
 import com.backend.api.billing.dto.response.BillingResponse;
-import com.backend.api.payment.dto.request.AutoPaymentRequest;
 import com.backend.api.payment.dto.response.PaymentResponse;
 import com.backend.api.subscription.dto.response.SubscriptionResponse;
 import com.backend.api.subscription.service.SubscriptionService;
@@ -52,6 +51,10 @@ public class BillingService {
 
         // 구독 PREMIUM 전환
         SubscriptionResponse updated = subscriptionService.activatePremium(request.customerKey(), billingKey);
+
+        //카드 등록 시 첫번째 결제 바로 실행
+        Subscription subscription = subscriptionService.getSubscriptionByCustomerKey(request.customerKey());
+        autoPayment(subscription);
 
         return new BillingResponse(billingKey, updated.customerKey());
     }
@@ -103,52 +106,4 @@ public class BillingService {
         PaymentResponse.from(payment);
     }
 
-
-
-    @Transactional
-    public PaymentResponse tossAutoPayment(AutoPaymentRequest request){
-
-        Subscription subscription = subscriptionService.getSubscriptionByCustomerKey(request.customerKey());
-
-        if (subscription.getBillingKey() == null) {
-            throw new ErrorException(ErrorCode.BILLING_KEY_NOT_FOUND);
-        }
-
-        if (!subscription.isActive()) {
-            throw new ErrorException(ErrorCode.SUBSCRIPTION_INACTIVE);
-        }
-
-        BillingPaymentResponse response = webClient.post()
-                .uri("/v1/billing/" + subscription.getBillingKey())
-                .bodyValue(Map.of(
-                        "customerKey", subscription.getCustomerKey(),
-                        "amount", subscription.getPrice(),
-                        "orderId", UUID.randomUUID().toString(),
-                        "orderName", "프리미엄 구독 자동결제",
-                        "customerEmail", subscription.getUser().getEmail(),
-                        "customerName", subscription.getUser().getName()
-                ))
-                .retrieve()
-                .bodyToMono(BillingPaymentResponse.class)
-                .block();
-
-        LocalDateTime approvedAt = LocalDateTime.parse(response.approvedAt(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-
-        Payment payment = Payment.builder()
-                .orderId(response.orderId())
-                .paymentKey(response.paymentKey())
-                .orderName(response.orderName())
-                .totalAmount(subscription.getPrice())
-                .method("CARD")
-                .status(PaymentStatus.valueOf(response.status()))
-                .approvedAt(approvedAt)
-                .user(subscription.getUser())
-                .subscription(subscription)
-                .build();
-
-        paymentRepository.save(payment);
-
-        subscriptionService.updateNextBillingDate(subscription, LocalDate.now().plusMonths(1));
-        return PaymentResponse.from(payment);
-    }
 }
