@@ -51,6 +51,7 @@ public enum ErrorCode {
     QNA_CONTENT_NOT_BLANK(HttpStatus.BAD_REQUEST, "문의 내용은 비워둘 수 없습니다."),
     QNA_TITLE_NOT_BLANK(HttpStatus.BAD_REQUEST, "문의 제목은 비워둘 수 없습니다."),
     QNA_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "Q&A 답변 등록 권한이 없습니다."),
+    QNA_ADMIN_ANSWER_FINISHED(HttpStatus.BAD_REQUEST, "관리자가 답변을 완료한 Q&A입니다."),
 
     //Question
     QUESTION_TITLE_NOT_BLANK(HttpStatus.BAD_REQUEST, "질문 제목은 공백일 수 없습니다."),
