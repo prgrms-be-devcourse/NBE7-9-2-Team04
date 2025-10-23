@@ -31,7 +31,7 @@ public enum Tier {
 
     //다음 티어 계산. master 찍으면 master를 반환한다
     public Tier nextTier() {
-        int count = this.ordinal();
+        int count = this.ordinal(); //enum 순서
         Tier[] values = Tier.values();
         return count < values.length - 1 ? values[count + 1] : values[count - 1];
     }

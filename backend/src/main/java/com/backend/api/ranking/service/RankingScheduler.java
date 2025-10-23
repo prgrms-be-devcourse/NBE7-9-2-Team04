@@ -12,6 +12,7 @@ public class RankingScheduler {
 
     private final RankingService rankingService;
 
+    //스케줄링 시간
     @Scheduled(cron = "0 0 12 * * *", zone = "Asia/Seoul")
     public void runAutoSubscriptionTask(){
         try {
