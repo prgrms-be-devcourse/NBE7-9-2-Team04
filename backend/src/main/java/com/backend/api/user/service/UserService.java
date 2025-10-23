@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -71,7 +70,7 @@ public class UserService {
                 .questionLimit(5)                   // 무료 사용자는 질문 제한 5회
                 .startDate(LocalDateTime.now())
                 .endDate(null)        // BASIC은 실질적 만료 개념 X
-                .nextBillingDate(LocalDate.now())    // 유료 전환 시점 기준으로 계산됨
+                .nextBillingDate(null)
                 .customerKey(UUID.randomUUID().toString()) // Toss에서 사용할 유저별 key
                 .billingKey(null)                    // 아직 유료결제X → null
                 .build();
