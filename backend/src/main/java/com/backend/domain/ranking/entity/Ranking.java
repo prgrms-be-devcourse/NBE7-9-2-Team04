@@ -2,10 +2,7 @@ package com.backend.domain.ranking.entity;
 
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -18,9 +15,26 @@ public class Ranking extends BaseEntity {
     @Column(nullable = false)
     private Integer totalScore;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String tier;
+    private Tier tier;
+
+    @Column(nullable = false)
+    private Integer rank;
+
 
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
+
+    public void updateTotalScore(int totalScore) {
+        this.totalScore = totalScore;
+    }
+
+    public void updateTier(Tier tier) {
+        this.tier = tier;
+    }
+
+    public void updateRank(Integer rank) {
+        this.rank = rank;
+    }
 }
