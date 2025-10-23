@@ -1,18 +1,18 @@
-package com.backend.domain.user.entity;
+package com.backend.domain.userQuestion.entity;
 
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 //user_id, question_id를 FK키로 가지는 테이블
+//동일한 문제 풀이에 대해서는 새로 생성하지 않고 갱신하도록 한다.
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "question_id"}))
 public class UserQuestion extends BaseEntity {
 
 
@@ -24,7 +24,8 @@ public class UserQuestion extends BaseEntity {
     @JoinColumn(name = "question")
     private Question question;
 
-    private int score;
+    @Column(nullable = false)
+    private Integer aiScore;
 
 
 }

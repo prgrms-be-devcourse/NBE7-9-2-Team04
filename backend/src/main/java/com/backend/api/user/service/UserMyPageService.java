@@ -2,7 +2,7 @@ package com.backend.api.user.service;
 
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.domain.user.entity.User;
-import com.backend.domain.user.entity.UserQuestion;
+import com.backend.domain.userQuestion.entity.UserQuestion;
 import com.backend.domain.user.repository.UserQuestionRepository;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.Rq.Rq;
