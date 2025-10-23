@@ -47,10 +47,13 @@ import java.util.Optional;
             String nickName, // 작성자의 닉네임
 
         @Schema(description = "카테고리 타입", example = "PROJECT")
-        PostCategoryType categoryType
+        PostCategoryType categoryType,
+
+        @Schema(description = "내 게시글 여부", example = "true")
+        Boolean isMine
     ) {
 
-    public static PostResponse from(Post post) {
+    public static PostResponse from(Post post, Boolean isMine) {
 
         String nickName = Optional.ofNullable(post.getUsers())
                 .map(user -> user.getNickname())
@@ -72,7 +75,8 @@ import java.util.Optional;
                 post.getPinStatus(),
                 post.getRecruitCount(),
                 nickName,
-                post.getPostCategoryType()
+                post.getPostCategoryType(),
+                isMine
         );
     }
 }

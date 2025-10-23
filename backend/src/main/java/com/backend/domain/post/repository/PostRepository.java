@@ -3,6 +3,7 @@ package com.backend.domain.post.repository;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
+import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,5 +21,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUsers(User user, Pageable pageable);
 
     @EntityGraph(attributePaths = {"users"})
-    List<Post> findByPinStatusOrderByCreateDateDesc(PinStatus pinStatus);
+    List<Post> findByPinStatusAndStatusOrderByCreateDateDesc(PinStatus pinStatus, PostStatus status);
 }

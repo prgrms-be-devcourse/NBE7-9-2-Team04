@@ -19,9 +19,11 @@ public record CommentResponse(
         @Schema(description = "작성자 닉네임", example = "user123")
         String authorNickName,
         @Schema(description = "게시글 ID", example = "1")
-        Long postId
+        Long postId,
+        @Schema(description = "내 댓글 여부", example = "true")
+        Boolean isMine
 ) {
-    public CommentResponse(Comment comment) {
+    public CommentResponse(Comment comment, Boolean isMine) {
         this(
                 comment.getId(),
                 comment.getCreateDate(),
@@ -29,7 +31,8 @@ public record CommentResponse(
                 comment.getContent(),
                 comment.getAuthor().getId(),
                 comment.getAuthor().getNickname(),
-                comment.getPost().getId()
+                comment.getPost().getId(),
+                isMine
         );
     }
 }

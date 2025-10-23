@@ -5,11 +5,11 @@ import { fetchApi } from "@/lib/client";
 import Link from "next/link";
 import Pagination from "@/components/pagination";
 import CategoryTab from "@/components/categoryTab";
-import { Post } from "@/types/post";
+import { PostResponse } from "@/types/post";
 
 export default function RecruitmentPage() {
   const [pinnedPosts, setPinnedPosts] = useState<any[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<PostResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("전체");
@@ -55,7 +55,7 @@ export default function RecruitmentPage() {
           method: "GET",
           cache: "no-store",
         });
-        setPosts(apiResponse.data ?? []);
+        setPosts(apiResponse.data.posts ?? []);
       } catch (err: any) {
         console.error("게시글 불러오기 실패:", err);
         alert(err.message);
