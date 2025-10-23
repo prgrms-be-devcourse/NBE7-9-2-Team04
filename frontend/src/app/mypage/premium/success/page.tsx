@@ -1,77 +1,55 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { fetchApi } from "@/lib/client";
 
 export default function SuccessPage() {
   const searchParams = useSearchParams();
-  const [responseData, setResponseData] = useState<any>(null);
+  const customerKey = searchParams.get("customerKey");
+  const authKey = searchParams.get("authKey");
+  const router = useRouter();
+  const [message, setMessage] = useState("카드 등록이 완료되었습니다 ✅");
 
   useEffect(() => {
-    async function confirm() {
-      const requestData = {
-        orderId: searchParams.get("orderId"),
-        amount: Number(searchParams.get("amount")),
-        paymentKey: searchParams.get("paymentKey"),
-      };
+    if (customerKey && authKey) {
+      (async () => {
+        try {
+          await fetchApi(`/api/v1/billing/confirm`, {
+            method: "POST",
+            body: JSON.stringify({
+              customerKey,
+              authKey,
+            }),
+          });
 
-      const response = await fetch("http://localhost:8080/api/v1/payments/confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
-      });
+          setMessage(
+            "카드 등록 및 결제가 완료되었습니다.<br/> 다음 결제일은 오늘로부터 한 달 뒤에 자동으로 진행됩니다."
+          );
 
-      const json = await response.json();
-
-      if (!response.ok) {
-        throw { message: json.message, code: json.code };
-      }
-
-      setResponseData(json);
+          // 3초 후 자동 이동
+          setTimeout(() => {
+            router.push("/mypage/premium");
+          }, 3000);
+        } catch (error) {
+          console.error("Billing issue failed:", error);
+          setMessage(
+            "결제 정보 등록 중 오류가 발생했습니다. 다시 시도해주세요."
+          );
+        }
+      })();
     }
-
-    confirm().catch((error) => {
-      window.location.href = `/mypage/fail?code=${error.code}&message=${error.message}`;
-    });
-  }, []);
+  }, [customerKey, authKey, router]);
 
   return (
-    <div className="flex flex-col items-center py-10">
-      <img
-        src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png"
-        width={100}
-        alt="success"
-        className="mb-4"
-      />
-      <h2 className="text-2xl font-bold mb-6">결제를 완료했어요 🎉</h2>
-
-      <div className="w-[360px] text-left bg-white p-4 rounded-md shadow">
-        <p>
-          <b>결제 금액:</b>{" "}
-          {Number(searchParams.get("amount")).toLocaleString()}원
-        </p>
-        <p>
-          <b>주문번호:</b> {searchParams.get("orderId")}
-        </p>
-        <p>
-          <b>paymentKey:</b> {searchParams.get("paymentKey")}
-        </p>
+    <>
+      <div className="flex flex-col items-center justify-center min-h-screen text-center px-6">
+        <h1
+          className="text-2xl font-bold mb-4"
+          dangerouslySetInnerHTML={{ __html: message }}
+        />
+        <p className="text-gray-500">잠시만 기다려주세요...</p>
       </div>
-
-      {responseData && (
-        <div className="mt-6 w-[400px] bg-gray-100 p-4 rounded-md text-sm">
-          <b>서버 응답:</b>
-          <pre>{JSON.stringify(responseData, null, 2)}</pre>
-        </div>
-      )}
-
-      <Link
-        href="/mypage"
-        className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-      >
-        마이페이지로 돌아가기
-      </Link>
-    </div>
+    </>
   );
 }

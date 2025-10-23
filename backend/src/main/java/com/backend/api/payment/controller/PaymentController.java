@@ -1,6 +1,6 @@
 package com.backend.api.payment.controller;
 
-import com.backend.api.payment.dto.reponse.PaymentResponse;
+import com.backend.api.payment.dto.response.PaymentResponse;
 import com.backend.api.payment.dto.request.PaymentRequest;
 import com.backend.api.payment.service.PaymentService;
 import com.backend.global.dto.response.ApiResponse;
@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+//2차 때 사용x
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/payments")

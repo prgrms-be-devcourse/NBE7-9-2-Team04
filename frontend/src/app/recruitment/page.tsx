@@ -173,16 +173,10 @@ export default function RecruitmentPage() {
       ? regularPosts
       : regularPosts.filter((post) => post.category === selectedCategory);
 
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
-    if (a.status === "모집중" && b.status !== "모집중") return -1;
-    if (a.status !== "모집중" && b.status === "모집중") return 1;
-    return 0;
-  });
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = sortedPosts.slice(indexOfFirstPost, indexOfLastPost);
-
+  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
   return (
     <div className="max-w-screen-xl mx-auto px-6 py-10">
       {/* 헤더 */}
