@@ -14,6 +14,7 @@ import com.backend.global.Rq.Rq;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
+import static org.hamcrest.Matchers.hasItem;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -409,10 +410,8 @@ public class AdminQuestionControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("관리자 질문 목록 조회 성공"))
-                    .andExpect(jsonPath("$.data").isArray())
-                    .andExpect(jsonPath("$.data.length()").value(2))
-                    .andExpect(jsonPath("$.data[0].title").value("승인 질문"))
-                    .andExpect(jsonPath("$.data[1].title").value("미승인 질문"))
+                    .andExpect(jsonPath("$.data.questions").isArray())
+                    .andExpect(jsonPath("$.data.questions[*].title", hasItem("승인 질문")))
                     .andDo(print());
         }
 

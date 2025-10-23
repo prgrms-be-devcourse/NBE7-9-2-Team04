@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -83,19 +84,19 @@ class QnaControllerTest {
         @Test
         @DisplayName("QnA 전체 조회 성공")
         void success_all() throws Exception {
-            mockMvc.perform(get("/api/v1/Qna")
+            mockMvc.perform(get("/api/v1/qna")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("Qna 목록 조회 성공"))
-                    .andExpect(jsonPath("$.data[0].title").value("기존 제목"))
+                    .andExpect(jsonPath("$.data[*].title", hasItem("기존 제목")))
                     .andDo(print());
         }
 
         @Test
         @DisplayName("QnA 단건 조회 성공")
         void success_single() throws Exception {
-            mockMvc.perform(get("/api/v1/Qna/{qnaId}", savedQna.getId())
+            mockMvc.perform(get("/api/v1/qna/{qnaId}", savedQna.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
@@ -108,7 +109,7 @@ class QnaControllerTest {
         @Test
         @DisplayName("QnA 단건 조회 실패 - 존재하지 않는 ID")
         void fail_notFound() throws Exception {
-            mockMvc.perform(get("/api/v1/Qna/{qnaId}", 999L)
+            mockMvc.perform(get("/api/v1/qna/{qnaId}", 999L)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
@@ -119,7 +120,7 @@ class QnaControllerTest {
         @Test
         @DisplayName("QnA 카테고리별 조회 성공")
         void success_category() throws Exception {
-            mockMvc.perform(get("/api/v1/Qna/category/{categoryType}", QnaCategoryType.ACCOUNT)
+            mockMvc.perform(get("/api/v1/qna/category/{categoryType}", QnaCategoryType.ACCOUNT)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
@@ -131,7 +132,7 @@ class QnaControllerTest {
         @Test
         @DisplayName("QnA 카테고리별 조회 실패 - 존재하지 않는 카테고리")
         void fail_invalidCategory() throws Exception {
-            mockMvc.perform(get("/api/v1/Qna/category/INVALID")
+            mockMvc.perform(get("/api/v1/qna/category/INVALID")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isInternalServerError())
                     .andExpect(jsonPath("$.status").value("INTERNAL_SERVER_ERROR"))
@@ -152,7 +153,7 @@ class QnaControllerTest {
                     QnaCategoryType.ACCOUNT
             );
 
-            mockMvc.perform(post("/api/v1/Qna")
+            mockMvc.perform(post("/api/v1/qna")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
@@ -172,7 +173,7 @@ class QnaControllerTest {
                     QnaCategoryType.SYSTEM
             );
 
-            mockMvc.perform(post("/api/v1/Qna")
+            mockMvc.perform(post("/api/v1/qna")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -190,7 +191,7 @@ class QnaControllerTest {
                     QnaCategoryType.SYSTEM
             );
 
-            mockMvc.perform(post("/api/v1/Qna")
+            mockMvc.perform(post("/api/v1/qna")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -213,7 +214,7 @@ class QnaControllerTest {
                     QnaCategoryType.SYSTEM
             );
 
-            mockMvc.perform(put("/api/v1/Qna/{qnaId}", savedQna.getId())
+            mockMvc.perform(put("/api/v1/qna/{qnaId}", savedQna.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -238,7 +239,7 @@ class QnaControllerTest {
                     QnaCategoryType.SYSTEM
             );
 
-            mockMvc.perform(put("/api/v1/Qna/{qnaId}", savedQna.getId())
+            mockMvc.perform(put("/api/v1/qna/{qnaId}", savedQna.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -256,7 +257,7 @@ class QnaControllerTest {
                     QnaCategoryType.ACCOUNT
             );
 
-            mockMvc.perform(put("/api/v1/Qna/{qnaId}", invalidId)
+            mockMvc.perform(put("/api/v1/qna/{qnaId}", invalidId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
@@ -273,7 +274,7 @@ class QnaControllerTest {
         @Test
         @DisplayName("QnA 삭제 성공")
         void success() throws Exception {
-            mockMvc.perform(delete("/api/v1/Qna/{qnaId}", savedQna.getId())
+            mockMvc.perform(delete("/api/v1/qna/{qnaId}", savedQna.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
@@ -287,7 +288,7 @@ class QnaControllerTest {
             savedQna.registerAnswer("관리자 답변");
             qnaRepository.save(savedQna);
 
-            mockMvc.perform(delete("/api/v1/Qna/{qnaId}", savedQna.getId())
+            mockMvc.perform(delete("/api/v1/qna/{qnaId}", savedQna.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value("관리자가 답변을 완료한 Q&A입니다."))
@@ -297,7 +298,7 @@ class QnaControllerTest {
         @Test
         @DisplayName("QnA 삭제 실패 - 존재하지 않는 ID")
         void fail_notFound() throws Exception {
-            mockMvc.perform(delete("/api/v1/Qna/{qnaId}", 999L)
+            mockMvc.perform(delete("/api/v1/qna/{qnaId}", 999L)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))

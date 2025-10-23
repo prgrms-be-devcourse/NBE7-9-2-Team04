@@ -275,8 +275,9 @@ class QuestionControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("질문 목록 조회 성공"))
-                    .andExpect(jsonPath("$.data").isArray())
-                    .andExpect(jsonPath("$.data[0].isApproved").value(true))
+                    .andExpect(jsonPath("$.data.questions").isArray())
+                    .andExpect(jsonPath("$.data.questions[0].title").value("승인된 질문"))
+                    .andExpect(jsonPath("$.data.questions[0].categoryType").value("NETWORK"))
                     .andDo(print());
         }
 
@@ -321,8 +322,8 @@ class QuestionControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("카테고리별 질문 조회 성공"))
-                    .andExpect(jsonPath("$.data[0].categoryType").value("OS"))
-                    .andExpect(jsonPath("$.data.length()").value(1)) // OS만 1건 반환
+                    .andExpect(jsonPath("$.data.questions[0].categoryType").value("OS"))
+                    .andExpect(jsonPath("$.data.questions.length()").value(1))
                     .andDo(print());
         }
     }
