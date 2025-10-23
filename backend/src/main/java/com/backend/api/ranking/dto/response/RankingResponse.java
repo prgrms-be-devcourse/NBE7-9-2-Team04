@@ -36,7 +36,7 @@ public record RankingResponse (
         if (currentTier == Tier.MASTER) {
             scoreToNextTier = 0; // 마스터면 더 이상 없음
         } else {
-            scoreToNextTier = Math.max(nextTier.getMinScore() - totalScore, 0);
+            scoreToNextTier =nextTier.getMinScore() - totalScore;
         }
 
         return new RankingResponse(
