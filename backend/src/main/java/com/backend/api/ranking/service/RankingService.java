@@ -1,10 +1,14 @@
 package com.backend.api.ranking.service;
 
+import com.backend.api.ranking.dto.response.RankingResponse;
+import com.backend.api.ranking.dto.response.RankingSummaryResponse;
 import com.backend.api.userQuestion.service.UserQuestionService;
 import com.backend.domain.ranking.entity.Ranking;
 import com.backend.domain.ranking.entity.Tier;
 import com.backend.domain.ranking.repository.RankingRepository;
 import com.backend.domain.user.entity.User;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +41,64 @@ public class RankingService {
         rankingRepository.save(ranking);
     }
 
+    //마이페이지용
+    @Transactional(readOnly = true)
+    public RankingResponse getMyRanking(User user) {
+        Ranking ranking = rankingRepository.findByUser(user)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        int rank = calculateUserRank(ranking);
+
+        return new RankingResponse(
+                user.getId(),
+                user.getNickname(),
+                ranking.getTotalScore(),
+                ranking.getTier(),
+                rank
+        );
+    }
+
+
+    //상위 10명
+    @Transactional(readOnly = true)
+    public List<RankingResponse> getTopRankings() {
+
+        List<Ranking> top10 = rankingRepository.findTop10ByOrderByTotalScoreDesc();
+
+        return top10.stream()
+                .map(r -> new RankingResponse(
+                        r.getUser().getId(),
+                        r.getUser().getNickname(),
+                        r.getTotalScore(),
+                        r.getTier(),
+                        r.getRank()
+                ))
+                .toList();
+    }
+
+    //상위 10명 + 내 랭킹
+    @Transactional(readOnly = true)
+    public RankingSummaryResponse getRankingSummary(User user) {
+
+        RankingResponse myRanking = getMyRanking(user);
+        List<RankingResponse> topRankings = getTopRankings();
+
+        return RankingSummaryResponse.from(myRanking, topRankings);
+    }
+
+
+
+    private int calculateUserRank(Ranking myRanking) {
+        List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
+        for (int i = 0; i < rankings.size(); i++) {
+            if (rankings.get(i).getUser().getId().equals(myRanking.getUser().getId())) {
+                return i + 1;
+            }
+        }
+        return rankings.size();
+    }
+
+    //스케줄러 랭킹 재계산
     @Transactional
     public void recalculateAllRankings() {
         List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
