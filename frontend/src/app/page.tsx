@@ -137,7 +137,7 @@ export default function HomePage() {
                 </div>
                 <div className="p-6 pt-0 flex-grow">
                   <Link
-                    href="/interview/portfolio"
+                    href="/portfolio_review"
                     className="text-blue-500 hover:underline p-0"
                   >
                     시작하기
