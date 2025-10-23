@@ -109,6 +109,7 @@ public class Subscription extends BaseEntity {
 
     public void setQuestionLimit(int questionLimit) {
         this.questionLimit = questionLimit;
+    }
     // 구독 유효성 검증
     public boolean isValid() {
         return this.isActive && this.endDate.isAfter(LocalDateTime.now());
