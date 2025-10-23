@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/Qna")
+@RequestMapping("/api/v1/qna")
 @RequiredArgsConstructor
 @Tag(name = "Qna", description = "Qna 관련 API")
 public class QnaController {
