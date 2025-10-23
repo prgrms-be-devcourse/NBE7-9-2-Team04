@@ -40,9 +40,11 @@ public class Post extends BaseEntity {
     private LocalDateTime deadline; // 마감일
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private PostStatus status; // 진행상태
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private PinStatus pinStatus; // 상단 고정 여부
 
     @NotNull

@@ -3,6 +3,7 @@ package com.backend.api.comment.controller;
 
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.PinStatus;
+import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
@@ -81,11 +82,14 @@ public class CommentControllerTest {
 
         Post post1 = Post.builder()
                 .title("제목")
-                .content("내용")
+                .introduction("소개")
+                .content("내용12321321321321")
                 .deadline(LocalDateTime.now().plusDays(7))
                 .status(PostStatus.ING)
                 .pinStatus(PinStatus.NOT_PINNED)
+                .recruitCount(5)
                 .users(userRepository.findById(1L).orElseThrow())
+                .postCategoryType(PostCategoryType.PROJECT)
                 .build();
         postRepository.save(post1);
 
@@ -326,14 +330,14 @@ public class CommentControllerTest {
 
         resultActions
                 .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$.data[*].id", containsInRelativeOrder(3, 1)))
-                .andExpect(jsonPath("$.data[0].id").value(3))
-                .andExpect(jsonPath("$.data[0].createDate").exists())
-                .andExpect(jsonPath("$.data[0].modifyDate").exists())
-                .andExpect(jsonPath("$.data[0].content").value("3번 댓글"))
-                .andExpect(jsonPath("$.data[0].authorId").value(1))
-                .andExpect(jsonPath("$.data[0].authorNickName").value("gildong"))
-                .andExpect(jsonPath("$.data[0].postId").value(1));
+                .andExpect(jsonPath("$.data.comments[*].id", containsInRelativeOrder(3, 1)))
+                .andExpect(jsonPath("$.data.comments[0].id").value(3))
+                .andExpect(jsonPath("$.data.comments[0].createDate").exists())
+                .andExpect(jsonPath("$.data.comments[0].modifyDate").exists())
+                .andExpect(jsonPath("$.data.comments[0].content").value("3번 댓글"))
+                .andExpect(jsonPath("$.data.comments[0].authorId").value(1))
+                .andExpect(jsonPath("$.data.comments[0].authorNickName").value("gildong"))
+                .andExpect(jsonPath("$.data.comments[0].postId").value(1));
 
     }
 
