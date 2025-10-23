@@ -86,7 +86,7 @@ public class PostService {
 
         if (page < 1) page = 1;
         Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
-        Page<Post> myPostsPage = postRepository.findByUsers(pageable, user);
+        Page<Post> myPostsPage = postRepository.findByUsers(user, pageable);
 
         List<PostResponse> myPosts =  myPostsPage
                 .getContent()
@@ -132,7 +132,7 @@ public class PostService {
         if (page < 1) page = 1;
 
         Pageable pageable = PageRequest.of(page -1, 9, Sort.by("createDate").descending());
-        Page<Post> postsPage = postRepository.findByPostCategoryType(pageable, categoryType);
+        Page<Post> postsPage = postRepository.findByPostCategoryType(categoryType, pageable);
 
         if (postsPage.isEmpty()) {
             throw new ErrorException(ErrorCode.POST_NOT_FOUND);
