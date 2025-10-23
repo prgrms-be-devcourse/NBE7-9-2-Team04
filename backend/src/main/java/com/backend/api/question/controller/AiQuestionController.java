@@ -5,6 +5,7 @@ import com.backend.api.question.service.OpenAiService;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,8 @@ public class AiQuestionController {
 
     private final Rq rq;
 
-    @PostMapping("/chat")
+    @PostMapping("")
+    @Operation(summary = "AI 면접 질문 생성", description = "AI 질문을 생성합니다.")
     public ApiResponse<List<AiQuestionResponse>> createAiQuestion() throws JsonProcessingException {
         Long userId = rq.getUser().getId();
         List<AiQuestionResponse> responses = openAiService.createAiQuestion(userId);

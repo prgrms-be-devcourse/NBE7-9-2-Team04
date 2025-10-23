@@ -1,6 +1,5 @@
 package com.backend.domain.subscription.entity;
 
-
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
@@ -58,14 +57,27 @@ public class Subscription extends BaseEntity {
     private String customerKey;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
     private List<Payment> payments = new ArrayList<>();
-
+  
     public void activatePremium(String billingKey) {
         this.billingKey = billingKey;
+        this.isActive = true;
+        this.subscriptionType = SubscriptionType.PREMIUM;
+        this.subscriptionName = "PREMIUM";
+        this.price = 9900L;
+        this.questionLimit = 8;
+        this.startDate = LocalDateTime.now();
+        this.endDate = this.startDate.plusMonths(1);
+        this.nextBillingDate = LocalDate.now().plusMonths(1);
+    }
+  
+
+    public void activate(LocalDateTime endDate) {
+        this.endDate = endDate;
         this.isActive = true;
         this.subscriptionType = SubscriptionType.PREMIUM;
         this.subscriptionName = "PREMIUM";
@@ -97,6 +109,9 @@ public class Subscription extends BaseEntity {
 
     public void setQuestionLimit(int questionLimit) {
         this.questionLimit = questionLimit;
+    // 구독 유효성 검증
+    public boolean isValid() {
+        return this.isActive && this.endDate.isAfter(LocalDateTime.now());
     }
 
 }

@@ -10,6 +10,7 @@ import com.backend.domain.user.entity.AccountStatus;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.domain.user.repository.VerificationCodeRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import com.backend.global.security.JwtTokenProvider;
@@ -29,11 +30,17 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final SubscriptionRepository subscriptionRepository;
+    private final EmailService emailService;
+    private final VerificationCodeRepository verificationCodeRepository;
 
     public User signUp(UserSignupRequest request) {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ErrorException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
+        if (!emailService.isVerified(request.email())) {
+            throw new ErrorException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         String encodedPassword = passwordEncoder.encode(request.password());
@@ -48,6 +55,11 @@ public class UserService {
                 .role(Role.USER)
                 .build();
 
+
+              
+      verificationCodeRepository.findByEmail(request.email())
+        .ifPresent(verificationCodeRepository::delete);
+      
         userRepository.save(user);
 
         Subscription basicSubscription = Subscription.builder()

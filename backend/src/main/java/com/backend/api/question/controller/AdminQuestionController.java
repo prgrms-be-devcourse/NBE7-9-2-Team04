@@ -1,6 +1,7 @@
 package com.backend.api.question.controller;
 
 import com.backend.api.question.dto.request.*;
+import com.backend.api.question.dto.response.QuestionPageResponse;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.api.question.service.AdminQuestionService;
 import com.backend.domain.user.entity.User;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/questions")
@@ -60,9 +63,11 @@ public class AdminQuestionController {
 
     @GetMapping
     @Operation(summary = "질문 전체 조회 (관리자)", description = "관리자가 질문 전체 조회합니다.(미승인 포함)")
-    public ApiResponse<java.util.List<QuestionResponse>> getAllQuestions() {
-        java.util.List<QuestionResponse> questions = adminQuestionService.getAllQuestions(rq.getUser());
-        return ApiResponse.ok("관리자 질문 목록 조회 성공", questions);
+    public ApiResponse<QuestionPageResponse<QuestionResponse>> getAllQuestions(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        QuestionPageResponse<QuestionResponse> questionsPage = adminQuestionService.getAllQuestions(page, rq.getUser());
+        return ApiResponse.ok("관리자 질문 목록 조회 성공", questionsPage);
     }
 
     @GetMapping("/{questionId}")

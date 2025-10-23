@@ -52,13 +52,20 @@ public class SecurityConfig {
 
 
                         .requestMatchers(HttpMethod.GET,
-                                "/api/v1/posts/{postId:\\d+}/comments",
+                                "/api/v1/posts/{postId}/comments",
                                 "/api/v1/posts",
-                                "/api/v1/posts/{postId:\\d+}",
+                                "/api/v1/posts/category/*",
+                                "/api/v1/posts/{postId}",
                                 "/api/v1/payments/*",
                                 "/api/v1/questions/{questionId}/answers",
                                 "/api/v1/questions/{questionId}/answers/*").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/users/login", "/api/v1/users/signup","/api/v1/users/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/v1/users/login",
+                                "/api/v1/users/signup",
+                                "/api/v1/users/refresh",
+                                "/api/v1/users/sendEmail",
+                                "/api/v1/users/verifyCode"
+                        ).permitAll()
                         .anyRequest().authenticated()
 
 

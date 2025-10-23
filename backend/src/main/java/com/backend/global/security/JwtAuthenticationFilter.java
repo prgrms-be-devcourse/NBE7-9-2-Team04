@@ -30,7 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     {
 
         //회원가입과 로그인은 인증 x
-        if(List.of("/api/v1/users/signup", "/api/v1/users/login").contains(request.getRequestURI())) {
+        if(List.of("/api/v1/users/signup",
+                "/api/v1/users/login",
+                "/api/v1/users/sendEmail",
+                "/api/v1/users/verifyCode").contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -1,14 +1,18 @@
 package com.backend.api.question.dto.request;
 
 import com.backend.api.question.dto.response.AiQuestionResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Schema(description = "AI 면접 질문 생성 요청")
 public record AiQuestionRequest(
+        @Schema(description = "AI 모델")
         String model,
+        @Schema(description = "프롬프트")
         List<MessagesRequest> messages
 ) {
     public static AiQuestionRequest of(String skill,String url){

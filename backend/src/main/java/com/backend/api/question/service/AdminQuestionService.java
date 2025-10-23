@@ -2,6 +2,7 @@ package com.backend.api.question.service;
 
 import com.backend.api.question.dto.request.AdminQuestionAddRequest;
 import com.backend.api.question.dto.request.AdminQuestionUpdateRequest;
+import com.backend.api.question.dto.response.QuestionPageResponse;
 import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.question.entity.Question;
@@ -10,6 +11,10 @@ import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -110,19 +115,24 @@ public class AdminQuestionService {
     }
 
     // 관리자용 질문 전체 조회
-    public List<QuestionResponse> getAllQuestions(User user) {
+    public QuestionPageResponse<QuestionResponse> getAllQuestions(int page, User user) {
         validateAdminAuthority(user);
-        List<Question> questions = questionRepository.findAll();
+        if (page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Page<Question> questionsPage = questionRepository.findAll(pageable);
 
-        if (questions.isEmpty()) {
+        if (questionsPage.isEmpty()) {
             throw new ErrorException(ErrorCode.NOT_FOUND_QUESTION);
         }
 
-        return mapToResponseList(questions);
+        List<QuestionResponse> questions = mapToResponseList(questionsPage);
+
+        return QuestionPageResponse.from(questionsPage, questions);
     }
 
-    private List<QuestionResponse> mapToResponseList(List<Question> questions) {
-        return questions.stream()
+    private List<QuestionResponse> mapToResponseList(Page<Question> questionsPage) {
+        return questionsPage.getContent()
+                .stream()
                 .map(QuestionResponse::from)
                 .toList();
     }

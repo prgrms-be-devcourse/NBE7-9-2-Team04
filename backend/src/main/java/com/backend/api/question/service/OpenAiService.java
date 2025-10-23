@@ -46,6 +46,9 @@ public class OpenAiService {
     public List<AiQuestionResponse> createAiQuestion(Long userId) throws JsonProcessingException {
 
         User user = userService.getUser(userId);
+        // AI 질문 생성 횟수 제한 검증
+        validateQuestionLimit(user);
+
         Resume resume = resumeService.getResumeByUser(user);
         AiQuestionRequest request = AiQuestionRequest.of(resume.getSkill(),resume.getPortfolioUrl());
 
@@ -57,6 +60,17 @@ public class OpenAiService {
 
         questionService.createListQuestion(questions);
         return AiQuestionResponse.toDtoList(questions);
+    }
+
+    // AI 질문 생성 횟수 제한 검증
+    private void validateQuestionLimit(User user) {
+        int availableCount = user.getAiQuestionLimit();
+        int usedCount = user.getAiQuestionUsedCount();
+
+        if (usedCount >= availableCount) {
+            throw new ErrorException(ErrorCode.AI_QUESTION_LIMIT_EXCEEDED);
+        }
+        user.incrementAiQuestionUsedCount();
     }
 
     private List<AiQuestionResponse> parseChatGptResponse(String connectionAi) throws JsonProcessingException {
