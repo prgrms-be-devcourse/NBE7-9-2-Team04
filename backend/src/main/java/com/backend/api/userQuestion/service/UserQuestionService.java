@@ -23,7 +23,7 @@ public class UserQuestionService {
             throw new ErrorException(ErrorCode.USER_QUESTION_ALREADY_EXISTS);
         }
 
-        UserQuestion userQuestion = UserQuestion.create(user, question);
+        UserQuestion userQuestion = UserQuestion.create(user, question); //builder 쓰도록 수정
         return userQuestionRepository.save(userQuestion);
     }
 
@@ -36,5 +36,10 @@ public class UserQuestionService {
         userQuestion.updateAiScoreIfHigher(aiScore);
 
         userQuestionRepository.save(userQuestion);
+    }
+
+    @Transactional(readOnly = true)
+    public Integer getTotalUserQuestionScore(User user) {
+        return userQuestionRepository.sumAiScoreByUser(user).orElse(0);
     }
 }
