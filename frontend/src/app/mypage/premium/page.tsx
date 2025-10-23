@@ -103,15 +103,22 @@ export default function MyPremiumPage() {
                   </span>
                 </p>
                 <p>
-                  📅 <span className="text-gray-600">다음 결제일:</span>{" "}
+                  📅{" "}
+                  <span className="text-gray-600">
+                    {isCanceledScheduled ? "만료일:" : "다음 결제일:"}
+                  </span>{" "}
                   <span className="font-semibold">
                     {subscription.nextBillingDate || "-"}
                   </span>
                 </p>
                 {isCanceledScheduled && (
                   <p className="text-orange-600 font-medium mt-2">
-                    ⚠️ {subscription.nextBillingDate}까지 이용 가능 (구독
-                    취소됨)
+                    ⚠️ 현재 구독이 취소된 상태이며,{" "}
+                    {subscription.nextBillingDate} 까지 서비스 이용이
+                    가능합니다.
+                    <br />
+                    ⚠️ 다시 구독을 원하실 경우, 만료일 이후 재결제를 진행해
+                    주세요.
                   </p>
                 )}
               </div>
