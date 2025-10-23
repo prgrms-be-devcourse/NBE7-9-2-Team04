@@ -99,17 +99,16 @@ public class User extends BaseEntity {
         return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.SUSPENDED;
     }
 
-    public boolean isPremium(){
-        return this.subscription != null &&
-                this.subscription.isValid() &&
-                this.subscription.getSubscriptionType() == SubscriptionType.PREMIUM;
+    public boolean isPremium() {
+        return this.subscription != null && this.subscription.isValid();
     }
 
     public int getAiQuestionLimit() {
-        if (this.subscription.isValid()) {
-            return 8; // 프리미엄 구독 시 8회
+        if (this.subscription != null) {
+            return this.subscription.getQuestionLimit();
         }
-        return 5; // 기본(베이직) 구독 시 5회
+        // 혹시나 subscription == null 일 경우 기본 값
+        return 5;
     }
 
     public void incrementAiQuestionUsedCount() {
