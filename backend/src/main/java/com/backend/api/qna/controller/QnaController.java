@@ -53,21 +53,21 @@ public class QnaController {
     @GetMapping
     @Operation(summary = "Qna 전체 조회", description = "사용자가 모든 Qna를 조회합니다.")
     public ApiResponse<List<QnaResponse>> getMyQnaList() {
-        List<QnaResponse> qnaList = qnaService.getQnaAll(rq.getUser());
+        List<QnaResponse> qnaList = qnaService.getQnaAll();
         return ApiResponse.ok("Qna 목록 조회 성공", qnaList);
     }
 
     @GetMapping("/{qnaId}")
     @Operation(summary = "Qna 단건 조회", description = "사용자가 특정 Qna를 조회합니다.")
     public ApiResponse<QnaResponse> getMyQna(@PathVariable Long qnaId) {
-        QnaResponse response = qnaService.getQna(qnaId, rq.getUser());
+        QnaResponse response = qnaService.getQna(qnaId);
         return ApiResponse.ok("%d번 Qna 조회 성공".formatted(qnaId), response);
     }
 
     @GetMapping("/category/{categoryType}")
     @Operation(summary = "카테고리별 Qna 조회", description = "사용자가 특정 카테고리의 Qna를 조회합니다.")
     public ApiResponse<List<QnaResponse>> getMyQnaByCategory(@PathVariable QnaCategoryType categoryType) {
-        List<QnaResponse> qnaList = qnaService.getQnaByCategory(rq.getUser(), categoryType);
+        List<QnaResponse> qnaList = qnaService.getQnaByCategory(categoryType);
         return ApiResponse.ok("%s 카테고리 Qna 조회 성공".formatted(categoryType.name()), qnaList);
     }
 }
