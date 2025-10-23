@@ -8,6 +8,7 @@ import com.backend.api.user.service.UserService;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
+import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
@@ -56,13 +57,15 @@ public class PostService {
 
         Post savedPost = postRepository.save(post);
 
-        return PostResponse.from(savedPost);
+        return PostResponse.from(savedPost, null);
     }
 
-    public PostResponse getPost(Long postId) {
+    public PostResponse getPost(Long postId, User user) {
         Post post = findPostByIdOrThrow(postId);
 
-        return PostResponse.from(post);
+        boolean isMine = user != null && post.getUsers().getId().equals(user.getId());
+
+        return PostResponse.from(post, isMine);
     }
 
     @Transactional(readOnly = true)
@@ -74,7 +77,7 @@ public class PostService {
 
         List<PostResponse> posts = postsPage.getContent()
                 .stream()
-                .map(PostResponse::from)
+                .map(Post -> PostResponse.from(Post, null))
                 .toList();
 
         return PostPageResponse.from(postsPage, posts);
@@ -91,7 +94,7 @@ public class PostService {
         List<PostResponse> myPosts =  myPostsPage
                 .getContent()
                 .stream()
-                .map(PostResponse::from)
+                .map(post -> PostResponse.from(post, null))
                 .toList();
 
         return PostPageResponse.from(myPostsPage, myPosts);
@@ -104,7 +107,7 @@ public class PostService {
 
         post.updatePost(request.title(), request.introduction(),request.content(), request.deadline(), request.status(), request.pinStatus(), request.recruitCount(), request.categoryType());
 
-        return PostResponse.from(post);
+        return PostResponse.from(post, null);
     }
 
     @Transactional
@@ -140,14 +143,14 @@ public class PostService {
 
         List<PostResponse> posts =  postsPage.getContent()
                 .stream()
-                .map(PostResponse::from)
+                .map(Post -> PostResponse.from(Post, null))
                 .toList();
 
         return PostPageResponse.from(postsPage, posts);
       }
-          
+
     public List<PostResponse> getPinnedPosts() {
-        List<Post> pinnedPosts = postRepository.findByPinStatusOrderByCreateDateDesc(PinStatus.PINNED);
+        List<Post> pinnedPosts = postRepository.findByPinStatusAndStatusOrderByCreateDateDesc(PinStatus.PINNED, PostStatus.ING);
 
         Collections.shuffle(pinnedPosts);
         List<Post> limitedList = pinnedPosts.stream()
@@ -155,7 +158,7 @@ public class PostService {
                 .toList();
 
         return limitedList.stream()
-                .map(PostResponse::from)
+                .map(post -> PostResponse.from(post, null))
                 .toList();
     }
 }

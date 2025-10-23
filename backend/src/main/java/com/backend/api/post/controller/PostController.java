@@ -97,7 +97,13 @@ public class PostController {
     @GetMapping("/{postId}")
     @Operation(summary = "게시글 단건 조회")
     public ApiResponse<PostResponse> getPost(@PathVariable Long postId) {
-        PostResponse response = postService.getPost(postId);
+        User user = null;
+        try {
+            user = rq.getUser();
+        } catch (Exception e) {
+        }
+
+        PostResponse response = postService.getPost(postId, user);
 
         return ApiResponse.ok(
                 "%d번 게시글을 성공적으로 조회했습니다.".formatted(postId),
