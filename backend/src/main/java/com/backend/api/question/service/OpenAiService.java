@@ -3,11 +3,13 @@ package com.backend.api.question.service;
 import com.backend.api.question.dto.request.AiQuestionRequest;
 import com.backend.api.question.dto.response.AiQuestionResponse;
 import com.backend.api.question.dto.response.ChatGptResponse;
+import com.backend.api.resume.dto.response.ResumeAiFeedbackResponse;
+import com.backend.api.resume.dto.request.ResumeAiFeedbackRequest;
 import com.backend.api.resume.service.ResumeService;
-import com.backend.api.user.service.UserService;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,14 +40,15 @@ public class OpenAiService {
 
     private final RestClient restClient;
     private final QuestionService questionService;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final ResumeService resumeService;
     private final ObjectMapper objectMapper;
 
     @Transactional
     public List<AiQuestionResponse> createAiQuestion(Long userId) throws JsonProcessingException {
 
-        User user = userService.getUser(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
         // AI 질문 생성 횟수 제한 검증
         validateQuestionLimit(user);
 
@@ -60,6 +63,27 @@ public class OpenAiService {
 
         questionService.createListQuestion(questions);
         return AiQuestionResponse.toDtoList(questions);
+    }
+
+    @Transactional
+    public ResumeAiFeedbackResponse createResumeAiFeedback(Long userId) throws JsonProcessingException {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        if(!user.isPremium()){
+            throw new ErrorException(ErrorCode.AI_FEEDBACK_FOR_PREMIUM_ONLY);
+        }
+
+        Resume resume = resumeService.getResumeByUser(user);
+
+        ResumeAiFeedbackRequest request = ResumeAiFeedbackRequest.of(resume);
+
+        String rawApiResponse = connectionAi(request);
+
+        String feedbackContent = parseSingleContentFromResponse(rawApiResponse);
+
+        return ResumeAiFeedbackResponse.of(feedbackContent);
     }
 
     // AI 질문 생성 횟수 제한 검증
@@ -86,7 +110,13 @@ public class OpenAiService {
         return objectMapper.readValue(cleanJson, new TypeReference<>() {});
     }
 
-    private String connectionAi(AiQuestionRequest request){
+
+    private String parseSingleContentFromResponse(String rawApiResponse) throws JsonProcessingException {
+        ChatGptResponse responseDto = objectMapper.readValue(rawApiResponse, ChatGptResponse.class);
+        return responseDto.choiceResponses().get(0).message().content();
+    }
+
+    private <T> String connectionAi(T request){
         return restClient.post()
                 .uri(apiUrl)
                 .header("Authorization", "Bearer " + apiKey)
