@@ -22,4 +22,10 @@ public class Feedback extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     private Answer answer;
+
+    public void update(Answer answer, int score, String content) {
+        this.answer = answer;
+        this.aiScore = score;
+        this.content = content;
+    }
 }
