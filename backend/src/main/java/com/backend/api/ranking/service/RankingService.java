@@ -23,18 +23,29 @@ public class RankingService {
     private final UserQuestionService userQuestionService;
 
     @Transactional
+    public Ranking createRanking(User user) {
+
+        if (rankingRepository.existsByUser(user)) {
+            throw new ErrorException(ErrorCode.RANKING_ALREADY_EXISTS);
+        }
+
+        Ranking ranking = Ranking.builder()
+                .user(user)
+                .totalScore(0)
+                .tier(Tier.UNRATED)
+                .rank(null)
+                .build();
+
+        return rankingRepository.save(ranking);
+    }
+
+
+    @Transactional
     public void updateUserRanking(User user){
 
         int totalScore = userQuestionService.getTotalUserQuestionScore(user);
 
-        Ranking ranking = rankingRepository.findByUser(user)
-                .orElseGet(() -> Ranking.builder()
-                        .user(user)
-                        .totalScore(0)
-                        .tier(Tier.UNRATED)
-                        .rank(null)
-                        .build());
-
+        Ranking ranking = createRanking(user);
         ranking.updateTotalScore(totalScore);
         ranking.updateTier(Tier.fromScore(totalScore));
 

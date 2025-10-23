@@ -23,7 +23,11 @@ public class UserQuestionService {
             throw new ErrorException(ErrorCode.USER_QUESTION_ALREADY_EXISTS);
         }
 
-        UserQuestion userQuestion = UserQuestion.create(user, question); //builder 쓰도록 수정
+        UserQuestion userQuestion = UserQuestion.builder()
+                .user(user)
+                .question(question)
+                .build();
+
         return userQuestionRepository.save(userQuestion);
     }
 

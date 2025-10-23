@@ -12,4 +12,6 @@ public interface RankingRepository extends JpaRepository<Ranking,Long> {
 
     List<Ranking> findAllByOrderByTotalScoreDesc();
     List<Ranking> findTop10ByOrderByTotalScoreDesc(); //상위 10명만 추출
+
+    boolean existsByUser(User user);
 }
