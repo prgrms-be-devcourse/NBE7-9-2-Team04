@@ -47,15 +47,7 @@ public class RankingService {
         Ranking ranking = rankingRepository.findByUser(user)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
 
-        int rank = calculateUserRank(ranking);
-
-        return new RankingResponse(
-                user.getId(),
-                user.getNickname(),
-                ranking.getTotalScore(),
-                ranking.getTier(),
-                rank
-        );
+        return RankingResponse.from(ranking);
     }
 
 
@@ -63,16 +55,9 @@ public class RankingService {
     @Transactional(readOnly = true)
     public List<RankingResponse> getTopRankings() {
 
-        List<Ranking> top10 = rankingRepository.findTop10ByOrderByTotalScoreDesc();
-
-        return top10.stream()
-                .map(r -> new RankingResponse(
-                        r.getUser().getId(),
-                        r.getUser().getNickname(),
-                        r.getTotalScore(),
-                        r.getTier(),
-                        r.getRank()
-                ))
+        return rankingRepository.findTop10ByOrderByTotalScoreDesc()
+                .stream()
+                .map(RankingResponse::from)
                 .toList();
     }
 
@@ -87,17 +72,6 @@ public class RankingService {
     }
 
 
-
-    private int calculateUserRank(Ranking myRanking) {
-        List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
-        for (int i = 0; i < rankings.size(); i++) {
-            if (rankings.get(i).getUser().getId().equals(myRanking.getUser().getId())) {
-                return i + 1;
-            }
-        }
-        return rankings.size();
-    }
-
     //스케줄러 랭킹 재계산
     @Transactional
     public void recalculateAllRankings() {
@@ -111,4 +85,16 @@ public class RankingService {
 
         rankingRepository.saveAll(rankings);
     }
+
+
+//
+//    private int calculateUserRank(Ranking myRanking) {
+//        List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
+//        for (int i = 0; i < rankings.size(); i++) {
+//            if (rankings.get(i).getUser().getId().equals(myRanking.getUser().getId())) {
+//                return i + 1;
+//            }
+//        }
+//        return rankings.size();
+//    }
 }
