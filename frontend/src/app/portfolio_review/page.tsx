@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 // 임시 로그인 / 구독 / 포트폴리오 상태
 const mockUser = {
   isLoggedIn: true,
-  isPremium: true,
+  isPremium: false,
   hasPortfolio: true,
 };
 
