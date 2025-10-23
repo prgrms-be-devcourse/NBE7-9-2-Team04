@@ -80,7 +80,7 @@ public class CommentService {
         postService.findPostByIdOrThrow(postId);
 
         if (page < 1) page = 1;
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, 20);
 
         Page<Comment> commentsPage  = commentRepository.findByPostId(pageable, postId);
 

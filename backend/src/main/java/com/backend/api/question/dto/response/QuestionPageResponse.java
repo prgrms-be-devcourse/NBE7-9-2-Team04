@@ -12,14 +12,20 @@ public record QuestionPageResponse<T>(
         @Schema(description = "현재 페이지 번호", example = "3")
         int currentPage,
         @Schema(description = "전체 페이지 수", example = "10")
-        int totalPages
+        int totalPages,
+        @Schema(description = "전체 질문 수", example = "95")
+        int totalCount,
+        @Schema(description = "페이지당 질문 수", example = "10")
+        int pageSize
 ) {
 
     public static <T> QuestionPageResponse<T> from(Page<Question> page, List<T> questions) {
         return new QuestionPageResponse<>(
                 questions,
                 page.getNumber() + 1,
-                page.getTotalPages()
+                page.getTotalPages(),
+                (int) page.getTotalElements(),
+                page.getSize()
         );
     }
 }
