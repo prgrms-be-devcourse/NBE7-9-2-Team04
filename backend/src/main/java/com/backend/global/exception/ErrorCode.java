@@ -76,10 +76,18 @@ public enum ErrorCode {
 
 
     //payment
-    PAYMENT_APPROVE_FAILED(HttpStatus.BAD_REQUEST, "결제 승인을 실패했습니다"),
-    PAYMENT_LOAD_FAILED(HttpStatus.BAD_REQUEST, "결제 조회를 실패했습니다"),
-    PAYMENT_CANCEL_FAILED(HttpStatus.BAD_REQUEST, "결제 취소를 실패했습니다"),
-    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다");
+    PAYMENT_APPROVE_FAILED(HttpStatus.BAD_REQUEST, "결제 승인을 실패했습니다."),
+    PAYMENT_LOAD_FAILED(HttpStatus.BAD_REQUEST, "결제 조회를 실패했습니다."),
+    PAYMENT_CANCEL_FAILED(HttpStatus.BAD_REQUEST, "결제 취소를 실패했습니다."),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다."),
+    AUTO_PAYMENT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "자동 결제 처리 중 오류가 발생했습니다."),
+
+    //billing
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 고객의 구독 정보를 찾을 수 없습니다."),
+    SUBSCRIPTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 구독 중입니다."),
+    SUBSCRIPTION_INACTIVE(HttpStatus.BAD_REQUEST, "비활성화된 구독입니다."),
+    BILLING_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "빌링키를 찾을 수 없습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String message;

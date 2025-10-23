@@ -1,155 +1,91 @@
-"use client"
+"use client";
 
+import { fetchApi } from "@/lib/client";
 //결제 성공
 import { loadTossPayments, ANONYMOUS } from "@tosspayments/tosspayments-sdk";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
-const customerKey = generateRandomString();
+const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 
-export default function CheckoutPage() {
-  const [amount, setAmount] = useState({
-    currency: "KRW",
-    value: 50000,
-  });
-  const [ready, setReady] = useState(false);
-  const [widgets, setWidgets] = useState<any>(null);
+//결제창 띄우기
+export default function PaymentCheckoutPage() {
+  const [payment, setPayment] = useState<any>(null);
+  const [customerKey, setCustomerKey] = useState<string | null>(null);
+  const router = useRouter();
+
+  // 서버에서 customerKey 불러오기
+  useEffect(() => {
+    async function initCustomerKey() {
+      try {
+        let res = await fetchApi("/api/v1/subscriptions/me", { method: "GET" });
+        setCustomerKey(res.data.customerKey);
+      } catch (err) {
+        // 구독이 없으면 새로 생성
+        const newSub = await fetchApi("/api/v1/subscriptions", {
+          method: "POST",
+        });
+        setCustomerKey(newSub.data.customerKey);
+      }
+    }
+    initCustomerKey();
+  }, []);
 
   useEffect(() => {
-    async function fetchPaymentWidgets() {
+    async function initTossPayment() {
+      if (!customerKey) return; // customerKey를 불러오기 전에는 실행 X
       try {
-        // ------  SDK 초기화 ------
         const tossPayments = await loadTossPayments(clientKey);
-
-        // 회원 결제
-        const widgets = tossPayments.widgets({customerKey,});
-
-        setWidgets(widgets);
+        const payment = tossPayments.payment({ customerKey });
+        setPayment(payment);
       } catch (error) {
-        console.error("Error fetching payment widget:", error);
+        console.error("Error initializing TossPayments:", error);
       }
     }
 
-    fetchPaymentWidgets();
-  }, [clientKey, customerKey]);
+    initTossPayment();
+  }, [customerKey]);
 
-  useEffect(() => {
-    async function renderPaymentWidgets() {
-      if (widgets == null) {
+  //카드 등록하기 버튼 누르면 결제창 띄우기
+
+  async function requestBillingAuth() {
+    try {
+      await payment.requestBillingAuth({
+        method: "CARD",
+        successUrl: window.location.origin + "/mypage/premium/success",
+        failUrl: window.location.origin + "/mypage/premium/fail",
+      });
+    } catch (err: any) {
+      if (err?.code === "USER_CANCEL" || err?.message?.includes("취소")) {
         return;
       }
 
-      // ------  주문서의 결제 금액 설정 ------
-      await widgets.setAmount(amount);
-
-      // ------  결제 UI 렌더링 ------
-      await widgets.renderPaymentMethods({
-        selector: "#payment-method",
-        // 렌더링하고 싶은 결제 UI의 variantKey
-        variantKey: "DEFAULT",
-      });
-
-      // ------  이용약관 UI 렌더링 ------
-      await widgets.renderAgreement({
-        selector: "#agreement",
-        variantKey: "AGREEMENT",
-      });
-
-      setReady(true);
+      alert("카드 등록창이 정상적으로 열리지 않았습니다. 다시 시도해주세요.");
     }
-
-    renderPaymentWidgets();
-  }, [widgets]);
-
-  const updateAmount = async (amount: any) => {
-    setAmount(amount);
-    await widgets.setAmount(amount);
-  };
-
-    // 결제 요청 처리
-   const handlePayment = async () => {
-        if (!widgets) return;
-    
-        try {
-          await widgets.requestPayment({
-            orderId: generateRandomString(),
-            orderName: "PREMIUM 구독 결제",
-            successUrl: `${window.location.origin}/mypage/success`,
-            failUrl: `${window.location.origin}/mypage/fail`,
-            customerEmail: "customer123@gmail.com",
-            customerName: "홍길동",
-            customerMobilePhone: "01012341234",
-          });
-        } catch (error) {
-          console.error("결제 요청 중 오류:", error);
-        }
-      
-    };
+  }
 
   return (
-    <div className="wrapper">
-      <div className="box_section">
-        {/* 결제 UI */}
-        <div id="payment-method" />
-        {/* 이용약관 UI */}
-        <div id="agreement" />
-        {/* 쿠폰 체크박스 */}
-        <div style={{ paddingLeft: "24px" }}>
-          <div className="checkable typography--p">
-            <label
-              htmlFor="coupon-box"
-              className="checkable__label typography--regular"
-            >
-              <input
-                id="coupon-box"
-                className="checkable__input"
-                type="checkbox"
-                aria-checked="true"
-                disabled={!ready}
-                // ------  주문서의 결제 금액이 변경되었을 경우 결제 금액 업데이트 ------
-                onChange={async (event) => {
-                  await updateAmount({
-                    currency: amount.currency,
-                    value: event.target.checked
-                      ? amount.value - 5000
-                      : amount.value + 5000,
-                  });
-                }}
-              />
-              <span className="checkable__label-text">5,000원 쿠폰 적용</span>
-            </label>
-          </div>
-        </div>
+    <>
+    <div className="flex flex-col items-center justify-center min-h-[70vh] gap-6">
+      <h1 className="text-2xl font-bold text-gray-800">💳 카드 등록하기</h1>
+      <p className="text-gray-500 text-center">
+        프리미엄 멤버십 결제를 위해 결제 수단 (카드) 을 등록하세요.
+      </p>
 
-        {/* 결제하기 버튼 */}
-        <button
-          className="button"
-          style={{ marginTop: "30px" }}
-          disabled={!ready}
-          // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
-          onClick={async () => {
-            try {
-              await widgets.requestPayment({
-                orderId: generateRandomString(),
-                orderName: "토스 티셔츠 외 2건",
-                successUrl: window.location.origin + "/mypage/success",
-                failUrl: window.location.origin + "/mypage/fail",
-                customerEmail: "customer123@gmail.com",
-                customerName: "김토스",
-                customerMobilePhone: "01012341234",
-              });
-            } catch (error) {
-              console.error(error);
-            }
-          }}
-        >
-          결제하기
-        </button>
-      </div>
+      <button
+        onClick={requestBillingAuth}
+        className="bg-blue-600 text-white font-semibold py-3 px-8 rounded-md hover:bg-blue-700 transition"
+      >
+        카드 등록하기
+      </button>
+
+      <button
+        onClick={() => router.back()}
+        className="text-gray-500 text-sm hover:underline mt-4"
+      >
+        ← 돌아가기
+      </button>
     </div>
+    </>
   );
-}
-
-function generateRandomString() {
-  return window.btoa(Math.random().toString()).slice(0, 20);
 }

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 public class Payment extends BaseEntity {
 
-    //주문 번호. 여기서는 subscriptionId?
+    //주문 번호.
     @Column(nullable = false, unique = true)
     private String orderId;
 
@@ -44,14 +44,13 @@ public class Payment extends BaseEntity {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    //결제 요청시간은 baseEntity createDate로
-
+    //subscription과 연결되기 때문에 빼도 되지만 일단 남겨둠
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_id", unique = true) // FK 칼럼 생성
+    @ManyToOne(fetch = FetchType.LAZY) //한 구독에 결제는 여러번
+    @JoinColumn(name = "subscription_id", nullable = false)
     private Subscription subscription;
 
 }

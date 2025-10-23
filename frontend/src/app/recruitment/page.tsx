@@ -18,7 +18,7 @@ export default function RecruitmentPage() {
   const postsPerPage = 9;
   const categories = ["전체", "프로젝트", "스터디"];
 
-  // ✅ 고정 게시글 불러오기
+  //  고정 게시글 불러오기
   const fetchPinnedPosts = async () => {
     try {
       const res = await fetchApi(`/api/v1/posts/pinned`);
@@ -98,17 +98,10 @@ export default function RecruitmentPage() {
             : post.categoryType === "STUDY"
         );
 
-  // 모집 상태별 정렬
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
-    if (a.status === "ING" && b.status !== "ING") return -1;
-    if (a.status !== "ING" && b.status === "ING") return 1;
-    return 0;
-  });
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = sortedPosts.slice(indexOfFirstPost, indexOfLastPost);
-
+  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
   return (
     <div className="max-w-screen-xl mx-auto px-6 py-10">
       {/* 헤더 */}
