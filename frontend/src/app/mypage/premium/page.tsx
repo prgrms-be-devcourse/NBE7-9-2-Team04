@@ -27,7 +27,6 @@ export default function MyPremiumPage() {
   }, []);
 
   const handleCancel = async () => {
-
     if (!subscription?.customerKey) {
       alert("구독 정보를 찾을 수 없습니다.");
       return;
@@ -37,27 +36,32 @@ export default function MyPremiumPage() {
     if (!confirmCancel) return;
 
     try {
-      const apiResponse = await fetchApi(`/api/v1/subscriptions/cancel/${subscription.customerKey}`, {
-        method: "DELETE",
-      });
+      const apiResponse = await fetchApi(
+        `/api/v1/subscriptions/cancel/${subscription.customerKey}`,
+        {
+          method: "DELETE",
+        }
+      );
       alert(apiResponse.message);
       window.location.reload();
-    } 
-    catch (err) {
+    } catch (err) {
       alert("구독 취소에 실패했습니다.");
     }
   };
 
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] text-gray-500">
-        로딩 중...
+        ⏳ 로딩 중...
       </div>
     );
   }
 
   const isPremium = subscription?.isActive === true;
+
+  //취소 예약 상태
+  const isCanceledScheduled =
+    isPremium && !subscription?.billingKey && subscription?.nextBillingDate;
 
   return (
     <div className="max-w-screen-lg mx-auto px-6 py-10">
@@ -104,9 +108,14 @@ export default function MyPremiumPage() {
                     {subscription.nextBillingDate || "-"}
                   </span>
                 </p>
+                {isCanceledScheduled && (
+                  <p className="text-orange-600 font-medium mt-2">
+                    ⚠️ {subscription.nextBillingDate}까지 이용 가능 (구독
+                    취소됨)
+                  </p>
+                )}
               </div>
             </div>
-
 
             <div>
               <h4 className="font-semibold flex items-center gap-2 mb-2">
@@ -119,14 +128,16 @@ export default function MyPremiumPage() {
               </ul>
             </div>
 
-            <div className="pt-4 border-t space-y-3">
-              <button
-                onClick={handleCancel}
-                className="w-full border border-red-300 text-red-600 py-2 rounded-md hover:bg-red-50 transition"
-              >
-                구독 취소
-              </button>
-            </div>
+            {!isCanceledScheduled && (
+              <div className="pt-4 border-t space-y-3">
+                <button
+                  onClick={handleCancel}
+                  className="w-full border border-red-300 text-red-600 py-2 rounded-md hover:bg-red-50 transition"
+                >
+                  구독 취소
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -138,7 +149,9 @@ export default function MyPremiumPage() {
                 </h3>
                 <p className="text-4xl font-bold text-blue-600">
                   9,900원{" "}
-                  <span className="text-lg font-normal text-gray-500">/ 월</span>
+                  <span className="text-lg font-normal text-gray-500">
+                    / 월
+                  </span>
                 </p>
               </div>
 
@@ -155,7 +168,9 @@ export default function MyPremiumPage() {
             <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg flex items-start gap-3">
               <span className="text-gray-600 text-lg mt-0.5">⚠️</span>
               <div className="space-y-1">
-                <p className="text-sm font-medium">결제 전 카드 등록이 필요합니다</p>
+                <p className="text-sm font-medium">
+                  결제 전 카드 등록이 필요합니다
+                </p>
                 <p className="text-xs text-gray-500">
                   안전한 결제를 위해 먼저 카드를 등록해주세요.
                 </p>
