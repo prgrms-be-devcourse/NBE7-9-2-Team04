@@ -17,6 +17,7 @@ public class BillingScheduler {
     private final BillingService billingService;
     private final SubscriptionRepository subscriptionRepository;
 
+    //00시에 자동으로 결제 진행
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
     public void runAutoBillingTask(){
 
@@ -24,12 +25,20 @@ public class BillingScheduler {
         List<Subscription> subscriptions =
                 subscriptionRepository.findByNextBillingDateAndIsActive(LocalDate.now(), true);
 
-        subscriptions.forEach(subscription -> {
-            try {
-                billingService.autoPayment(subscription);
-            } catch (ErrorException e) {
-                subscription.deactivate();
+
+        for(Subscription subscription:subscriptions){
+            if(subscription.getBillingKey() == null){
+                subscription.deActivatePremium(); //구독 종료
+                subscriptionRepository.save(subscription);
+                continue;
             }
-        });
+            try{
+                billingService.autoPayment(subscription);
+            }catch(ErrorException e){
+                subscription.deActivatePremium();
+                subscriptionRepository.save(subscription);
+            }
+
+        }
     }
 }
