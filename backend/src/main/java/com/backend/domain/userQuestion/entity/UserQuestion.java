@@ -27,5 +27,20 @@ public class UserQuestion extends BaseEntity {
     @Column(nullable = false)
     private Integer aiScore;
 
+    public static UserQuestion create(User user, Question question) {
+        UserQuestion userQuestion = new UserQuestion();
+        userQuestion.user = user;
+        userQuestion.question = question;
+        return userQuestion;
+    }
+
+
+    public void updateAiScoreIfHigher(Integer newAiScore) {
+        if (newAiScore == null) return;
+        if (this.aiScore == null || newAiScore > this.aiScore) {
+            this.aiScore = newAiScore;
+        }
+    }
+
 
 }
