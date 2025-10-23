@@ -1,6 +1,5 @@
 package com.backend.api.payment.dto.request;
 
-import com.backend.domain.payment.entity.Payment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,12 +21,5 @@ public record PaymentRequest(
         @Schema(description = "결제 금액", example = "3000")
         Long amount
 ) {
-    public PaymentRequest(Payment payment){
-        this(
-                payment.getPaymentKey(),
-                payment.getOrderId(),
-                payment.getTotalAmount()
-        );
-    }
 }
 
