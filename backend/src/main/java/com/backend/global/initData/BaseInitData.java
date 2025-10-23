@@ -10,6 +10,9 @@ import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
+import com.backend.domain.qna.entity.Qna;
+import com.backend.domain.qna.entity.QnaCategoryType;
+import com.backend.domain.qna.repository.QnaRepository;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
@@ -41,6 +44,7 @@ public class BaseInitData {
     private final CommentService commentService;
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
+    private final QnaRepository qnaRepository;
     private final AnswerService answerService;
     private final PasswordEncoder passwordEncoder;
 
@@ -52,8 +56,68 @@ public class BaseInitData {
             self.commentInitData();  // 댓글 초기 데이터 등록
             self.questionInitData();  // 질문 초기 데이터 등록
             self.answerInitData();  // 답변 초기 데이터 등록
+            self.qnaInitData(); // QnA 초기 데이터 등록
             self.initAdminUser();
         };
+    }
+
+    @Transactional
+    public void qnaInitData() {
+        if (qnaRepository.count() > 0) {
+            return;
+        }
+
+        User user1 = userRepository.findById(1L).orElseThrow();
+        User user2 = userRepository.findById(2L).orElseThrow();
+
+        Qna qna1 = Qna.builder()
+                .title("로그인이 자꾸 실패합니다.")
+                .content("회원가입은 정상적으로 되었는데, 로그인 시 '이메일 또는 비밀번호가 올바르지 않습니다'라는 문구가 계속 나옵니다.")
+                .author(user1)
+                .categoryType(QnaCategoryType.ACCOUNT)
+                .build();
+
+        Qna qna2 = Qna.builder()
+                .title("프리미엄 멤버십 결제 관련 문의드립니다.")
+                .content("결제 완료 후에도 프리미엄 기능이 활성화되지 않습니다.")
+                .author(user2)
+                .categoryType(QnaCategoryType.PAYMENT)
+                .build();
+
+        Qna qna3 = Qna.builder()
+                .title("사이트 접속 시 오류가 발생합니다.")
+                .content("크롬 브라우저에서 접속 시 자꾸 500 오류가 뜹니다.")
+                .author(user1)
+                .categoryType(QnaCategoryType.SYSTEM)
+                .build();
+
+        Qna qna4 = Qna.builder()
+                .title("팀 모집글 관련 문의드립니다.")
+                .content("모집글 작성 시 마감일을 수정할 수 있나요?")
+                .author(user2)
+                .categoryType(QnaCategoryType.RECRUITMENT)
+                .build();
+
+        Qna qna5 = Qna.builder()
+                .title("사이트 개선 제안드립니다.")
+                .content("Q&A 게시판에 검색 기능이 추가되면 좋겠습니다.")
+                .author(user1)
+                .categoryType(QnaCategoryType.SUGGESTION)
+                .build();
+
+        Qna qna6 = Qna.builder()
+                .title("기타 문의드립니다.")
+                .content("회원탈퇴는 어디서 하나요?")
+                .author(user2)
+                .categoryType(QnaCategoryType.OTHER)
+                .build();
+
+        qnaRepository.save(qna1);
+        qnaRepository.save(qna2);
+        qnaRepository.save(qna3);
+        qnaRepository.save(qna4);
+        qnaRepository.save(qna5);
+        qnaRepository.save(qna6);
     }
 
     @Transactional
