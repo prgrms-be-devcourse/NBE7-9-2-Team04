@@ -167,33 +167,8 @@ export default function AdminPostsPage() {
 
       <div>
         <h1 className="text-3xl font-bold mb-2">📰 게시글 관리</h1>
-        <p className="text-gray-500">모집글과 QnA 게시글을 관리합니다</p>
+        <p className="text-gray-500">모집글을 관리합니다</p>
       </div>
-
-
-      <div className="flex gap-3 mb-4">
-        <button
-          onClick={() => setPostType("recruitment")}
-          className={`px-4 py-2 rounded-md border text-sm font-medium transition ${
-            postType === "recruitment"
-              ? "bg-blue-600 text-white border-blue-600"
-              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-          }`}
-        >
-          모집글
-        </button>
-        <button
-          onClick={() => setPostType("qna")}
-          className={`px-4 py-2 rounded-md border text-sm font-medium transition ${
-            postType === "qna"
-              ? "bg-blue-600 text-white border-blue-600"
-              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-          }`}
-        >
-          QnA
-        </button>
-      </div>
-
 
       <div className="overflow-x-auto bg-white border border-gray-200 shadow-sm rounded-lg">
         <Table>
