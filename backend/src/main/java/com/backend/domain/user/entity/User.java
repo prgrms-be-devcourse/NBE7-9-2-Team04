@@ -99,6 +99,11 @@ public class User extends BaseEntity {
         return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.SUSPENDED;
     }
 
+    public boolean isPremium(){
+        return this.subscription != null &&
+                this.subscription.isValid() &&
+                this.subscription.getSubscriptionType() == SubscriptionType.PREMIUM;
+    }
 
     public int getAiQuestionLimit() {
         if (this.subscription.isValid()) {
