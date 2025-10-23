@@ -1,28 +1,30 @@
 package com.backend.domain.user.entity;
 
 import com.backend.domain.question.entity.Question;
-import jakarta.persistence.*;
-import lombok.*;
+import com.backend.global.entity.BaseEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
+//user_id, question_id를 FK키로 가지는 테이블
 @Entity
 @Getter
 @NoArgsConstructor
-public class UserQuestion {
+public class UserQuestion extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "문제 제목")
+    @JoinColumn(name = "question")
     private Question question;
-    private LocalDateTime modifyDate;
 
-    private String title;
+    private int score;
+
+
 }
