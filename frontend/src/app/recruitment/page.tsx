@@ -5,11 +5,10 @@ import { fetchApi } from "@/lib/client";
 import Link from "next/link";
 import Pagination from "@/components/pagination";
 import CategoryTab from "@/components/categoryTab";
-import { fetchApi } from "@/lib/client";
-
 import { Post } from "@/types/post";
 
 export default function RecruitmentPage() {
+  const [pinnedPosts, setPinnedPosts] = useState<any[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -18,7 +17,7 @@ export default function RecruitmentPage() {
   const postsPerPage = 9;
   const categories = ["전체", "프로젝트", "스터디"];
 
-  //  고정 게시글 불러오기
+  // 고정 게시글 불러오기
   const fetchPinnedPosts = async () => {
     try {
       const res = await fetchApi(`/api/v1/posts/pinned`);
@@ -48,7 +47,7 @@ export default function RecruitmentPage() {
     fetchPinnedPosts();
   }, []);
 
-  // ✅ 자동 슬라이드 (5초 간격)
+  // 게시글 불러오기
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -56,7 +55,6 @@ export default function RecruitmentPage() {
           method: "GET",
           cache: "no-store",
         });
-
         setPosts(apiResponse.data ?? []);
       } catch (err: any) {
         console.error("게시글 불러오기 실패:", err);
@@ -72,14 +70,14 @@ export default function RecruitmentPage() {
   const premiumPosts = posts.filter((p) => p.pinStatus === "PINNED");
   const regularPosts = posts.filter((p) => p.pinStatus === "NOT_PINNED");
 
-  //프리미엄 글 슬라이드
+  // 프리미엄 글 슬라이드
   useEffect(() => {
     if (premiumPosts.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % pinnedPosts.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, [premiumPosts.length]);
+  }, [premiumPosts.length, pinnedPosts.length]);
 
   const nextSlide = () =>
     setCurrentSlide((prev) => (prev + 1) % pinnedPosts.length);
@@ -88,7 +86,7 @@ export default function RecruitmentPage() {
       (prev) => (prev - 1 + pinnedPosts.length) % pinnedPosts.length
     );
 
-  // ✅ 카테고리 필터링 + 모집중 우선 정렬
+  // 카테고리 필터링
   const filteredPosts =
     selectedCategory === "전체"
       ? regularPosts
@@ -98,10 +96,10 @@ export default function RecruitmentPage() {
             : post.categoryType === "STUDY"
         );
 
-
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+
   return (
     <div className="max-w-screen-xl mx-auto px-6 py-10">
       {/* 헤더 */}
@@ -110,7 +108,7 @@ export default function RecruitmentPage() {
         <p className="text-gray-500">함께 성장할 팀원을 찾아보세요</p>
       </div>
 
-      {/* ✅ 프리미엄 모집글 */}
+      {/* 프리미엄 모집글 */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">프리미엄 모집글</h2>
@@ -160,16 +158,9 @@ export default function RecruitmentPage() {
                     </div>
                   </div>
 
-                    <div className="flex flex-col justify-between items-end">
-                      <div className="text-sm text-gray-500">
-                        ⏰ 마감: {post.deadline}
-                      </div>
-                      <Link
-                        href={`/recruitment/${post.postId}`}
-                        className="bg-blue-500 text-white hover:bg-blue-600 text-sm px-4 py-2 rounded-md"
-                      >
-                        자세히 보기
-                      </Link>
+                  <div className="flex flex-col justify-between items-end">
+                    <div className="text-sm text-gray-500">
+                      ⏰ 마감: {post.deadline}
                     </div>
                     <Link
                       href={`/recruitment/${post.postId || post.id}`}
@@ -183,7 +174,7 @@ export default function RecruitmentPage() {
             ))}
           </div>
 
-          {/* ✅ 하단 슬라이드 dot */}
+          {/* 하단 슬라이드 dot */}
           <div className="flex justify-center gap-2 mt-3">
             {pinnedPosts.map((_, i) => (
               <button
@@ -198,7 +189,7 @@ export default function RecruitmentPage() {
         </div>
       </div>
 
-      {/* ✅ 카테고리 */}
+      {/* 카테고리 */}
       <CategoryTab
         categories={categories}
         selected={selectedCategory}
@@ -208,69 +199,62 @@ export default function RecruitmentPage() {
         }}
       />
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentPosts.map((post) => (
-              <div
-                key={post.postId}
-                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition"
-              >
-                <div className="flex items-center justify-between mb-2 text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        post.categoryType === "PROJECT"
-                          ? "bg-indigo-50 text-indigo-700"
-                          : "bg-green-50 text-green-700"
-                      }`}
-                    >
-                      {post.categoryType === "PROJECT" ? "프로젝트" : "스터디"}
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        post.status === "ING"
-                          ? "bg-red-50 text-red-700"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {post.status === "ING" ? "모집중" : "마감"}
-                    </span>
-                  </div>
-
-                  <span className="text-gray-500 text-xs">
-                    마감일 {post.deadline?.split("T")[0]}
-                  </span>
-                </div>
-                <h3 className="text-lg font-semibold mb-1 line-clamp-2">
-                  {post.title}
-                </h3>
-                <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                  {post.introduction}
-                </p>
-
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                  <span>🧑‍🤝‍🧑 {post.recruitCount}명</span>
-                </div>
-
-                <Link
-                  href={`/recruitment/${post.postId}`}
-                  className="block text-center border border-gray-300 rounded-md py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+      {/* 일반 모집글 */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {currentPosts.map((post) => (
+          <div
+            key={post.postId}
+            className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition"
+          >
+            <div className="flex items-center justify-between mb-2 text-sm">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    post.categoryType === "PROJECT"
+                      ? "bg-indigo-50 text-indigo-700"
+                      : "bg-green-50 text-green-700"
+                  }`}
                 >
-                  자세히 보기
-                </Link>
+                  {post.categoryType === "PROJECT" ? "프로젝트" : "스터디"}
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    post.status === "ING"
+                      ? "bg-red-50 text-red-700"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  {post.status === "ING" ? "모집중" : "마감"}
+                </span>
               </div>
 
-              <Link
-                href={`/recruitment/${post.id}`}
-                className="block text-center border border-gray-300 rounded-md py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-              >
-                자세히 보기
-              </Link>
+              <span className="text-gray-500 text-xs">
+                마감일 {post.deadline?.split("T")[0]}
+              </span>
             </div>
-          ))}
-        </div>
+
+            <h3 className="text-lg font-semibold mb-1 line-clamp-2">
+              {post.title}
+            </h3>
+            <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+              {post.introduction}
+            </p>
+
+            <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+              <span>🧑‍🤝‍🧑 {post.recruitCount}명</span>
+            </div>
+
+            <Link
+              href={`/recruitment/${post.postId}`}
+              className="block text-center border border-gray-300 rounded-md py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            >
+              자세히 보기
+            </Link>
+          </div>
+        ))}
       </div>
 
-      {/* ✅ 페이지네이션 */}
+      {/* 페이지네이션 */}
       <Pagination
         currentPage={currentPage}
         totalItems={filteredPosts.length}
