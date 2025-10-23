@@ -4,6 +4,7 @@ import com.backend.api.post.dto.request.AdminPostPinRequest;
 import com.backend.api.post.dto.request.AdminPostStatusRequest;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
+import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.Role;
@@ -78,14 +79,19 @@ public class AdminPostControllerTest {
                 .role(Role.USER)
                 .build());
 
-        post = postRepository.save(Post.builder()
-                .title("테스트 게시글")
-                .content("테스트 내용")
-                .deadline(LocalDateTime.now().plusDays(3))
+        post = Post.builder()
+                .title("관리자용 테스트 게시글")
+                .introduction("관리자 테스트용 소개입니다.")
+                .content("관리자 테스트용 내용입니다. 10자 이상입니다.")
+                .deadline(LocalDateTime.now().plusDays(7))
                 .status(PostStatus.ING)
                 .pinStatus(PinStatus.NOT_PINNED)
-                .users(user)
-                .build());
+                .recruitCount(3)
+                .postCategoryType(PostCategoryType.PROJECT)
+                .users(admin)
+                .build();
+
+        post = postRepository.save(post);
 
         when(rq.getUser()).thenReturn(admin);
     }
@@ -141,7 +147,7 @@ public class AdminPostControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("게시글 단건 조회 성공"))
-                    .andExpect(jsonPath("$.data.title").value("테스트 게시글"))
+                    .andExpect(jsonPath("$.data.title").value("관리자용 테스트 게시글"))
                     .andDo(print());
         }
 
@@ -224,9 +230,10 @@ public class AdminPostControllerTest {
         @Test
         @DisplayName("게시글 진행 상태 변경 성공")
         void success() throws Exception {
+            Long postId = post.getId();
             AdminPostStatusRequest request = new AdminPostStatusRequest(PostStatus.CLOSED);
 
-            mockMvc.perform(patch("/api/v1/admin/posts/{postId}/status", post.getId())
+            mockMvc.perform(patch("/api/v1/admin/posts/{postId}/status", postId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())

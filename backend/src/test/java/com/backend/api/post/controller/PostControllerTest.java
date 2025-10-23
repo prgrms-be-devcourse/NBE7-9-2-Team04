@@ -2,11 +2,13 @@ package com.backend.api.post.controller;
 
 import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
+import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.post.entity.PinStatus;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
+import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
@@ -53,6 +55,12 @@ class PostControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
+    private AnswerRepository answerRepository;
+
     private User testUser;
     private User otherUser;
     private Post savedPost;
@@ -63,7 +71,9 @@ class PostControllerTest {
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
 
+        answerRepository.deleteAll();
         postRepository.deleteAll();
+        questionRepository.deleteAll();
         userRepository.deleteAll();
 
         testUser = User.builder()
@@ -167,7 +177,7 @@ class PostControllerTest {
         void fail2() throws Exception {
             // given
             PostAddRequest request = new PostAddRequest(
-                    "", // 제목 누락
+                    null, // 제목 누락
                     "내용은 10자 이상으로 충분합니다.",
                     "한 줄 소개도 10자 이상으로 충분합니다.",
                     FIXED_DEADLINE,
@@ -189,7 +199,7 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("제목은 2자 이상 255자 이하로 입력해주세요."))
+                    .andExpect(jsonPath("$.message").value("제목은 필수입니다."))
                     .andDo(print());
         }
 
@@ -242,7 +252,8 @@ class PostControllerTest {
                     FIXED_DEADLINE,
                     PostStatus.CLOSED,
                     PinStatus.PINNED,
-                    10
+                    10,
+                    PostCategoryType.PROJECT
             );
 
             // when
@@ -279,7 +290,8 @@ class PostControllerTest {
                     FIXED_DEADLINE,
                     PostStatus.CLOSED,
                     PinStatus.PINNED,
-                    10
+                    10,
+                    PostCategoryType.PROJECT
             );
 
             // when
@@ -310,7 +322,8 @@ class PostControllerTest {
                     FIXED_DEADLINE,
                     PostStatus.CLOSED,
                     PinStatus.PINNED,
-                    10
+                    10,
+                    PostCategoryType.PROJECT
             );
 
             // when
@@ -341,7 +354,8 @@ class PostControllerTest {
                     FIXED_DEADLINE,
                     PostStatus.CLOSED,
                     PinStatus.PINNED,
-                    10
+                    10,
+                    PostCategoryType.PROJECT
             );
 
             // when
@@ -477,8 +491,9 @@ class PostControllerTest {
                     .andDo(print());
         }
     }
-   @Nested
-   @DisplayName("게시글 다건 조회 API")
+
+    @Nested
+    @DisplayName("게시글 다건 조회 API")
     class GetAllPostsApiTest {
 
         @Test
@@ -497,6 +512,7 @@ class PostControllerTest {
                     .status(PostStatus.ING)
                     .pinStatus(PinStatus.NOT_PINNED)
                     .recruitCount(2)
+                    .postCategoryType(PostCategoryType.PROJECT)
                     .build();
             postRepository.save(anotherPost);
 
@@ -510,109 +526,109 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
-                    .andExpect(jsonPath("$.data.length()").value(3))
+                    .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공"))
+                    .andExpect(jsonPath("$.data.length()").value(2))
                     .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
                     .andDo(print());
         }
 
-    @Nested
-    @DisplayName("카테고리별 게시글 조회 API")
-    class GetPostsByCategoryApiTest {
+        @Nested
+        @DisplayName("카테고리별 게시글 조회 API")
+        class GetPostsByCategoryApiTest {
 
-        @Test
-        @DisplayName("카테고리별 게시글 조회 성공 - PROJECT")
-        @WithAnonymousUser
-        void success_project() throws Exception {
-            // given
-            Post post1 = Post.builder()
-                    .title("프로젝트 게시글 1")
-                    .introduction("프로젝트 소개 1")
-                    .content("프로젝트 게시글의 내용입니다.")
-                    .deadline(FIXED_DEADLINE)
-                    .status(PostStatus.ING)
-                    .pinStatus(PinStatus.NOT_PINNED)
-                    .recruitCount(3)
-                    .users(testUser)
-                    .postCategoryType(PostCategoryType.PROJECT)
-                    .build();
-            postRepository.save(post1);
+            @Test
+            @DisplayName("카테고리별 게시글 조회 성공 - PROJECT")
+            @WithAnonymousUser
+            void success_project() throws Exception {
+                // given
+                Post post1 = Post.builder()
+                        .title("프로젝트 게시글 1")
+                        .introduction("프로젝트 소개 1")
+                        .content("프로젝트 게시글의 내용입니다.")
+                        .deadline(FIXED_DEADLINE)
+                        .status(PostStatus.ING)
+                        .pinStatus(PinStatus.NOT_PINNED)
+                        .recruitCount(3)
+                        .users(testUser)
+                        .postCategoryType(PostCategoryType.PROJECT)
+                        .build();
+                postRepository.save(post1);
 
-            Post post2 = Post.builder()
-                    .title("프로젝트 게시글 2")
-                    .introduction("프로젝트 소개 2")
-                    .content("프로젝트 게시글의 내용입니다.")
-                    .deadline(FIXED_DEADLINE)
-                    .status(PostStatus.ING)
-                    .pinStatus(PinStatus.NOT_PINNED)
-                    .recruitCount(5)
-                    .users(testUser)
-                    .postCategoryType(PostCategoryType.PROJECT)
-                    .build();
-            postRepository.save(post2);
+                Post post2 = Post.builder()
+                        .title("프로젝트 게시글 2")
+                        .introduction("프로젝트 소개 2")
+                        .content("프로젝트 게시글의 내용입니다.")
+                        .deadline(FIXED_DEADLINE)
+                        .status(PostStatus.ING)
+                        .pinStatus(PinStatus.NOT_PINNED)
+                        .recruitCount(5)
+                        .users(testUser)
+                        .postCategoryType(PostCategoryType.PROJECT)
+                        .build();
+                postRepository.save(post2);
 
-            // when
-            ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/posts/category/{categoryType}", "PROJECT")
+                // when
+                ResultActions resultActions = mockMvc.perform(
+                        get("/api/v1/posts/category/{categoryType}", "PROJECT")
+                                .accept(MediaType.APPLICATION_JSON)
+                );
 
-        @Test
-        @DisplayName("카테고리별 게시글 조회 성공 - STUDY")
-        @WithAnonymousUser
-        void success_study() throws Exception {
-            // given
-            Post studyPost = Post.builder()
-                    .title("스터디 게시글 1")
-                    .introduction("스터디 소개 1")
-                    .content("스터디 게시글의 내용입니다.")
-                    .deadline(FIXED_DEADLINE)
-                    .status(PostStatus.ING)
-                    .pinStatus(PinStatus.NOT_PINNED)
-                    .recruitCount(2)
-                    .users(testUser)
-                    .postCategoryType(PostCategoryType.STUDY)
-                    .build();
-            postRepository.save(studyPost);
+                resultActions
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.status").value("OK"))
+                        .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
+                        .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
+                        .andDo(print());
+            }
 
-            ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/posts/category/{categoryType}", "STUDY")
-                            .accept(MediaType.APPLICATION_JSON)
-            );
+            @Test
+            @DisplayName("카테고리별 게시글 조회 성공 - STUDY")
+            @WithAnonymousUser
+            void success_study() throws Exception {
+                // given
+                Post studyPost = Post.builder()
+                        .title("스터디 게시글 1")
+                        .introduction("스터디 소개 1")
+                        .content("스터디 게시글의 내용입니다.")
+                        .deadline(FIXED_DEADLINE)
+                        .status(PostStatus.ING)
+                        .pinStatus(PinStatus.NOT_PINNED)
+                        .recruitCount(2)
+                        .users(testUser)
+                        .postCategoryType(PostCategoryType.STUDY)
+                        .build();
+                postRepository.save(studyPost);
 
-            resultActions
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
-                    .andExpect(jsonPath("$.data[0].categoryType").value("STUDY"))
-                    .andExpect(jsonPath("$.data[0].title").value("스터디 게시글 1"))
-                    .andDo(print());
-        }
+                ResultActions resultActions = mockMvc.perform(
+                        get("/api/v1/posts/category/{categoryType}", "STUDY")
+                                .accept(MediaType.APPLICATION_JSON)
+                );
 
-        @Test
-        @DisplayName("실패 - 해당 카테고리에 게시글이 없음")
-        @WithAnonymousUser
-        void fail_empty_category() throws Exception {
+                resultActions
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.status").value("OK"))
+                        .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
+                        .andExpect(jsonPath("$.data[0].categoryType").value("STUDY"))
+                        .andExpect(jsonPath("$.data[0].title").value("스터디 게시글 1"))
+                        .andDo(print());
+            }
 
-            ResultActions resultActions = mockMvc.perform(
-                    get("/api/v1/posts/category/{categoryType}", "STUDY")
-                            .accept(MediaType.APPLICATION_JSON)
-            );
+            @Test
+            @DisplayName("실패 - 해당 카테고리에 게시글이 없음")
+            @WithAnonymousUser
+            void fail_empty_category() throws Exception {
 
-            resultActions
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("존재하지 않는 게시글입니다."))
-                    .andDo(print());
-        }
-    }
-}
-                    .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공"))
-                    .andExpect(jsonPath("$.data").isArray())
-                    .andExpect(jsonPath("$.data.length()").value(2))
-                    .andExpect(jsonPath("$.data[0].postId").value(anotherPost.getId()))
-                    .andExpect(jsonPath("$.data[0].title").value("두 번째 게시글"))
-                    .andExpect(jsonPath("$.data[1].postId").value(savedPost.getId()))
-                    .andExpect(jsonPath("$.data[1].title").value("기존 제목"))
-                    .andDo(print());
+                ResultActions resultActions = mockMvc.perform(
+                        get("/api/v1/posts/category/{categoryType}", "STUDY")
+                                .accept(MediaType.APPLICATION_JSON)
+                );
+
+                resultActions
+                        .andExpect(status().isNotFound())
+                        .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                        .andExpect(jsonPath("$.message").value("존재하지 않는 게시글입니다."))
+                        .andDo(print());
+            }
         }
     }
 }

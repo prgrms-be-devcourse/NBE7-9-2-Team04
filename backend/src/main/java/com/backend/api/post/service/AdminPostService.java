@@ -1,5 +1,6 @@
 package com.backend.api.post.service;
 
+import com.backend.api.post.dto.response.PostPageResponse;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.user.service.AdminUserService;
 import com.backend.domain.post.entity.PinStatus;
@@ -8,6 +9,10 @@ import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +27,19 @@ public class AdminPostService {
     private final PostService postService;
     private final AdminUserService adminUserService;
 
-    public List<PostResponse> getAllPosts(User admin) {
+    public PostPageResponse<PostResponse> getAllPosts(int page, User admin) {
         adminUserService.validateAdminAuthority(admin);
-        return postRepository.findAll().stream()
+
+        if(page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Page<Post> postsPage = postRepository.findAll(pageable);
+
+        List<PostResponse> posts =  postsPage.getContent()
+                .stream()
                 .map(PostResponse::from)
                 .toList();
+
+        return PostPageResponse.from(postsPage, posts);
     }
 
     public PostResponse getPostById(Long postId, User user) {

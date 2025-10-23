@@ -6,7 +6,6 @@ spring:
     password: ${DB_PASSWORD}
     hikari:
       auto-commit: false
-
   output:
     ansi:
       enabled: always
@@ -26,6 +25,9 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
 
 
   mail:
@@ -69,7 +71,12 @@ custom:
       expire-time: "#{72 * 60 * 60 * 1000}"       # 72시간 (3일)
     secretPattern: ${SECRET_PATTERN}
 
+
+openai:
+  url: ${OPENAI_API_URL}
+
 toss:
   payments:
     base-url: "https://api.tosspayments.com/v1/payments"
     secret-key: ${PAYMENT_SECRET_KEY}
+

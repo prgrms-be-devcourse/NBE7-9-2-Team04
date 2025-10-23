@@ -43,11 +43,19 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+	implementation("org.springframework.ai:spring-ai-starter-model-openai")
 
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
 
+}
+extra["springAiVersion"] = "1.1.0-M1"
+
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
+	}
 }
 
 tasks.withType<Test> {
