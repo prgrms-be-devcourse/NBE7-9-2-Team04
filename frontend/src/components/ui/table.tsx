@@ -37,13 +37,14 @@ export function TableRow({ children }: { children: React.ReactNode }) {
 export function TableCell({
   children,
   className = "",
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
+  ...props
+}: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td className={`px-4 py-3 text-gray-700 text-sm align-middle ${className}`}>
+    <td
+      className={`px-4 py-3 text-gray-700 text-sm align-middle ${className}`}
+      {...props}
+    >
       {children}
     </td>
-  )
+  );
 }
