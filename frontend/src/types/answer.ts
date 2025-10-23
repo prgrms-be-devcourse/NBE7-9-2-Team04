@@ -26,7 +26,7 @@ export type AnswerCreateRequest = {
   export type AnswerReadResponse = AnswerResponseBase;
   export type AnswerUpdateResponse = AnswerResponseBase;
   
-  export type AnswerPageResponse<T extends AnswerResponseBase> = {
+  export type AnswerPageResponse<T = AnswerResponseBase> = {
     answers: T[];
     currentPage: number;
     totalPages: number;
