@@ -77,6 +77,69 @@ class QnaControllerTest {
     }
 
     @Nested
+    @DisplayName("QnA 조회 API")
+    class GetQnaTest {
+
+        @Test
+        @DisplayName("QnA 전체 조회 성공")
+        void success_all() throws Exception {
+            mockMvc.perform(get("/api/v1/Qna")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("Qna 목록 조회 성공"))
+                    .andExpect(jsonPath("$.data[0].title").value("기존 제목"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("QnA 단건 조회 성공")
+        void success_single() throws Exception {
+            mockMvc.perform(get("/api/v1/Qna/{qnaId}", savedQna.getId())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value(savedQna.getId() + "번 Qna 조회 성공"))
+                    .andExpect(jsonPath("$.data.title").value("기존 제목"))
+                    .andExpect(jsonPath("$.data.categoryType").value("ACCOUNT"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("QnA 단건 조회 실패 - 존재하지 않는 ID")
+        void fail_notFound() throws Exception {
+            mockMvc.perform(get("/api/v1/Qna/{qnaId}", 999L)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("해당 Q&A를 찾을 수 없습니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("QnA 카테고리별 조회 성공")
+        void success_category() throws Exception {
+            mockMvc.perform(get("/api/v1/Qna/category/{categoryType}", QnaCategoryType.ACCOUNT)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("ACCOUNT 카테고리 Qna 조회 성공"))
+                    .andExpect(jsonPath("$.data[0].categoryType").value("ACCOUNT"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("QnA 카테고리별 조회 실패 - 존재하지 않는 카테고리")
+        void fail_invalidCategory() throws Exception {
+            mockMvc.perform(get("/api/v1/Qna/category/INVALID")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.status").value("INTERNAL_SERVER_ERROR"))
+                    .andDo(print());
+        }
+    }
+
+    @Nested
     @DisplayName("QnA 등록 API")
     class AddQnaTest {
 
