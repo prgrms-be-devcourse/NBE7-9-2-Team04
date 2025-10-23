@@ -18,14 +18,21 @@ public enum Tier {
     private final String label;
     private final int minScore;
 
+    //현재 score로 티어 계산
     public static Tier fromScore(int score) {
-        if (score < BRONZE.minScore) return UNRATED;
-        if (score < SILVER.minScore) return BRONZE;
-        if (score < GOLD.minScore) return SILVER;
-        if (score < PLATINUM.minScore) return GOLD;
-        if (score < DIAMOND.minScore) return PLATINUM;
-        if (score < RUBY.minScore) return DIAMOND;
-        if (score < MASTER.minScore) return RUBY;
-        return MASTER;
+        Tier result = UNRATED;
+        for (Tier tier : values()) {
+            if (score >= tier.minScore) {
+                result = tier;
+            }
+        }
+        return result;
+    }
+
+    //다음 티어 계산. master 찍으면 master를 반환한다
+    public Tier nextTier() {
+        int count = this.ordinal();
+        Tier[] values = Tier.values();
+        return count < values.length - 1 ? values[count + 1] : values[count - 1];
     }
 }
