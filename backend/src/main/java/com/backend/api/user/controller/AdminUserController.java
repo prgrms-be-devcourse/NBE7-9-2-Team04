@@ -2,6 +2,7 @@ package com.backend.api.user.controller;
 
 import com.backend.api.user.dto.request.AdminUserStatusUpdateRequest;
 import com.backend.api.user.dto.response.AdminUserResponse;
+import com.backend.api.user.dto.response.UserPageResponse;
 import com.backend.api.user.service.AdminUserService;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
@@ -11,8 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,10 +28,12 @@ public class AdminUserController {
 
     @GetMapping
     @Operation(summary = "전체 사용자 조회", description = "모든 사용자 정보를 조회합니다.")
-    public ApiResponse<List<AdminUserResponse>> getAllUsers() {
+    public ApiResponse<UserPageResponse<AdminUserResponse>> getAllUsers(
+            @RequestParam(defaultValue = "1") int page
+    ) {
         User admin = getCurrentUser();
-        List<AdminUserResponse> users = adminUserService.getAllUsers(admin);
-        return ApiResponse.ok("전체 사용자 조회 성공", users);
+        UserPageResponse<AdminUserResponse> usersPage = adminUserService.getAllUsers(page, admin);
+        return ApiResponse.ok("전체 사용자 조회 성공", usersPage);
     }
 
     @GetMapping("/{userId}")

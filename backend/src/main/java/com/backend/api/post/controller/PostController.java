@@ -2,6 +2,7 @@ package com.backend.api.post.controller;
 
 import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
+import com.backend.api.post.dto.response.PostPageResponse;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.post.service.PostService;
 import com.backend.domain.post.entity.PostCategoryType;
@@ -12,8 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
 
 import java.util.List;
 
@@ -79,11 +78,16 @@ public class PostController {
             summary = "카테고리별 게시글 조회",
             description = "특정 카테고리(ENUM)에 속한 게시글을 조회합니다. 예: /api/v1/posts/category/PROJECT"
     )
-    public ApiResponse<List<PostResponse>> getPostsByCategory(
-            @PathVariable PostCategoryType categoryType
+    public ApiResponse<PostPageResponse<PostResponse>> getPostsByCategory(
+            @PathVariable PostCategoryType categoryType,
+            @RequestParam(defaultValue = "1") int page
     ) {
-        List<PostResponse> posts = postService.getPostsByCategory(categoryType);
-        return ApiResponse.ok("카테고리별 게시글 조회 성공", posts);
+        PostPageResponse<PostResponse> postsPage = postService.getPostsByCategory(page, categoryType);
+
+        return ApiResponse.ok(
+                "카테고리별 게시글 조회 성공",
+                postsPage
+        );
     }
 
     private User getCurrentUser() {
@@ -103,9 +107,14 @@ public class PostController {
 
     @GetMapping
     @Operation(summary = "게시글 다건 조회")
-    public ApiResponse<List<PostResponse>> getAllPosts() {
-        List<PostResponse> posts = postService.getAllPosts();
+    public ApiResponse<PostPageResponse<PostResponse>> getAllPosts(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        PostPageResponse<PostResponse> postsPage = postService.getAllPosts(page);
+
         return ApiResponse.ok(
-                "전체 게시글 조회 성공", posts);
+                "전체 게시글 조회 성공",
+                postsPage
+        );
     }
 }

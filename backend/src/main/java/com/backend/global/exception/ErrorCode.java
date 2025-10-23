@@ -43,6 +43,16 @@ public enum ErrorCode {
     COMMENT_INVALID_USER(HttpStatus.FORBIDDEN, "해당 댓글에 대한 권한이 없는 사용자입니다."),
     PIN_POST_FORBIDDEN(HttpStatus.FORBIDDEN, "게시물 상단 고정 권한이 없습니다."),
 
+    //Qna
+    QNA_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 Q&A를 찾을 수 없습니다."),
+    QNA_ACCESS_DENIED(HttpStatus.FORBIDDEN, "자신의 문의만 수정하거나 삭제할 수 있습니다."),
+    QNA_ALREADY_ANSWERED(HttpStatus.BAD_REQUEST, "이미 답변이 등록된 Q&A입니다."),
+    QNA_CATEGORY_INVALID(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리입니다."),
+    QNA_CONTENT_NOT_BLANK(HttpStatus.BAD_REQUEST, "문의 내용은 비워둘 수 없습니다."),
+    QNA_TITLE_NOT_BLANK(HttpStatus.BAD_REQUEST, "문의 제목은 비워둘 수 없습니다."),
+    QNA_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "Q&A 답변 등록 권한이 없습니다."),
+    QNA_ADMIN_ANSWER_FINISHED(HttpStatus.BAD_REQUEST, "관리자가 답변을 완료한 Q&A입니다."),
+
     //Question
     QUESTION_TITLE_NOT_BLANK(HttpStatus.BAD_REQUEST, "질문 제목은 공백일 수 없습니다."),
     QUESTION_CONTENT_NOT_BLANK(HttpStatus.BAD_REQUEST, "질문 내용은 공백일 수 없습니다."),
@@ -66,10 +76,18 @@ public enum ErrorCode {
 
 
     //payment
-    PAYMENT_APPROVE_FAILED(HttpStatus.BAD_REQUEST, "결제 승인을 실패했습니다"),
-    PAYMENT_LOAD_FAILED(HttpStatus.BAD_REQUEST, "결제 조회를 실패했습니다"),
-    PAYMENT_CANCEL_FAILED(HttpStatus.BAD_REQUEST, "결제 취소를 실패했습니다"),
-    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다");
+    PAYMENT_APPROVE_FAILED(HttpStatus.BAD_REQUEST, "결제 승인을 실패했습니다."),
+    PAYMENT_LOAD_FAILED(HttpStatus.BAD_REQUEST, "결제 조회를 실패했습니다."),
+    PAYMENT_CANCEL_FAILED(HttpStatus.BAD_REQUEST, "결제 취소를 실패했습니다."),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다."),
+    AUTO_PAYMENT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "자동 결제 처리 중 오류가 발생했습니다."),
+
+    //billing
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 고객의 구독 정보를 찾을 수 없습니다."),
+    SUBSCRIPTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 구독 중입니다."),
+    SUBSCRIPTION_INACTIVE(HttpStatus.BAD_REQUEST, "비활성화된 구독입니다."),
+    BILLING_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "빌링키를 찾을 수 없습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String message;

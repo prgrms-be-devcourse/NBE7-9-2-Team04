@@ -42,6 +42,7 @@ public class GlobalExceptionHandler {
                 , HttpStatus.BAD_REQUEST);
     }
 
+
     // 그 외 모든 예외 처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleAllException(final Exception e) {

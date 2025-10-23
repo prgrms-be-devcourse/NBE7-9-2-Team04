@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
@@ -32,6 +33,11 @@ public class SecurityConfig {
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
 
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
@@ -46,18 +52,47 @@ public class SecurityConfig {
 
 
                         .requestMatchers(HttpMethod.GET,
-                                "/api/v1/posts/{postId:\\d+}/comments",
+                                "/api/v1/posts/{postId}/comments",
                                 "/api/v1/posts",
-                                "/api/v1/posts/{postId:\\d+}",
+                                "/api/v1/posts/category/*",
+                                "/api/v1/posts/{postId}",
                                 "/api/v1/payments/*",
                                 "/api/v1/questions/{questionId}/answers",
                                 "/api/v1/questions/{questionId}/answers/*").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/users/login", "/api/v1/users/signup","/api/v1/users/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/v1/users/login",
+                                "/api/v1/users/signup",
+                                "/api/v1/users/refresh",
+                                "/api/v1/users/sendEmail",
+                                "/api/v1/users/verifyCode"
+                        ).permitAll()
                         .anyRequest().authenticated()
 
 
+
+
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                //인증 안한 사람 접근 시 커스텀 예외 처리
+                .exceptionHandling(
+                        exceptionHandling -> exceptionHandling
+                                .authenticationEntryPoint((request, response, authenticationException) -> {
+                                    response.setContentType("application/json; charset=UTF-8"); //에러 한글 처리
+                                    response.setStatus(401);
+                                    response.getWriter().write(
+                                            """
+                                                        {
+                                                            "status": "UNAUTHORIZED",
+                                                            "message": "로그인 후 이용해주세요.",
+                                                            "data" : null
+                                                        }
+                                                    """);
+                                })
+                )
+
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+
         ;
         return http.build();
     }
