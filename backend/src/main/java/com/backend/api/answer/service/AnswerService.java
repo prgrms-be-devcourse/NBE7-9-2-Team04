@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +52,7 @@ public class AnswerService {
                 .isPublic(isPublic)
                 .author(currentUser)
                 .question(question)
+                .aiScore((int) (Math.random() * 100))  // 임시 AI 점수 부여
                 .build();
 
         return answerRepository.save(answer);
@@ -84,7 +86,7 @@ public class AnswerService {
         questionService.findByIdOrThrow(questionId);
 
         if(page < 1) page = 1;
-        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, 10, Sort.by("createDate").descending());
         Page<Answer> answersPage = answerRepository.findByQuestionIdAndIsPublicTrue(questionId, pageable);
 
         List<AnswerReadResponse> answers = answersPage.getContent()
@@ -95,17 +97,16 @@ public class AnswerService {
         return new AnswerPageResponse<>(answersPage, answers);
     }
 
-    public Answer findAnswer (Long questionId, Long answerId) {
+    public AnswerReadResponse findMyAnswer(Long questionId) {
+        // 질문 존재 여부 확인
         questionService.findByIdOrThrow(questionId);
-        Answer answer = this.findByIdOrThrow(answerId);
 
-        if(!answer.isPublic()) {
-            if (!answer.getAuthor().getId().equals(rq.getUser().getId())) {
-                throw new ErrorException(ErrorCode.ANSWER_NOT_PUBLIC);
-            }
-        }
+        User currentUser = rq.getUser();
 
-        return answer;
+        // 질문에 대해 현재 사용자가 작성한 답변 조회
+        return answerRepository.findFirstByQuestionIdAndAuthorIdOrderByCreateDateDesc(questionId, currentUser.getId())
+                .map(AnswerReadResponse::new) // 있으면 DTO로 변환
+                .orElse(null); // 없으면 null 반환
     }
 
     public AnswerPageResponse<AnswerReadResponse> findAnswersByUserId(int page, Long userId) {

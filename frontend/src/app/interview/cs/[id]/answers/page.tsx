@@ -28,10 +28,18 @@ export default function AnswersPage() {
         data: AnswerPageResponse<AnswerReadResponse>
         message?: string
       }
-
+  
       if (res.status === "OK") {
         const data = res.data
-        setAnswers(data.answers)
+  
+        // ✅ 날짜 포맷 처리
+        const formattedAnswers = data.answers.map((answer) => ({
+          ...answer,
+          createDate: answer.createDate?.split("T")[0] ?? "",
+          modifyDate: answer.modifyDate?.split("T")[0] ?? "",
+        }))
+  
+        setAnswers(formattedAnswers)
         setCurrentPage(data.currentPage)
         setTotalPages(data.totalPages === 0 ? 1 : data.totalPages)
       } else {
@@ -43,10 +51,11 @@ export default function AnswersPage() {
       setLoading(false)
     }
   }
-
+  
   useEffect(() => {
     fetchAnswers(1)
   }, [questionId])
+  
 
   return (
     <div className="max-w-screen-lg mx-auto px-6 py-10">
@@ -59,7 +68,7 @@ export default function AnswersPage() {
           ← 문제로 돌아가기
         </Link>
 
-        <h1 className="text-3xl font-bold mb-2">다른 사람의 답변</h1>
+        <h1 className="text-3xl font-bold mb-2">다른 사람들의 답변</h1>
       </div>
 
       {/* 답변 목록 */}
@@ -85,7 +94,7 @@ export default function AnswersPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">AI 점수</span>
                   <div
                     className={`px-3 py-1 rounded-full font-semibold text-sm ${
@@ -102,7 +111,7 @@ export default function AnswersPage() {
                   >
                     {answer.aiScore ?? "-"}점
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {/* 답변 내용 */}
