@@ -33,7 +33,7 @@ public class Subscription extends BaseEntity {
     @Column(nullable = true)
     private LocalDateTime endDate;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate nextBillingDate;
 
     //질문 가능 횟수
@@ -74,19 +74,18 @@ public class Subscription extends BaseEntity {
         this.endDate = this.startDate.plusMonths(1);
         this.nextBillingDate = LocalDate.now().plusMonths(1);
     }
-  
 
-    public void activate(LocalDateTime endDate) {
-        this.endDate = endDate;
-        this.isActive = true;
-        this.subscriptionType = SubscriptionType.PREMIUM;
-        this.subscriptionName = "PREMIUM";
-        this.price = 9900L;
-        this.questionLimit = 8;
-        this.startDate = LocalDateTime.now();
-        this.endDate = this.startDate.plusMonths(1);
-        this.nextBillingDate = LocalDate.now().plusMonths(1);
+    public void deActivatePremium() {
+        this.billingKey = null;
+        this.isActive = false;
+        this.subscriptionType = SubscriptionType.BASIC;
+        this.subscriptionName = "BASIC";
+        this.price = 0L;
+        this.questionLimit = 5;
+        this.endDate = LocalDateTime.now();
+        this.nextBillingDate = null;
     }
+
 
     @PrePersist
     public void generateCustomerKey() {
@@ -99,17 +98,11 @@ public class Subscription extends BaseEntity {
         this.nextBillingDate = nextDate;
     }
 
-    public void deactivate() {
-        this.isActive = false;
-    }
 
     public void setBillingKey(String billingKey) {
         this.billingKey = billingKey;
     }
 
-    public void setQuestionLimit(int questionLimit) {
-        this.questionLimit = questionLimit;
-    }
     // 구독 유효성 검증
     public boolean isValid() {
         // PREMIUM 구독만 활성 상태와 만료일을 기준으로 유효성을 검사합니다.

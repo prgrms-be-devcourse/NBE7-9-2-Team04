@@ -4,7 +4,6 @@ import com.backend.api.comment.dto.request.CommentRequest;
 import com.backend.api.comment.dto.response.CommentPageResponse;
 import com.backend.api.comment.dto.response.CommentResponse;
 import com.backend.api.comment.service.CommentService;
-import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
@@ -31,11 +30,11 @@ public class CommentController {
     ) {
         User currentUser = rq.getUser();
 
-        Comment newComment = commentService.writeComment(currentUser, postId, reqBody.content());
+        CommentResponse response = commentService.writeComment(currentUser, postId, reqBody.content());
 
         return ApiResponse.created(
-                "%d번 댓글이 생성되었습니다.".formatted(newComment.getId()),
-                new CommentResponse(newComment)
+                "%d번 댓글이 생성되었습니다.".formatted(response.id()),
+                response
         );
     }
 
@@ -47,15 +46,15 @@ public class CommentController {
     ) {
         User currentUser = rq.getUser();
 
-        Comment updatedComment = commentService.updateComment(
+        CommentResponse response = commentService.updateComment(
                 currentUser,
                 commentId,
                 reqBody.content()
         );
 
         return ApiResponse.ok(
-                "%d번 댓글이 수정되었습니다.".formatted(updatedComment.getId()),
-                new CommentResponse(updatedComment)
+                "%d번 댓글이 수정되었습니다.".formatted(response.id()),
+                response
         );
     }
 
@@ -80,7 +79,18 @@ public class CommentController {
             @PathVariable Long postId,
             @RequestParam(defaultValue = "1") int page
     ) {
-        CommentPageResponse<CommentResponse> commentsPage = commentService.getCommentsByPostId(page, postId);
+        User currentUser = null;
+        try {
+            currentUser = rq.getUser();
+        } catch (Exception e) {
+
+        }
+
+        CommentPageResponse<CommentResponse> commentsPage = commentService.getCommentsByPostId(
+                currentUser,
+                page,
+                postId
+        );
 
         return ApiResponse.ok(
                 "%d번 게시글의 댓글 목록 조회 성공".formatted(postId),

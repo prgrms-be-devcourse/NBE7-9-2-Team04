@@ -36,7 +36,7 @@ public class AdminPostService {
 
         List<PostResponse> posts =  postsPage.getContent()
                 .stream()
-                .map(PostResponse::from)
+                .map(post -> PostResponse.from(post, null))
                 .toList();
 
         return PostPageResponse.from(postsPage, posts);
@@ -45,7 +45,7 @@ public class AdminPostService {
     public PostResponse getPostById(Long postId, User user) {
         adminUserService.validateAdminAuthority(user);
         Post post = postService.findPostByIdOrThrow(postId);
-        return PostResponse.from(post);
+        return PostResponse.from(post, null);
     }
 
     @Transactional
@@ -61,7 +61,7 @@ public class AdminPostService {
         Post post = postService.findPostByIdOrThrow(postId);
         post.updatePinStatus(status);
 
-        return PostResponse.from(post);
+        return PostResponse.from(post, null);
     }
 
     @Transactional
@@ -70,6 +70,6 @@ public class AdminPostService {
         Post post =postService.findPostByIdOrThrow(postId);
         post.updateStatus(status);
 
-        return PostResponse.from(post);
+        return PostResponse.from(post, null);
     }
 }

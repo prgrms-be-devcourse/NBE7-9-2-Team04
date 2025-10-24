@@ -1,4 +1,111 @@
 package com.backend.api.ranking.service;
 
+import com.backend.api.ranking.dto.response.RankingResponse;
+import com.backend.api.ranking.dto.response.RankingSummaryResponse;
+import com.backend.api.userQuestion.service.UserQuestionService;
+import com.backend.domain.ranking.entity.Ranking;
+import com.backend.domain.ranking.entity.Tier;
+import com.backend.domain.ranking.repository.RankingRepository;
+import com.backend.domain.user.entity.User;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
 public class RankingService {
+
+    private final RankingRepository rankingRepository;
+    private final UserQuestionService userQuestionService;
+
+    @Transactional
+    public Ranking createRanking(User user) {
+
+        if (rankingRepository.existsByUser(user)) {
+            throw new ErrorException(ErrorCode.RANKING_ALREADY_EXISTS);
+        }
+
+        Ranking ranking = Ranking.builder()
+                .user(user)
+                .totalScore(0)
+                .tier(Tier.UNRATED)
+                .rank(null)
+                .build();
+
+        return rankingRepository.save(ranking);
+    }
+
+
+    @Transactional
+    public void updateUserRanking(User user){
+
+        int totalScore = userQuestionService.getTotalUserQuestionScore(user);
+
+        Ranking ranking = createRanking(user);
+        ranking.updateTotalScore(totalScore);
+        ranking.updateTier(Tier.fromScore(totalScore));
+
+        rankingRepository.save(ranking);
+    }
+
+    //마이페이지용
+    @Transactional(readOnly = true)
+    public RankingResponse getMyRanking(User user) {
+        Ranking ranking = rankingRepository.findByUser(user)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        return RankingResponse.from(ranking);
+    }
+
+
+    //상위 10명
+    @Transactional(readOnly = true)
+    public List<RankingResponse> getTopRankings() {
+
+        return rankingRepository.findTop10ByOrderByTotalScoreDesc()
+                .stream()
+                .map(RankingResponse::from)
+                .toList();
+    }
+
+    //상위 10명 + 내 랭킹
+    @Transactional(readOnly = true)
+    public RankingSummaryResponse getRankingSummary(User user) {
+
+        RankingResponse myRanking = getMyRanking(user);
+        List<RankingResponse> topRankings = getTopRankings();
+
+        return RankingSummaryResponse.from(myRanking, topRankings);
+    }
+
+
+    //스케줄러 랭킹 재계산
+    @Transactional
+    public void recalculateAllRankings() {
+        List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
+        int rank = 1;
+
+        for (Ranking r : rankings) {
+            r.updateRank(rank++);
+            r.updateTier(Tier.fromScore(r.getTotalScore()));
+        }
+
+        rankingRepository.saveAll(rankings);
+    }
+
+
+//
+//    private int calculateUserRank(Ranking myRanking) {
+//        List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
+//        for (int i = 0; i < rankings.size(); i++) {
+//            if (rankings.get(i).getUser().getId().equals(myRanking.getUser().getId())) {
+//                return i + 1;
+//            }
+//        }
+//        return rankings.size();
+//    }
 }

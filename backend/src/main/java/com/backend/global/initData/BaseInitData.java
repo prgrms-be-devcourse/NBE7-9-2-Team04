@@ -51,15 +51,16 @@ public class BaseInitData {
     @Bean
     ApplicationRunner initDataRunner() {
         return args -> {
-            self.userInitData();     // 1순위: 회원 초기 데이터 등록
-            self.postInitData();     // 2순위: 게시글 및 댓글 초기 데이터 등록
-            self.questionInitData(); // 3순위: 질문 초기 데이터 등록
-            self.answerInitData();   // 4순위: 답변 초기 데이터 등록
-            self.qnaInitData();      // 5순위: QnA 초기 데이터 등록
-            self.initAdminUser();    // 6순위: 관리자 계정 초기 데이터 등록
+            self.userInitData();  // 회원 초기 데이터 등록
+            self.postInitData();  // 게시글 초기 데이터 등록
+            self.commentInitData();  // 댓글 초기 데이터 등록
+            self.questionInitData();  // 질문 초기 데이터 등록
+            self.answerInitData();  // 답변 초기 데이터 등록
+            self.qnaInitData(); // QnA 초기 데이터 등록
+            self.initAdminUser();
         };
     }
-    
+
     @Transactional
     public void userInitData() {
         if(userRepository.count() > 0) {

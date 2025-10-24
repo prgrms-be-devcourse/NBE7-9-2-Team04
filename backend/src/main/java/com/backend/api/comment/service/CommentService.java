@@ -39,7 +39,7 @@ public class CommentService {
     }
 
     @Transactional
-    public Comment writeComment(User currentUser, Long postId, String content) {
+    public CommentResponse writeComment(User currentUser, Long postId, String content) {
 
         Post post = postService.findPostByIdOrThrow(postId);
 
@@ -49,11 +49,13 @@ public class CommentService {
                 .post(post)
                 .build();
 
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        return new CommentResponse(savedComment, null);
     }
 
     @Transactional
-    public Comment updateComment(User currentUser, Long commentId, String newContent) {
+    public CommentResponse updateComment(User currentUser, Long commentId, String newContent) {
         Comment comment = this.findByIdOrThrow(commentId);
 
         if (!comment.getAuthor().getId().equals(currentUser.getId())) {
@@ -62,7 +64,7 @@ public class CommentService {
 
         comment.updateContent(newContent);
 
-        return comment;
+        return new CommentResponse(comment, null);
     }
 
     @Transactional
@@ -76,18 +78,24 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    public CommentPageResponse<CommentResponse> getCommentsByPostId(int page, Long postId) {
+    public CommentPageResponse<CommentResponse> getCommentsByPostId(User currentUser, int page, Long postId) {
         postService.findPostByIdOrThrow(postId);
 
         if (page < 1) page = 1;
-        Pageable pageable = PageRequest.of(page - 1, 20);
+        Pageable pageable = PageRequest.of(page - 1, 20, Sort.by("createDate").ascending());
 
-        Page<Comment> commentsPage  = commentRepository.findByPostId(postId, pageable);
+        Page<Comment> commentsPage = commentRepository.findByPostId(postId, pageable);
+
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
 
         List<CommentResponse> comments = commentsPage.getContent()
                 .stream()
-                .map(CommentResponse::new)
+                .map(comment -> {
+                    boolean isMine = comment.getAuthor().getId().equals(currentUserId);
+                    return new CommentResponse(comment, isMine);
+                })
                 .toList();
+
         return new CommentPageResponse<>(commentsPage, comments);
     }
 
