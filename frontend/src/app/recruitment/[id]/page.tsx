@@ -281,18 +281,18 @@ export default function RecruitmentDetailPage() {
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold">댓글 {totalCount}개</h3>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold">{currentPage} / {totalPages}</span>
+              <span className="text-lg font-semibold">{currentPage} / {totalPages === 0 ? 1 : totalPages}</span>
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:cursor-default disabled:bg-gray-200 disabled:opacity-50"
+                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer disabled:cursor-default disabled:bg-gray-200 disabled:opacity-50"
               >
                 &lt;
               </button>
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:cursor-default disabled:bg-gray-200 disabled:opacity-50"
+                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer disabled:cursor-default disabled:bg-gray-200 disabled:opacity-50"
               >
                 &gt;
               </button>
