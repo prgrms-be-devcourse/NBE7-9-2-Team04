@@ -33,7 +33,7 @@ public class RankingService {
                 .user(user)
                 .totalScore(0)
                 .tier(Tier.UNRATED)
-                .rankValue(null)
+                .rankValue(0)
                 .build();
 
         return rankingRepository.save(ranking);
@@ -45,7 +45,8 @@ public class RankingService {
 
         int totalScore = userQuestionService.getTotalUserQuestionScore(user);
 
-        Ranking ranking = createRanking(user);
+        Ranking ranking = rankingRepository.findByUser(user)
+                .orElseGet(() -> createRanking(user)); // 존재하지 않으면 생성
         ranking.updateTotalScore(totalScore);
         ranking.updateTier(Tier.fromScore(totalScore));
 

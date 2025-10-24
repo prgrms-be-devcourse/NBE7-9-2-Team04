@@ -26,6 +26,7 @@ public class UserQuestionService {
         UserQuestion userQuestion = UserQuestion.builder()
                 .user(user)
                 .question(question)
+                .aiScore(0)
                 .build();
 
         return userQuestionRepository.save(userQuestion);
@@ -36,7 +37,8 @@ public class UserQuestionService {
 
         if (aiScore == null) return;
 
-        UserQuestion userQuestion = createUserQuestion(user, question); //업데이트 할 때 존재하지 않으면 생성
+        UserQuestion userQuestion = userQuestionRepository.findByUserAndQuestion(user, question)
+                .orElseGet(() -> createUserQuestion(user, question));
         userQuestion.updateAiScoreIfHigher(aiScore);
 
         userQuestionRepository.save(userQuestion);
