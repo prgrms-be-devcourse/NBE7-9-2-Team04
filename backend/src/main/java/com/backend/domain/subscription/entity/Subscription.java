@@ -105,7 +105,11 @@ public class Subscription extends BaseEntity {
 
     // 구독 유효성 검증
     public boolean isValid() {
-        return this.isActive && this.endDate.isAfter(LocalDateTime.now());
+        // PREMIUM 구독만 활성 상태와 만료일을 기준으로 유효성을 검사합니다.
+        if (subscriptionType != SubscriptionType.PREMIUM) {
+            return false;
+        }
+        return this.isActive && this.endDate != null && this.endDate.isAfter(LocalDateTime.now());
     }
 
 }
