@@ -28,6 +28,11 @@ export default function ProfileLayout({
       icon: "📰",
     },
     {
+      title: "QnA 관리",
+      href: "/admin/qna",
+      icon: "📰",
+    },
+    {
       title: "결제 관리",
       href: "/admin/premiums",
       icon: "💰",

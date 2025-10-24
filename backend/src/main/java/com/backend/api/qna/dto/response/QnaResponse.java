@@ -29,6 +29,9 @@ public record QnaResponse(
         @Schema(description = "카테고리 타입", example = "ACCOUNT")
         QnaCategoryType categoryType,
 
+        @Schema(description = "카테고리 이름", example = "계정")
+        String categoryName,
+
         @Schema(description = "작성일", example = "2025-10-13T11:00:00")
         LocalDateTime createdDate,
 
@@ -49,6 +52,7 @@ public record QnaResponse(
                 qna.getAuthor().getId(),
                 qna.getAuthor().getNickname(),
                 qna.getCategoryType(),
+                qna.getCategoryType().getDisplayName(),
                 qna.getCreateDate(),
                 qna.getModifyDate(),
                 qna.getAdminAnswer(),

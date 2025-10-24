@@ -26,6 +26,8 @@ public enum ErrorCode {
     EXPIRED_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "인증 코드가 만료되었습니다."),
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다."),
     EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다."),
+    USER_QUESTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 유저-문제 관계입니다."),
+    RANKING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 랭킹입니다."),
 
     //token
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Refresh Token입니다."),
@@ -86,8 +88,10 @@ public enum ErrorCode {
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 고객의 구독 정보를 찾을 수 없습니다."),
     SUBSCRIPTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 구독 중입니다."),
     SUBSCRIPTION_INACTIVE(HttpStatus.BAD_REQUEST, "비활성화된 구독입니다."),
-    BILLING_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "빌링키를 찾을 수 없습니다.");
+    BILLING_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "빌링키를 찾을 수 없습니다."),
 
+    // feedback
+    FEEDBACK_NOT_FOUND(HttpStatus.NOT_FOUND,"피드백을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

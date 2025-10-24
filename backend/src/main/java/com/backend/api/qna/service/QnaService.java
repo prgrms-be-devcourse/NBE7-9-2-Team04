@@ -99,19 +99,19 @@ public class QnaService {
         qnaRepository.delete(qna);
     }
 
-    public List<QnaResponse> getQnaAll(User user) {
+    public List<QnaResponse> getQnaAll() {
         List<Qna> qnaList = qnaRepository.findAll();
         return qnaList.stream()
                 .map(QnaResponse::from)
                 .toList();
     }
 
-    public QnaResponse getQna(Long qnaId, User user) {
+    public QnaResponse getQna(Long qnaId) {
         Qna qna = findByIdOrThrow(qnaId);
         return QnaResponse.from(qna);
     }
 
-    public List<QnaResponse> getQnaByCategory(User user, QnaCategoryType categoryType) {
+    public List<QnaResponse> getQnaByCategory(QnaCategoryType categoryType) {
         List<Qna> qnaList = qnaRepository.findByCategoryType(categoryType);
         return qnaList.stream()
                 .map(QnaResponse::from)

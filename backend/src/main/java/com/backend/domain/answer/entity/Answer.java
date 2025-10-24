@@ -1,5 +1,6 @@
 package com.backend.domain.answer.entity;
 
+import com.backend.domain.feedback.entity.Feedback;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
@@ -18,12 +19,8 @@ public class Answer extends BaseEntity {
     @Column(nullable = false, length = 1000)
     private String content;
 
-    private Integer aiScore;
-
-    @Column(name = "is_public", nullable = false)
+    @Column(nullable = false)
     private boolean isPublic;
-
-    private String feedback;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -33,6 +30,9 @@ public class Answer extends BaseEntity {
     @JsonIgnore
     @JoinColumn(nullable = false)
     private Question question;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private Feedback feedback;
 
     public void update(String content, Boolean isPublic) {
         if(content != null && !content.isBlank()) {

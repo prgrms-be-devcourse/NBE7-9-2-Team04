@@ -4,6 +4,7 @@ import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.dto.request.AnswerUpdateRequest;
 import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
+import com.backend.api.feedback.service.FeedbackService;
 import com.backend.api.question.service.QuestionService;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.answer.entity.Answer;
@@ -34,6 +35,7 @@ public class AnswerService {
     private final QuestionService questionService;
     private final Rq rq;
     private final UserService userService;
+    private final FeedbackService feedbackService;
 
     public Answer findByIdOrThrow(Long id) {
         return answerRepository.findById(id)
@@ -54,8 +56,9 @@ public class AnswerService {
                 .question(question)
                 .aiScore((int) (Math.random() * 100))  // 임시 AI 점수 부여
                 .build();
-
-        return answerRepository.save(answer);
+        Answer savedAnswer = answerRepository.save(answer);
+        feedbackService.createFeedback(savedAnswer);
+        return savedAnswer;
     }
 
     @Transactional
@@ -67,7 +70,7 @@ public class AnswerService {
         }
 
         answer.update(reqBody.content(), reqBody.isPublic());
-
+        feedbackService.updateFeedback(answer);
         return answer;
     }
 
