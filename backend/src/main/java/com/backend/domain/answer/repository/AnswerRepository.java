@@ -5,14 +5,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     @EntityGraph(attributePaths = {"author", "question"})
-    Page<Answer> findByQuestionIdAndIsPublicTrue(Long questionId, Pageable pageable);
+    @Query("SELECT a FROM Answer a WHERE a.question.id = :questionId AND a.isPublic = true ORDER BY a.feedback.aiScore DESC")
+    Page<Answer> findByQuestionIdAndIsPublicTrueOrderByFeedbackScoreDesc(Long questionId, Pageable pageable);
+
     @EntityGraph(attributePaths = {"author", "question"})
     Page<Answer> findByAuthorId(Long authorId, Pageable pageable);
 
-    Optional<Answer> findByQuestionIdAndAuthorId(Long questionId, Long authorId);
+    Optional<Answer> findFirstByQuestionIdAndAuthorIdOrderByCreateDateDesc(Long questionId, Long authorId);
 }
