@@ -13,18 +13,18 @@ import lombok.*;
 @AllArgsConstructor
 public class Review extends BaseEntity {
 
-    @Column(name = "reviewId")
+    @Column(name = "review_id")
     private Long reviewId;
 
-    @Column(name = "AiReviewContent", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "ai_review_content", columnDefinition = "TEXT", nullable = false)
     private String AiReviewContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "resumeId", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "resume_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Resume resume;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private User user;
 
 }
