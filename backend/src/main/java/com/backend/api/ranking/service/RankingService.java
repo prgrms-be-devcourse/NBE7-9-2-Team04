@@ -1,5 +1,6 @@
 package com.backend.api.ranking.service;
 
+import com.backend.api.question.service.QuestionService;
 import com.backend.api.ranking.dto.response.RankingResponse;
 import com.backend.api.ranking.dto.response.RankingSummaryResponse;
 import com.backend.api.userQuestion.service.UserQuestionService;
@@ -21,6 +22,7 @@ public class RankingService {
 
     private final RankingRepository rankingRepository;
     private final UserQuestionService userQuestionService;
+    private final QuestionService questionService;
 
     @Transactional
     public Ranking createRanking(User user) {
@@ -58,6 +60,9 @@ public class RankingService {
     public RankingResponse getMyRanking(User user) {
         Ranking ranking = rankingRepository.findByUser(user)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        int solvedCount = userQuestionService.countSolvedQuestion(user);
+        int questionCount = questionService.
 
         return RankingResponse.from(ranking);
     }

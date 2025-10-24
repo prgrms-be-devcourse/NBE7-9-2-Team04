@@ -50,7 +50,7 @@ public class UserQuestionService {
     }
 
     @Transactional(readOnly = true)
-    public long countSolvedQuestion(User user){
+    public int countSolvedQuestion(User user){
         if (user == null) {
             throw new ErrorException(ErrorCode.UNAUTHORIZED_USER);
         }

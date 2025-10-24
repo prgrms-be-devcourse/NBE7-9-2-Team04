@@ -20,5 +20,5 @@ public interface UserQuestionRepository extends JpaRepository<UserQuestion, Long
     @Query("SELECT SUM(uq.aiScore) FROM UserQuestion uq WHERE uq.user = :user")
     Optional<Integer> sumAiScoreByUser(@Param("user") User user);
 
-    long countByUser(User user);
+    int countByUser(User user);
 }

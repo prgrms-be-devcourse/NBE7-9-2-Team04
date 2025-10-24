@@ -16,5 +16,5 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @EntityGraph(attributePaths = {"author"})
     Page<Question> findByCategoryTypeAndIsApprovedTrue(QuestionCategoryType categoryType, Pageable pageable);
 
-    long CountByAuthor(User author);
+    int CountByAuthor(User author);
 }
