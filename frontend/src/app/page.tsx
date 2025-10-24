@@ -137,7 +137,7 @@ export default function HomePage() {
                 </div>
                 <div className="p-6 pt-0 flex-grow">
                   <Link
-                    href="/interview/portfolio"
+                    href="/portfolio_review"
                     className="text-blue-500 hover:underline p-0"
                   >
                     시작하기
@@ -193,12 +193,6 @@ export default function HomePage() {
                   </p>
                 </div>
                 <div className="p-6 pt-0 flex-grow">
-                  <button
-                    className="h-10 px-4 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600"
-                    onClick={handlePremiumClick}
-                  >
-                    자세히 보기
-                  </button>
                 </div>
               </div>
             </div>

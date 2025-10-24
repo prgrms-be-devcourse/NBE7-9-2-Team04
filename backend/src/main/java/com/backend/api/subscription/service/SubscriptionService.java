@@ -66,11 +66,13 @@ public class SubscriptionService {
         Subscription subscription = subscriptionRepository.findByCustomerKey(customerKey)
                 .orElseThrow(() -> new ErrorException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
 
+        if(!subscription.isActive()) { //이미 비활성화된 구독은 처리 x
+            throw new ErrorException(ErrorCode.SUBSCRIPTION_INACTIVE);
+        }
 
-        subscription.deactivate();
-        subscription.updateNextBillingDate(null);
         subscription.setBillingKey(null);
-        subscription.setQuestionLimit(5);
+
+        //다음 결제일까지는 구독 유효하도록
         subscriptionRepository.save(subscription);
 
         return SubscriptionResponse.from(subscription);

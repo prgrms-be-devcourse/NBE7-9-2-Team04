@@ -59,6 +59,7 @@ public class BillingService {
         return new BillingResponse(billingKey, updated.customerKey());
     }
 
+    //자동 결제. 한달 주기로 결제 진행
     @Transactional
     public void autoPayment(Subscription subscription){
 
