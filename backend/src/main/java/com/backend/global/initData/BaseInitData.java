@@ -62,6 +62,7 @@ public class BaseInitData {
     }
 
     @Transactional
+
     public void userInitData() {
         if(userRepository.count() > 0) {
             return;

@@ -18,10 +18,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.backend.domain.subscription.repository.SubscriptionRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -160,5 +162,22 @@ public class PostService {
         return limitedList.stream()
                 .map(post -> PostResponse.from(post, null))
                 .toList();
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    @Transactional
+    public void closePostStatus(){
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Post> expiredPosts = getByStatusAndDeadlineLessThan(now);
+        for(Post post : expiredPosts){
+            post.updateStatus(PostStatus.CLOSED);
+        }
+    }
+
+    public List<Post> getByStatusAndDeadlineLessThan(LocalDateTime now){
+        return postRepository.findByStatusAndDeadlineLessThan(PostStatus.ING,now)
+                .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
+
     }
 }
