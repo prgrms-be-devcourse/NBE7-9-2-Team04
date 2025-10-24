@@ -48,4 +48,13 @@ public class UserQuestionService {
     public Integer getTotalUserQuestionScore(User user) {
         return userQuestionRepository.sumAiScoreByUser(user).orElse(0);
     }
+
+    @Transactional(readOnly = true)
+    public long countSolvedQuestion(User user){
+        if (user == null) {
+            throw new ErrorException(ErrorCode.UNAUTHORIZED_USER);
+        }
+        return userQuestionRepository.countByUser(user);
+    }
+    }
 }

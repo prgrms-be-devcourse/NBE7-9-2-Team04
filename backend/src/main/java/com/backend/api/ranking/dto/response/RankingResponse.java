@@ -24,10 +24,16 @@ public record RankingResponse (
         Tier nextTier,
 
         @Schema(description = "다음 티어까지 남은 점수", example = "130")
-        int scoreToNextTier
+        int scoreToNextTier,
+
+        @Schema(description = "해결한 문제 수", example = "100")
+        int solvedCount,
+
+        @Schema(description = "제출한 질문 수", example = "5")
+        int questionCount
 )
 {
-    public static RankingResponse from(Ranking ranking) {
+    public static RankingResponse from(Ranking ranking, int solvedCount, int questionCount) {
         int totalScore = ranking.getTotalScore();
         Tier currentTier = ranking.getTier();
         Tier nextTier = currentTier.nextTier();
@@ -46,7 +52,9 @@ public record RankingResponse (
                 currentTier,
                 ranking.getRankValue(),
                 nextTier,
-                scoreToNextTier
+                scoreToNextTier,
+                solvedCount,
+                questionCount
         );
     }
 }
