@@ -53,7 +53,6 @@ public class BaseInitData {
         return args -> {
             self.userInitData();  // 회원 초기 데이터 등록
             self.postInitData();  // 게시글 초기 데이터 등록
-            self.commentInitData();  // 댓글 초기 데이터 등록
             self.questionInitData();  // 질문 초기 데이터 등록
             self.answerInitData();  // 답변 초기 데이터 등록
             self.qnaInitData(); // QnA 초기 데이터 등록
@@ -62,7 +61,6 @@ public class BaseInitData {
     }
 
     @Transactional
-
     public void userInitData() {
         if(userRepository.count() > 0) {
             return;
