@@ -7,10 +7,12 @@ import com.backend.api.feedback.dto.request.AiFeedbackRequest;
 import com.backend.api.feedback.dto.response.FeedbackReadResponse;
 import com.backend.api.question.service.QuestionService;
 import com.backend.domain.answer.entity.Answer;
+import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.feedback.entity.Feedback;
 
 import com.backend.domain.feedback.repository.FeedbackRepository;
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,8 @@ public class FeedbackService {
     private final OpenAiChatModel openAiChatModel;  // 리퀘스트 정의
     private final FeedbackRepository feedbackRepository;
     private final QuestionService questionService;
+
+    private final AnswerRepository answerRepository;
 
     @Async("feedbackExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -102,8 +106,11 @@ public class FeedbackService {
     }
 
     @Transactional(readOnly = true)
-    public FeedbackReadResponse readFeedback(Long feedbackId) {
-        Feedback feedback = getFeedback(feedbackId);
+    public FeedbackReadResponse readFeedback(Long questionId,User user) {
+        Answer answer = answerRepository.findByQuestionIdAndAuthorId(questionId,user.getId())
+                .orElseThrow(() -> new ErrorException(ErrorCode.ANSWER_NOT_FOUND));
+        Feedback feedback = getFeedbackByAnswerId(answer.getId());
+
         return FeedbackReadResponse.from(feedback);
     }
 
