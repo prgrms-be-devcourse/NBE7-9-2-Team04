@@ -56,5 +56,5 @@ public class UserQuestionService {
         }
         return userQuestionRepository.countByUser(user);
     }
-    }
+
 }

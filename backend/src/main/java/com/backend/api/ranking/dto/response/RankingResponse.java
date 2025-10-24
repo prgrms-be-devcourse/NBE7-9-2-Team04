@@ -11,6 +11,9 @@ public record RankingResponse (
         @Schema(description = "닉네임", example = "김개발")
         String nickName,
 
+        @Schema(description = "이메일", example = "kim@example.com")
+        String email,
+
         @Schema(description = "총 점수", example = "870")
         int totalScore,
 
@@ -47,6 +50,7 @@ public record RankingResponse (
 
         return new RankingResponse(
                 ranking.getUser().getId(),
+                ranking.getUser().getEmail(),
                 ranking.getUser().getNickname(),
                 totalScore,
                 currentTier,

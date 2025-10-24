@@ -62,9 +62,9 @@ public class RankingService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
 
         int solvedCount = userQuestionService.countSolvedQuestion(user);
-        int questionCount = questionService.
+        int questionCount = questionService.countByUser(user);
 
-        return RankingResponse.from(ranking);
+        return RankingResponse.from(ranking, solvedCount, questionCount);
     }
 
 
@@ -72,9 +72,14 @@ public class RankingService {
     @Transactional(readOnly = true)
     public List<RankingResponse> getTopRankings() {
 
-        return rankingRepository.findTop10ByOrderByTotalScoreDesc()
-                .stream()
-                .map(RankingResponse::from)
+        List<Ranking> top10 = rankingRepository.findTop10ByOrderByTotalScoreDescUser_NicknameAsc();
+
+        return top10.stream()
+                .map(r -> {
+                    int solved = userQuestionService.countSolvedQuestion(r.getUser());
+                    int submitted = questionService.countByUser(r.getUser());
+                    return RankingResponse.from(r, solved, submitted);
+                })
                 .toList();
     }
 
