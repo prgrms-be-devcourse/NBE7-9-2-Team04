@@ -1,4 +1,4 @@
-package com.backend.api.resume.dto.request;
+package com.backend.api.review.dto.request;
 
 import com.backend.api.question.dto.request.MessagesRequest;
 import com.backend.domain.resume.entity.Resume;
@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record ResumeAiFeedbackRequest(
+public record AiReviewbackRequest(
         String model,
         List<MessagesRequest> messages
 ) {
 
 
-    public static ResumeAiFeedbackRequest of(Resume resume) {
+    public static AiReviewbackRequest of(Resume resume) {
 
         String systemContent = """
                 # 요청 사항:
@@ -60,6 +60,6 @@ public record ResumeAiFeedbackRequest(
         ).collect(Collectors.toList());
 
 
-        return new ResumeAiFeedbackRequest("gpt-4o-mini-search-preview", requests);
+        return new AiReviewbackRequest("gpt-4o-mini-search-preview", requests);
     }
 }

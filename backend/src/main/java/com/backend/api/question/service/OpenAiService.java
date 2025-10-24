@@ -3,9 +3,8 @@ package com.backend.api.question.service;
 import com.backend.api.question.dto.request.AiQuestionRequest;
 import com.backend.api.question.dto.response.AiQuestionResponse;
 import com.backend.api.question.dto.response.ChatGptResponse;
-import com.backend.api.resume.dto.response.ResumeAiFeedbackResponse;
-import com.backend.api.resume.dto.request.ResumeAiFeedbackRequest;
 import com.backend.api.resume.service.ResumeService;
+import com.backend.api.review.dto.request.AiReviewbackRequest;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.user.entity.User;
@@ -16,15 +15,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
-
 import java.util.Optional;
 
 @Service
@@ -65,25 +61,9 @@ public class OpenAiService {
         return AiQuestionResponse.toDtoList(questions);
     }
 
-    @Transactional
-    public ResumeAiFeedbackResponse createResumeAiFeedback(Long userId) throws JsonProcessingException {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
-
-        if(!user.isPremium()){
-            throw new ErrorException(ErrorCode.AI_FEEDBACK_FOR_PREMIUM_ONLY);
-        }
-
-        Resume resume = resumeService.getResumeByUser(user);
-
-        ResumeAiFeedbackRequest request = ResumeAiFeedbackRequest.of(resume);
-
+    public String getAiReviewContent(AiReviewbackRequest request) throws JsonProcessingException {
         String rawApiResponse = connectionAi(request);
-
-        String feedbackContent = parseSingleContentFromResponse(rawApiResponse);
-
-        return ResumeAiFeedbackResponse.of(feedbackContent);
+        return parseSingleContentFromResponse(rawApiResponse);
     }
 
     // AI 질문 생성 횟수 제한 검증
