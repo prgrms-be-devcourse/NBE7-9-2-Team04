@@ -3,89 +3,84 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client";
-import { QuestionCategoryType } from "@/types/question";
+import { CreateQna, QnaCategoryType } from "@/types/qna";
 
-export default function AdminQuestionAddPage() {
+export default function NewQnAPage() {
   const router = useRouter();
 
-  // ✅ 폼 데이터 상태 (isApproved 포함)
-  const [formData, setFormData] = useState({
+  /** ✅ formData를 CreateQna 타입으로 관리 */
+  const [formData, setFormData] = useState<CreateQna>({
     title: "",
-    category: "" as QuestionCategoryType | "",
     content: "",
-    score: 0,
-    isApproved: false,
+    categoryType: "" as QnaCategoryType, // 초기값은 빈 문자열로 캐스팅
   });
 
-  // 로그인 및 권한 확인 상태
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isCheckingLogin, setIsCheckingLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ 관리자 권한 확인
+  // ✅ UI용 카테고리 매핑 (label ↔ value)
+  const CATEGORY_LABELS: Record<QnaCategoryType, string> = {
+    ACCOUNT: "계정",
+    PAYMENT: "결제",
+    SYSTEM: "시스템",
+    RECRUITMENT: "모집",
+    SUGGESTION: "제안",
+    OTHER: "기타",
+  };
+
+  // ✅ 로그인 여부 확인
   useEffect(() => {
-    const checkAdmin = async () => {
+    const checkLogin = async () => {
       try {
         const res = await fetchApi("/api/v1/users/check", { method: "GET" });
-
-        if (res.status !== "OK" || res.data.role !== "ADMIN") {
-          alert("관리자만 접근할 수 있습니다.");
-          router.replace("/auth?returnUrl=/admin/questions/new");
+        if (res.status !== "OK") {
+          router.replace("/auth?returnUrl=/qna/new");
           return;
         }
-
-        setIsCheckingAuth(false);
+        setIsCheckingLogin(false);
       } catch {
-        router.replace("/auth?returnUrl=/admin/questions/new");
+        router.replace("/auth?returnUrl=/qna/new");
       }
     };
-
-    checkAdmin();
+    checkLogin();
   }, [router]);
 
-  // ✅ 인증 확인 중일 때 로딩 화면
-  if (isCheckingAuth) {
+  // ✅ 로그인 확인 중일 때
+  if (isCheckingLogin) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
         <div className="animate-pulse text-gray-400 text-sm">
-          관리자 권한 확인 중...
+          로그인 상태 확인 중...
         </div>
       </div>
     );
   }
 
-  // ✅ 폼 제출
+  /** ✅ QnA 등록 */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.content || !formData.category) {
+    if (!formData.title || !formData.content || !formData.categoryType) {
       alert("모든 필드를 입력해주세요.");
       return;
     }
 
-    // ✅ AdminCreateQuestionRequest DTO 형태로 전송
-    const payload = {
-      title: formData.title,
-      content: formData.content,
-      categoryType: formData.category as QuestionCategoryType,
-      isApproved: formData.isApproved, // 최초 등록 시 false or true 가능
-      score: Number(formData.score),
-    };
-
     try {
       setIsLoading(true);
-      const apiResponse = await fetchApi("/api/v1/admin/questions", {
+
+      const res = await fetchApi("/api/v1/qna", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData), // ✅ CreateQna 타입 그대로 전송
       });
 
-      if (apiResponse.status === "OK" || apiResponse.status === "CREATED") {
-        alert("질문이 성공적으로 등록되었습니다!");
-        router.push("/admin/questions");
+      if (res.status === "CREATED" || res.status === "OK") {
+        alert("질문이 등록되었습니다!");
+        router.push("/qna");
       } else {
-        alert(apiResponse.message || "등록에 실패했습니다.");
+        alert(res.message || "등록에 실패했습니다.");
       }
-    } catch {
-      alert("서버 오류가 발생했습니다.");
+    } catch (err) {
+      alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setIsLoading(false);
     }
@@ -93,17 +88,18 @@ export default function AdminQuestionAddPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
-      {/* 목록으로 돌아가기 */}
+      {/* 🔙 목록으로 이동 */}
       <button
-        onClick={() => router.push("/admin/questions")}
+        onClick={() => router.push("/qna")}
         className="text-sm text-gray-500 flex items-center gap-1 hover:text-blue-600"
       >
         ← 목록으로
       </button>
 
+      {/* ✅ 질문 등록 폼 */}
       <div className="bg-white rounded-lg shadow p-8">
-        <h1 className="text-3xl font-bold mb-2">질문 등록</h1>
-        <p className="text-gray-500 mb-6">새로운 면접 질문을 등록합니다.</p>
+        <h1 className="text-3xl font-bold mb-2">질문하기</h1>
+        <p className="text-gray-500 mb-6">궁금한 점을 자유롭게 질문해주세요.</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 제목 */}
@@ -116,9 +112,7 @@ export default function AdminQuestionAddPage() {
               type="text"
               placeholder="질문 제목을 입력하세요"
               value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
               required
             />
@@ -126,83 +120,40 @@ export default function AdminQuestionAddPage() {
 
           {/* 카테고리 */}
           <div>
-            <label
-              htmlFor="category"
-              className="block text-sm font-semibold mb-2"
-            >
+            <label htmlFor="category" className="block text-sm font-semibold mb-2">
               카테고리
             </label>
             <select
               id="category"
-              value={formData.category}
+              value={formData.categoryType}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  category: e.target.value as QuestionCategoryType,
+                  categoryType: e.target.value as QnaCategoryType,
                 })
               }
               className="w-full border rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-200"
               required
             >
               <option value="">카테고리 선택</option>
-              <option value="NETWORK">네트워크</option>
-              <option value="OS">운영체제</option>
-              <option value="DATABASE">데이터베이스</option>
-              <option value="DATA_STRUCTURE">자료구조</option>
-              <option value="ALGORITHM">알고리즘</option>
+              {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
-          </div>
-
-          {/* 점수 */}
-          <div>
-            <label htmlFor="score" className="block text-sm font-semibold mb-2">
-              점수
-            </label>
-            <input
-              id="score"
-              type="number"
-              min="0"
-              placeholder="점수를 입력하세요"
-              value={formData.score}
-              onChange={(e) =>
-                setFormData({ ...formData, score: Number(e.target.value) })
-              }
-              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
-              required
-            />
-          </div>
-
-          {/* 승인 여부 */}
-          <div className="flex items-center gap-2">
-            <input
-              id="isApproved"
-              type="checkbox"
-              checked={formData.isApproved}
-              onChange={(e) =>
-                setFormData({ ...formData, isApproved: e.target.checked })
-              }
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="isApproved" className="text-sm text-gray-700">
-              등록 즉시 승인 상태로 설정
-            </label>
           </div>
 
           {/* 내용 */}
           <div>
-            <label
-              htmlFor="content"
-              className="block text-sm font-semibold mb-2"
-            >
+            <label htmlFor="content" className="block text-sm font-semibold mb-2">
               내용
             </label>
             <textarea
               id="content"
               placeholder="질문 내용을 자세히 작성해주세요"
               value={formData.content}
-              onChange={(e) =>
-                setFormData({ ...formData, content: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               rows={10}
               className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-200"
               required
@@ -213,7 +164,7 @@ export default function AdminQuestionAddPage() {
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => router.push("/admin/questions")}
+              onClick={() => router.push("/qna")}
               className="px-4 py-2 border rounded-md hover:bg-gray-50"
             >
               취소

@@ -24,7 +24,7 @@ import {
   ACCOUNT_STATUS_LABELS,
 } from "@/types/user";
 
-/* ✅ 계정 상태 뱃지 */
+/*계정 상태 뱃지 */
 const getStatusBadge = (status: AccountStatus) => {
   const base = "px-2 py-1 text-sm rounded font-medium";
   switch (status) {
@@ -39,7 +39,7 @@ const getStatusBadge = (status: AccountStatus) => {
   }
 };
 
-/* ✅ 행 컴포넌트 */
+/*행 컴포넌트 */
 function UserRow({
   user,
   onStatusChange,
@@ -50,7 +50,7 @@ function UserRow({
   const router = useRouter();
   const { ref, open, setOpen } = useDropdown();
 
-  // ✅ 상태별 전환 옵션 (DEACTIVATED 제거)
+  //상태별 전환 옵션 (DEACTIVATED 제거)
   const nextStatusOptions: AccountStatus[] = (() => {
     switch (user.accountStatus) {
       case "ACTIVE":
@@ -89,7 +89,7 @@ function UserRow({
           href={user.github}
           target="_blank"
           className="text-blue-600 hover:underline text-sm"
-          onClick={(e) => e.stopPropagation()} // ✅ 링크 클릭 시 라우팅 방지
+          onClick={(e) => e.stopPropagation()} //링크 클릭 시 라우팅 방지
         >
           GitHub
         </a>
@@ -102,7 +102,7 @@ function UserRow({
         <div ref={ref} className="relative inline-block">
           <button
             onClick={(e) => {
-              e.stopPropagation(); // ✅ 드롭다운 클릭 시 행 클릭 방지
+              e.stopPropagation(); //드롭다운 클릭 시 행 클릭 방지
               setOpen(!open);
             }}
             className="p-2 rounded hover:bg-gray-100 text-gray-600"
@@ -138,7 +138,7 @@ function UserRow({
   );
 }
 
-/* ✅ 메인 페이지 */
+/*메인 페이지 */
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUserResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -146,7 +146,7 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // ✅ 사용자 목록 조회
+  //사용자 목록 조회
   const fetchUsers = async (pageNum: number) => {
     try {
       setIsLoading(true);
@@ -173,7 +173,7 @@ export default function AdminUsersPage() {
     fetchUsers(page);
   }, [page]);
 
-  // ✅ 상태 변경
+  //상태 변경
   const handleStatusChange = async (userId: number, newStatus: AccountStatus) => {
     try {
       const body: AdminUserStatusUpdateRequest = { status: newStatus };
@@ -197,7 +197,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  // ✅ 로딩/에러 처리
+  //로딩/에러 처리
   if (isLoading)
     return (
       <div className="flex justify-center items-center py-20 text-gray-500">
@@ -208,7 +208,7 @@ export default function AdminUsersPage() {
   if (errorMsg)
     return <div className="text-center text-red-600 py-20">{errorMsg}</div>;
 
-  // ✅ 메인 렌더링
+  //메인 렌더링
   return (
     <div className="max-w-7xl mx-auto p-8 space-y-6">
       <div>
