@@ -49,7 +49,7 @@ public class AdminUserService {
 
         if (page < 1) page = 1;
         Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
-        Page<User> usersPage = userRepository.findAll(pageable);
+        Page<User> usersPage = userRepository.findAllByRoleNot(Role.ADMIN, pageable);
 
         if (usersPage.isEmpty()) {
             throw new ErrorException(ErrorCode.NOT_FOUND_USER);
@@ -97,7 +97,7 @@ public class AdminUserService {
 
     // 상태 변경에 따른 이메일 발송
     private void sendStatusChangeMailIfNeeded(User user, AccountStatus status) {
-        if (status == AccountStatus.SUSPENDED || status == AccountStatus.BANNED) {
+        if (status == AccountStatus.SUSPENDED || status == AccountStatus.BANNED || status == AccountStatus.DEACTIVATED || status == AccountStatus.ACTIVE) {
             emailService.sendStatusChangeMail(user);
         }
     }
