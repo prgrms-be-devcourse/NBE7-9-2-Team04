@@ -13,5 +13,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
     Page<Answer> findByQuestionIdAndIsPublicTrue(Long questionId, Pageable pageable);
     @EntityGraph(attributePaths = {"author", "question"})
     Page<Answer> findByAuthorId(Long authorId, Pageable pageable);
-    Optional<Answer> findFirstByQuestionIdAndAuthorIdOrderByCreateDateDesc(Long questionId, Long id);
+
+    Optional<Answer> findByQuestionIdAndAuthorId(Long questionId, Long authorId);
 }
