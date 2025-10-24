@@ -26,7 +26,7 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class OpenAiService {
+public class AiQuestionService {
 
     @Value("${openai.url}")
     private String apiUrl;
