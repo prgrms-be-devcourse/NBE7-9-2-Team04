@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -107,7 +108,8 @@ public class AdminPostControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공"))
-                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.posts").isArray())
+                    .andExpect(jsonPath("$.data.posts[*].title", hasItem("관리자용 테스트 게시글")))
                     .andDo(print());
         }
 
