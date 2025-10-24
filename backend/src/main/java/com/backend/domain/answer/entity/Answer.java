@@ -13,6 +13,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+
 public class Answer extends BaseEntity {
 
     @Column(nullable = false, length = 1000)

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +56,7 @@ public class AnswerService {
                 .isPublic(isPublic)
                 .author(currentUser)
                 .question(question)
+                .aiScore((int) (Math.random() * 100))  // 임시 AI 점수 부여
                 .build();
         Answer savedAnswer = answerRepository.save(answer);
         feedbackService.createFeedback(savedAnswer);

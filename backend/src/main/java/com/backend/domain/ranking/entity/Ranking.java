@@ -20,7 +20,7 @@ public class Ranking extends BaseEntity {
     private Tier tier;
 
     @Column(nullable = false)
-    private Integer rank;
+    private Integer rankValue;
 
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -34,7 +34,7 @@ public class Ranking extends BaseEntity {
         this.tier = tier;
     }
 
-    public void updateRank(Integer rank) {
-        this.rank = rank;
+    public void updateRank(Integer rankValue) {
+        this.rankValue = rankValue;
     }
 }
