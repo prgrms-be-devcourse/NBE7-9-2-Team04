@@ -35,7 +35,7 @@ public class AnswerService {
     private final Rq rq;
     private final UserService userService;
 
-    private FeedbackService feedbackService;
+    private final FeedbackService feedbackService;
 
     public Answer findByIdOrThrow(Long id) {
         return answerRepository.findById(id)
