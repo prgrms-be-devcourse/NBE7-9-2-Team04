@@ -2,10 +2,7 @@ package com.backend.api.answer.controller;
 
 import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.dto.request.AnswerUpdateRequest;
-import com.backend.api.answer.dto.response.AnswerCreateResponse;
-import com.backend.api.answer.dto.response.AnswerPageResponse;
-import com.backend.api.answer.dto.response.AnswerReadResponse;
-import com.backend.api.answer.dto.response.AnswerUpdateResponse;
+import com.backend.api.answer.dto.response.*;
 import com.backend.api.answer.service.AnswerService;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.user.entity.User;
@@ -82,11 +79,11 @@ public class AnswerController {
 
     @GetMapping("/{questionId}/answers")
     @Operation(summary = "답변 목록 조회")
-    public ApiResponse<AnswerPageResponse<AnswerReadResponse>> readAnswers(
+    public ApiResponse<AnswerPageResponse<AnswerReadWithScoreResponse>> readAnswers(
             @PathVariable Long questionId,
             @RequestParam(defaultValue = "1") int page
     ) {
-        AnswerPageResponse<AnswerReadResponse> answersPage = answerService.findAnswersByQuestionId(page, questionId);
+        AnswerPageResponse<AnswerReadWithScoreResponse> answersPage = answerService.findAnswersByQuestionId(page, questionId);
 
         return ApiResponse.ok(
                 "%d번 질문의 답변 목록 조회 성공".formatted(questionId),
@@ -94,18 +91,18 @@ public class AnswerController {
         );
     }
 
-    @GetMapping(value = "/{questionId}/answers/{answerId}")
+    @GetMapping(value = "/{questionId}/answers/mine")
     @Transactional(readOnly = true)
-    @Operation(summary = "답변 단건 조회")
-    public ApiResponse<AnswerReadResponse> readAnswer(
-            @PathVariable Long questionId,
-            @PathVariable Long answerId
+    @Operation(summary = "내 답변 조회")
+    public ApiResponse<AnswerReadResponse> readMyAnswer(
+            @PathVariable Long questionId
     ) {
-        Answer answer = answerService.findAnswer(questionId, answerId);
+
+        AnswerReadResponse answerResponse = answerService.findMyAnswer(questionId);
 
         return ApiResponse.ok(
-                "%d번 질문의 %d번 답변 조회 성공".formatted(questionId, answerId),
-                new AnswerReadResponse(answer)
+                "%d번 질문의 내 답변 조회 성공".formatted(questionId),
+                answerResponse
         );
     }
 
