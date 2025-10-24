@@ -24,6 +24,7 @@ export type AnswerCreateRequest = {
   // 생성 / 조회 / 수정 응답은 구조 동일하므로 공통 타입 사용
   export type AnswerCreateResponse = AnswerResponseBase;
   export type AnswerReadResponse = AnswerResponseBase;
+  export type MyAnswerReadResponse = AnswerResponseBase | null;
   export type AnswerUpdateResponse = AnswerResponseBase;
   
   export type AnswerPageResponse<T = AnswerResponseBase> = {
