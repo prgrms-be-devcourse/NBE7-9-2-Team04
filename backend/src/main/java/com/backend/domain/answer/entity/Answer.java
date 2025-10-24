@@ -15,7 +15,7 @@ import lombok.*;
 @Builder
 public class Answer extends BaseEntity {
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String content;
 
     @Column(nullable = false)
@@ -30,7 +30,7 @@ public class Answer extends BaseEntity {
     @JoinColumn(nullable = false)
     private Question question;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "answer", cascade = CascadeType.REMOVE,  fetch = FetchType.LAZY)
     private Feedback feedback;
 
     public void update(String content, Boolean isPublic) {
