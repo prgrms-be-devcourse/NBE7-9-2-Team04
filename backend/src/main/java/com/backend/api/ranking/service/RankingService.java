@@ -45,12 +45,21 @@ public class RankingService {
     @Transactional
     public void updateUserRanking(User user){
 
+
         int totalScore = userQuestionService.getTotalUserQuestionScore(user);
 
         Ranking ranking = rankingRepository.findByUser(user)
                 .orElseGet(() -> createRanking(user)); // 존재하지 않으면 생성
+
+        // 점수 / 티어 업데이트
         ranking.updateTotalScore(totalScore);
         ranking.updateTier(Tier.fromScore(totalScore));
+
+        // 현재 유저보다 점수 높은 사람 수 계산
+        int higherRankCount = rankingRepository.countByTotalScoreGreaterThan(totalScore);
+
+        // 현재 유저의 순위 = 점수 높은 사람 수 + 1
+        ranking.updateRank(higherRankCount + 1);
 
         rankingRepository.save(ranking);
     }

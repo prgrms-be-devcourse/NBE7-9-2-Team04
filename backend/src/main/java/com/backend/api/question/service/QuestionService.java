@@ -146,6 +146,6 @@ public class QuestionService {
     @Transactional(readOnly = true)
     public int countByUser(User user) {
         validateUserAuthority(user);
-        return questionRepository.CountByAuthor(user);
+        return questionRepository.countByAuthor(user);
     }
 }
