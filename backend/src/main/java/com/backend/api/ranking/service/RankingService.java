@@ -33,7 +33,7 @@ public class RankingService {
                 .user(user)
                 .totalScore(0)
                 .tier(Tier.UNRATED)
-                .rank(null)
+                .rankValue(null)
                 .build();
 
         return rankingRepository.save(ranking);
@@ -87,10 +87,10 @@ public class RankingService {
     @Transactional
     public void recalculateAllRankings() {
         List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
-        int rank = 1;
+        int ranks = 1;
 
         for (Ranking r : rankings) {
-            r.updateRank(rank++);
+            r.updateRank(ranks++);
             r.updateTier(Tier.fromScore(r.getTotalScore()));
         }
 

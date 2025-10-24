@@ -18,7 +18,7 @@ public record RankingResponse (
         Tier currentTier,
 
         @Schema(description = "순위", example = "15")
-        int rank,
+        int rankValue,
 
         @Schema(description = "다음 티어", example = "PLATINUM")
         Tier nextTier,
@@ -44,7 +44,7 @@ public record RankingResponse (
                 ranking.getUser().getNickname(),
                 totalScore,
                 currentTier,
-                ranking.getRank(),
+                ranking.getRankValue(),
                 nextTier,
                 scoreToNextTier
         );
