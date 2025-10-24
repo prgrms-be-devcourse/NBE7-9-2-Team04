@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     {
 
         //회원가입과 로그인은 인증 x
-        if(List.of("/api/v1/users/signup",
+        if (List.of("/api/v1/users/signup",
                 "/api/v1/users/login",
                 "/api/v1/users/sendEmail",
                 "/api/v1/users/verifyCode").contains(request.getRequestURI())) {
@@ -38,11 +38,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-
         String token = resolveToken(request);
 
-
-        if(token != null && jwtTokenProvider.validateToken(token)) {
+        if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
