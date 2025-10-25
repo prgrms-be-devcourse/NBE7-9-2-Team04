@@ -6,7 +6,7 @@ import { fetchApi } from "@/lib/client";
 import {
   AiQuestionReadResponse,
   AiQuestionReadAllResponse,
-} from "@/types/aiquestion";
+} from "@/types/aiquestion";
 
 
 export default function AiQuestionPage() {
