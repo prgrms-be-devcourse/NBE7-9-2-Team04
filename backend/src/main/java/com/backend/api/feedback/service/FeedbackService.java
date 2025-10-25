@@ -1,19 +1,17 @@
 package com.backend.api.feedback.service;
 
 
-
-import com.backend.api.feedback.dto.response.AiFeedbackResponse;
 import com.backend.api.feedback.dto.request.AiFeedbackRequest;
+import com.backend.api.feedback.dto.response.AiFeedbackResponse;
 import com.backend.api.feedback.dto.response.FeedbackReadResponse;
 import com.backend.api.question.service.QuestionService;
+import com.backend.api.ranking.service.RankingService;
+import com.backend.api.userQuestion.service.UserQuestionService;
 import com.backend.domain.answer.entity.Answer;
-
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.feedback.entity.Feedback;
-
 import com.backend.domain.feedback.repository.FeedbackRepository;
 import com.backend.domain.question.entity.Question;
-
 import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -22,14 +20,12 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
-
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -45,8 +41,9 @@ public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final QuestionService questionService;
 
-
     private final AnswerRepository answerRepository;
+    private final UserQuestionService userQuestionService;
+    private final RankingService rankingService;
 
     @Async("feedbackExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -62,6 +59,8 @@ public class FeedbackService {
                 .build();
 
         feedbackRepository.save(feedback);
+        userQuestionService.updateUserQuestionScore(answer.getAuthor(), question, feedback.getAiScore());
+        rankingService.updateUserRanking(answer.getAuthor());
     }
 
     @Async("feedbackExecutor")

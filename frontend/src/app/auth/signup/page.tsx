@@ -16,8 +16,7 @@ export default function SignupPage() {
     name: "",
     nickname: "",
     age: 0,
-    github: "",
-    image: "",
+    github: ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,12 +132,6 @@ export default function SignupPage() {
               value={formData.github}
               onChange={handleChange}
               required
-            />
-            <Input
-              label="프로필 이미지 (선택)"
-              name="image"
-              value={formData.image || ""}
-              onChange={handleChange}
             />
 
             <button
