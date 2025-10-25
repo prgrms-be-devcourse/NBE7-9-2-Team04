@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client";
 import {
   Table,
   TableBody,
@@ -13,201 +14,290 @@ import {
 import {
   DropdownMenuContent,
   DropdownMenuItem,
-  useDropdown,
 } from "@/components/ui/dropdown-menu";
-
-// ✅ Mock questions data
-const mockQuestions = [
-  {
-    id: "q1",
-    title: "TCP와 UDP의 차이점을 설명하세요",
-    category: "네트워크",
-    status: "approved",
-    submittedBy: "관리자",
-    submittedAt: "2025-09-01",
-  },
-  {
-    id: "q2",
-    title: "프로세스와 스레드의 차이는 무엇인가요?",
-    category: "운영체제",
-    status: "approved",
-    submittedBy: "관리자",
-    submittedAt: "2025-09-01",
-  },
-  {
-    id: "q3",
-    title: "데이터베이스 인덱스의 동작 원리",
-    category: "데이터베이스",
-    status: "pending",
-    submittedBy: "김개발",
-    submittedAt: "2025-10-15",
-  },
-  {
-    id: "q4",
-    title: "RESTful API 설계 원칙",
-    category: "네트워크",
-    status: "pending",
-    submittedBy: "박알고",
-    submittedAt: "2025-10-14",
-  },
-  {
-    id: "q5",
-    title: "가비지 컬렉션의 종류와 특징",
-    category: "운영체제",
-    status: "rejected",
-    submittedBy: "이프론트",
-    submittedAt: "2025-10-13",
-  },
-];
+import { QuestionResponse, QUESTION_CATEGORY_LIST } from "@/types/question";
 
 export default function AdminQuestionsPage() {
-  const [questions, setQuestions] = useState(mockQuestions);
+  const router = useRouter();
+  const [questions, setQuestions] = useState<QuestionResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [selectedQuestion, setSelectedQuestion] = useState<QuestionResponse | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
-  const handleApprove = (id: string) => {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, status: "approved" } : q))
-    );
-    alert("질문이 승인되었습니다.");
+  //영어 카테고리를 한글로 변환하는 유틸 함수
+  const getCategoryLabel = (value: string) => {
+    const category = QUESTION_CATEGORY_LIST.find((c) => c.value === value);
+    return category ? category.label : value;
   };
 
-  const handleReject = (id: string) => {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, status: "rejected" } : q))
-    );
-    alert("질문이 거부되었습니다.");
-  };
+  //질문 목록 불러오기
+  const fetchQuestions = async () => {
+    try {
+      setIsLoading(true);
+      const apiResponse = await fetchApi("/api/v1/admin/questions?page=1", {
+        method: "GET",
+      });
 
-  const handleDelete = (id: string) => {
-    setQuestions((prev) => prev.filter((q) => q.id !== id));
-    alert("질문이 삭제되었습니다.");
-  };
-
-  const getStatusBadge = (status: string) => {
-    const base = "px-2 py-1 text-sm rounded";
-    switch (status) {
-      case "approved":
-        return (
-          <span className={`${base} bg-green-100 text-green-700`}>승인됨</span>
-        );
-      case "pending":
-        return (
-          <span className={`${base} bg-yellow-100 text-yellow-700`}>
-            대기중
-          </span>
-        );
-      case "rejected":
-        return (
-          <span className={`${base} bg-red-100 text-red-700`}>거부됨</span>
-        );
-      default:
-        return null;
+      if (apiResponse.status === "OK") {
+        setQuestions(apiResponse.data.questions || []);
+      } else {
+        setErrorMsg(apiResponse.message || "질문 목록을 불러오지 못했습니다.");
+      }
+    } catch (error: any) {
+      setErrorMsg(error.message || "서버 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+  //승인 / 미승인 처리
+  const handleApprove = async (questionId: number, isApproved: boolean) => {
+    try {
+      const res = await fetchApi(`/api/v1/admin/questions/${questionId}/approve`, {
+        method: "PATCH",
+        body: JSON.stringify({ isApproved }),
+      });
+
+      if (res.status === "OK") {
+        alert(isApproved ? "질문이 승인되었습니다." : "질문이 미승인 처리되었습니다.");
+        setQuestions((prev) =>
+          prev.map((q) =>
+            q.questionId === questionId ? { ...q, isApproved } : q
+          )
+        );
+        setSelectedQuestion(null);
+      } else {
+        alert(res.message || "처리 중 오류가 발생했습니다.");
+      }
+    } catch {
+      alert("서버 통신 중 오류가 발생했습니다.");
+    }
+  };
+
+  //삭제
+  const handleDelete = async (questionId: number) => {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      const res = await fetchApi(`/api/v1/admin/questions/${questionId}`, {
+        method: "DELETE",
+      });
+      if (res.status === "OK") {
+        alert("질문이 삭제되었습니다.");
+        setQuestions((prev) => prev.filter((q) => q.questionId !== questionId));
+        setSelectedQuestion(null);
+      } else {
+        alert(res.message || "삭제 실패");
+      }
+    } catch {
+      alert("서버 오류가 발생했습니다.");
+    }
+  };
+
+  //상태 뱃지
+  const getStatusBadge = (isApproved: boolean) => {
+    return isApproved ? (
+      <span className="px-2 py-1 text-sm font-semibold rounded-md bg-green-100 text-green-700 border border-green-200">
+        승인됨
+      </span>
+    ) : (
+      <span className="px-2 py-1 text-sm font-semibold rounded-md bg-yellow-100 text-yellow-700 border border-yellow-200">
+        미승인
+      </span>
+    );
+  };
+
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center py-20 text-gray-500">
+        로딩 중...
+      </div>
+    );
+
+  if (errorMsg)
+    return <div className="text-center text-red-600 py-20">{errorMsg}</div>;
+
   return (
     <div className="max-w-7xl mx-auto p-8 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">📝 질문 관리</h1>
-        <p className="text-gray-500">
-          CS 면접 질문을 관리하고 사용자 제출 질문을 승인합니다
-        </p>
+      {/*상단 헤더 */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">📝 질문 관리</h1>
+          <p className="text-gray-500">
+            관리자가 등록된 질문을 승인/삭제할 수 있습니다.
+          </p>
+        </div>
+
+        <button
+          onClick={() => router.push("/admin/questions/new")}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          질문 등록하기
+        </button>
       </div>
 
-      {/* Table */}
+      {/*테이블 */}
       <div className="overflow-x-auto bg-white border border-gray-200 shadow-sm rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>질문</TableHead>
-              <TableHead>카테고리</TableHead>
-              <TableHead>상태</TableHead>
+              <TableHead>질문 제목</TableHead>
               <TableHead>작성자</TableHead>
-              <TableHead>제출일</TableHead>
+              <TableHead>카테고리</TableHead>
+              <TableHead>점수</TableHead>
+              <TableHead>상태</TableHead>
+              <TableHead>등록일</TableHead>
               <TableHead>작업</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {questions.map((q) => {
-              const { ref, open, setOpen } = useDropdown();
-              return (
-                <TableRow key={q.id}>
-                  {/* 질문 제목 */}
-                  <TableCell className="max-w-xs">
-                    <Link
-                      href={`/interview/cs/${q.id}`}
-                      className="font-medium line-clamp-1 hover:text-blue-600 hover:underline"
+            {questions.map((q) => (
+              <TableRow key={q.questionId}>
+                <TableCell
+                  className="max-w-xs cursor-pointer hover:text-blue-600 hover:underline"
+                  onClick={() => setSelectedQuestion(q)}
+                >
+                  {q.title}
+                </TableCell>
+                <TableCell>{q.authorNickname}</TableCell>
+                {/*카테고리 한글 변환 */}
+                <TableCell>{getCategoryLabel(q.categoryType)}</TableCell>
+                <TableCell>{q.score}</TableCell>
+                <TableCell>{getStatusBadge(q.isApproved)}</TableCell>
+                <TableCell>
+                  {new Date(q.createdDate).toLocaleDateString()}
+                </TableCell>
+
+                <TableCell className="text-right">
+                  <div className="relative inline-block">
+                    <button
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === q.questionId ? null : q.questionId)
+                      }
+                      className="p-2 rounded hover:bg-gray-100 text-gray-600"
                     >
-                      {q.title}
-                    </Link>
-                  </TableCell>
+                      ⋮
+                    </button>
 
-                  {/* 카테고리 */}
-                  <TableCell>
-                    <span className="px-2 py-1 text-sm border border-gray-200 rounded bg-gray-50">
-                      {q.category}
-                    </span>
-                  </TableCell>
-
-                  {/* 난이도 / 상태 */}
-                  <TableCell>{getStatusBadge(q.status)}</TableCell>
-
-                  {/* 작성자 */}
-                  <TableCell>{q.submittedBy}</TableCell>
-                  <TableCell>{q.submittedAt}</TableCell>
-
-                  {/* 드롭다운 */}
-                  <TableCell className="text-right">
-                    <div ref={ref} className="relative inline-block">
-                      <button
-                        onClick={() => setOpen(!open)}
-                        className="p-2 rounded hover:bg-gray-100 text-gray-600"
-                        aria-label="더보기"
-                      >
-                        ⋮
-                      </button>
-
-                      <DropdownMenuContent open={open} align="end">
-                        {q.status === "pending" && (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                handleApprove(q.id);
-                                setOpen(false);
-                              }}
-                            >
-                              승인
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                handleReject(q.id);
-                                setOpen(false);
-                              }}
-                            >
-                              거부
-                            </DropdownMenuItem>
-                          </>
+                    {openMenuId === q.questionId && (
+                      <DropdownMenuContent open align="end">
+                        {q.isApproved ? (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleApprove(q.questionId, false);
+                              setOpenMenuId(null);
+                            }}
+                          >
+                            미승인
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleApprove(q.questionId, true);
+                              setOpenMenuId(null);
+                            }}
+                          >
+                            승인
+                          </DropdownMenuItem>
                         )}
-
                         <DropdownMenuItem
                           onClick={() => {
-                            handleDelete(q.id);
-                            setOpen(false);
+                            handleDelete(q.questionId);
+                            setOpenMenuId(null);
                           }}
                           className="text-red-600"
                         >
                           삭제
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
+
+      {/*질문 상세 모달 */}
+      {selectedQuestion && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+            <button
+              className="absolute top-3 right-4 text-gray-400 hover:text-gray-600"
+              onClick={() => setSelectedQuestion(null)}
+            >
+              ✕
+            </button>
+
+            <h2 className="text-2xl font-bold mb-4">{selectedQuestion.title}</h2>
+
+            <div className="text-gray-800 whitespace-pre-wrap border p-4 rounded-lg bg-gray-50 mb-4">
+              {selectedQuestion.content}
+            </div>
+
+            <div className="flex justify-between items-center border-t pt-4 mt-4">
+              <div className="flex gap-3 items-center">
+                {getStatusBadge(selectedQuestion.isApproved)}
+                {/*모달 내 카테고리도 한글 변환 */}
+                <span className="text-sm text-gray-500">
+                  {getCategoryLabel(selectedQuestion.categoryType)}
+                </span>
+              </div>
+              <div className="text-sm text-gray-500">
+                점수: {selectedQuestion.score}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              {selectedQuestion.isApproved ? (
+                <>
+                  <button
+                    className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                    onClick={() =>
+                      handleApprove(selectedQuestion.questionId, false)
+                    }
+                  >
+                    미승인
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                    onClick={() =>
+                      handleDelete(selectedQuestion.questionId)
+                    }
+                  >
+                    삭제
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    onClick={() =>
+                      handleApprove(selectedQuestion.questionId, true)
+                    }
+                  >
+                    승인
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                    onClick={() =>
+                      handleDelete(selectedQuestion.questionId)
+                    }
+                  >
+                    삭제
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

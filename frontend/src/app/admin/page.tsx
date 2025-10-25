@@ -1,6 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client";
 import {
   Table,
   TableBody,
@@ -8,251 +10,269 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
   useDropdown,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import {
+  AdminUserResponse,
+  UserPageResponse,
+  AdminUserStatusUpdateRequest,
+  AccountStatus,
+  ACCOUNT_STATUS_LABELS,
+} from "@/types/user";
 
-// ===============================
-// 🔸 Mock 데이터
-// ===============================
-const mockUsers = [
-  {
-    id: "u1",
-    name: "김개발",
-    email: "kim@example.com",
-    problemsSolved: 75,
-    totalPoints: 850,
-    status: "active",
-    joinedAt: "2025-09-01",
-    isPremium: false,
-  },
-  {
-    id: "u2",
-    name: "박알고",
-    email: "park@example.com",
-    problemsSolved: 185,
-    totalPoints: 2150,
-    status: "active",
-    joinedAt: "2025-08-15",
-    isPremium: true,
-  },
-  {
-    id: "u3",
-    name: "이프론트",
-    email: "lee@example.com",
-    problemsSolved: 165,
-    totalPoints: 1980,
-    status: "active",
-    joinedAt: "2025-08-20",
-    isPremium: true,
-  },
-  {
-    id: "u4",
-    name: "최백엔드",
-    email: "choi@example.com",
-    problemsSolved: 142,
-    totalPoints: 1720,
-    status: "suspended",
-    joinedAt: "2025-07-10",
-    isPremium: false,
-  },
-  {
-    id: "u5",
-    name: "정풀스택",
-    email: "jung@example.com",
-    problemsSolved: 128,
-    totalPoints: 1580,
-    status: "active",
-    joinedAt: "2025-09-05",
-    isPremium: false,
-  },
-]
-
-
-function getStatusBadge(status: string) {
-  const base = "px-2 py-1 text-sm rounded"
+/* ✅ 계정 상태 뱃지 */
+const getStatusBadge = (status: AccountStatus) => {
+  const base = "px-2 py-1 text-sm rounded font-medium";
   switch (status) {
-    case "active":
-      return <span className={`${base} bg-green-100 text-green-700`}>활성</span>
-    case "suspended":
-      return <span className={`${base} bg-yellow-100 text-yellow-700`}>정지</span>
-    case "banned":
-      return <span className={`${base} bg-red-100 text-red-700`}>차단</span>
+    case "ACTIVE":
+      return <span className={`${base} bg-green-100 text-green-700`}>활성</span>;
+    case "SUSPENDED":
+      return <span className={`${base} bg-yellow-100 text-yellow-700`}>일시정지</span>;
+    case "BANNED":
+      return <span className={`${base} bg-red-100 text-red-700`}>영구정지</span>;
     default:
-      return null
+      return null;
   }
-}
+};
 
-// 티어 계산
-function getTierByProblems(problemsSolved: number) {
-  if (problemsSolved >= 180) return { level: "Diamond", color: "text-blue-700", bg: "bg-blue-100", icon: "💎" }
-  if (problemsSolved >= 150) return { level: "Platinum", color: "text-cyan-700", bg: "bg-cyan-100", icon: "🔷" }
-  if (problemsSolved >= 100) return { level: "Gold", color: "text-yellow-700", bg: "bg-yellow-100", icon: "🥇" }
-  if (problemsSolved >= 50) return { level: "Silver", color: "text-gray-700", bg: "bg-gray-100", icon: "🥈" }
-  return { level: "Bronze", color: "text-amber-700", bg: "bg-amber-100", icon: "🥉" }
-}
+/* ✅ 행 컴포넌트 */
+function UserRow({
+  user,
+  onStatusChange,
+}: {
+  user: AdminUserResponse;
+  onStatusChange: (id: number, newStatus: AccountStatus) => void;
+}) {
+  const router = useRouter();
+  const { ref, open, setOpen } = useDropdown();
 
-// 티어 뱃지
-function TierBadge({ problemsSolved }: { problemsSolved: number }) {
-  const tier = getTierByProblems(problemsSolved)
+  // ✅ 상태별 전환 옵션 (DEACTIVATED 제거)
+  const nextStatusOptions: AccountStatus[] = (() => {
+    switch (user.accountStatus) {
+      case "ACTIVE":
+        return ["SUSPENDED", "BANNED"];
+      case "SUSPENDED":
+      case "BANNED":
+        return ["ACTIVE"];
+      default:
+        return [];
+    }
+  })();
+
   return (
-    <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full font-medium ${tier.bg} ${tier.color}`}
+    <TableRow
+      key={user.id}
+      onClick={() => router.push(`/admin/users/${user.id}`)}
+      className="hover:bg-gray-50 cursor-pointer transition"
     >
-      <span>{tier.icon}</span>
-      {tier.level}
-    </span>
-  )
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 font-bold text-gray-700">
+            {user.nickname?.[0] || "?"}
+          </div>
+          <div>
+            <p className="font-medium">{user.name}</p>
+            <p className="text-sm text-gray-500">{user.email}</p>
+          </div>
+        </div>
+      </TableCell>
+
+      <TableCell>{user.nickname}</TableCell>
+      <TableCell>{user.age}</TableCell>
+
+      <TableCell>
+        <a
+          href={user.github}
+          target="_blank"
+          className="text-blue-600 hover:underline text-sm"
+          onClick={(e) => e.stopPropagation()} // ✅ 링크 클릭 시 라우팅 방지
+        >
+          GitHub
+        </a>
+      </TableCell>
+
+      <TableCell>{user.role === "ADMIN" ? "관리자" : "사용자"}</TableCell>
+      <TableCell>{getStatusBadge(user.accountStatus)}</TableCell>
+
+      <TableCell className="text-right">
+        <div ref={ref} className="relative inline-block">
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // ✅ 드롭다운 클릭 시 행 클릭 방지
+              setOpen(!open);
+            }}
+            className="p-2 rounded hover:bg-gray-100 text-gray-600"
+            aria-label="더보기"
+          >
+            ⋮
+          </button>
+
+          <DropdownMenuContent open={open} align="end">
+            {nextStatusOptions.map((status) => (
+              <DropdownMenuItem
+                key={status}
+                onClick={() => {
+                  onStatusChange(user.id, status);
+                  setOpen(false);
+                }}
+                className={`text-sm px-3 py-1.5 ${status === "BANNED"
+                    ? "text-red-600"
+                    : status === "SUSPENDED"
+                      ? "text-yellow-700"
+                      : "text-green-700"
+                  }`}
+              >
+                {status === "ACTIVE"
+                  ? "활성화 (복구)"
+                  : `${ACCOUNT_STATUS_LABELS[status]}로 변경`}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
 }
 
-// 프리미엄 태그
-function PremiumTag() {
-  return (
-    <span className="text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-0.5">
-      프리미엄
-    </span>
-  )
-}
-
-
+/* ✅ 메인 페이지 */
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState(mockUsers)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [users, setUsers] = useState<AdminUserResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // ✅ 사용자 목록 조회
+  const fetchUsers = async (pageNum: number) => {
+    try {
+      setIsLoading(true);
+      const res = await fetchApi(`/api/v1/admin/users?page=${pageNum}`, {
+        method: "GET",
+      });
 
-  const updateStatus = (id: string, status: string) => {
-    setUsers(users.map((u) => (u.id === id ? { ...u, status } : u)))
-    alert(
-      status === "active"
-        ? "사용자가 활성화되었습니다."
-        : status === "suspended"
-        ? "사용자의 활동이 정지되었습니다."
-        : "사용자가 영구 차단되었습니다."
-    )
-  }
+      if (res.status === "OK") {
+        const data: UserPageResponse = res.data;
+        setUsers(data.users);
+        setPage(data.currentPage);
+        setTotalPages(data.totalPages);
+      } else {
+        setErrorMsg(res.message || "사용자 목록을 불러오지 못했습니다.");
+      }
+    } catch (e: any) {
+      setErrorMsg(e.message || "서버 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    fetchUsers(page);
+  }, [page]);
+
+  // ✅ 상태 변경
+  const handleStatusChange = async (userId: number, newStatus: AccountStatus) => {
+    try {
+      const body: AdminUserStatusUpdateRequest = { status: newStatus };
+      const res = await fetchApi(`/api/v1/admin/users/${userId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+
+      if (res.status === "OK") {
+        alert(`사용자 상태가 "${ACCOUNT_STATUS_LABELS[newStatus]}"로 변경되었습니다.`);
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === userId ? { ...u, accountStatus: newStatus } : u
+          )
+        );
+      } else {
+        alert(res.message || "상태 변경 실패");
+      }
+    } catch {
+      alert("서버 오류가 발생했습니다.");
+    }
+  };
+
+  // ✅ 로딩/에러 처리
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center py-20 text-gray-500">
+        로딩 중...
+      </div>
+    );
+
+  if (errorMsg)
+    return <div className="text-center text-red-600 py-20">{errorMsg}</div>;
+
+  // ✅ 메인 렌더링
   return (
     <div className="max-w-7xl mx-auto p-8 space-y-6">
-
       <div>
         <h1 className="text-3xl font-bold mb-2">👥 사용자 관리</h1>
-        <p className="text-gray-500">플랫폼 사용자를 관리하고 활동을 모니터링합니다</p>
+        <p className="text-gray-500">플랫폼 사용자의 상태를 관리합니다.</p>
       </div>
 
-
-      <div className="relative w-full max-w-md">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
-        <input
-          type="text"
-          placeholder="이름 또는 이메일로 검색..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-10 py-2 focus:outline-none focus:border-blue-500"
-        />
-      </div>
-
-
-      <div className="overflow-x-auto bg-white border border-gray-200 shadow-sm rounded-lg">
+      {/* 사용자 테이블 */}
+      <div className="overflow-visible bg-white border border-gray-200 shadow-sm rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>사용자</TableHead>
-              <TableHead>티어</TableHead>
-              <TableHead>문제 수</TableHead>
-              <TableHead>포인트</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead>가입일</TableHead>
+              <TableHead>닉네임</TableHead>
+              <TableHead>나이</TableHead>
+              <TableHead>GitHub</TableHead>
+              <TableHead>역할</TableHead>
+              <TableHead>계정 상태</TableHead>
               <TableHead>작업</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {filteredUsers.map((user) => {
-              const { ref, open, setOpen } = useDropdown()
-              return (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 font-bold text-gray-700">
-                        {user.name[0]}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{user.name}</p>
-                          {user.isPremium && <PremiumTag />}
-                        </div>
-                        <p className="text-sm text-gray-500">{user.email}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <TierBadge problemsSolved={user.problemsSolved} />
-                  </TableCell>
-                  <TableCell>{user.problemsSolved}</TableCell>
-                  <TableCell>{user.totalPoints}</TableCell>
-                  <TableCell>{getStatusBadge(user.status)}</TableCell>
-                  <TableCell>{user.joinedAt}</TableCell>
-
-                  {/* 드롭다운 */}
-                  <TableCell className="text-right">
-                    <div ref={ref} className="relative inline-block">
-                      <button
-                        onClick={() => setOpen(!open)}
-                        className="p-2 rounded hover:bg-gray-100 text-gray-600"
-                        aria-label="더보기"
-                      >
-                        ⋮
-                      </button>
-
-                      <DropdownMenuContent open={open} align="end">
-                        {user.status === "active" ? (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                updateStatus(user.id, "suspended")
-                                setOpen(false)
-                              }}
-                            >
-                              활동 정지
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                updateStatus(user.id, "banned")
-                                setOpen(false)
-                              }}
-                              className="text-red-600"
-                            >
-                              영구 정지
-                            </DropdownMenuItem>
-                          </>
-                        ) : (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              updateStatus(user.id, "active")
-                              setOpen(false)
-                            }}
-                          >
-                            활성화
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
+            {users.length > 0 ? (
+              users.map((user) => (
+                <UserRow
+                  key={user.id}
+                  user={user}
+                  onStatusChange={handleStatusChange}
+                />
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-6 text-gray-500">
+                  사용자가 없습니다.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
+
+      {/* 페이지네이션 */}
+      <div className="flex justify-center items-center gap-2 mt-6">
+        <button
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page === 1}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          이전
+        </button>
+
+        <span className="text-sm text-gray-600">
+          {page} / {totalPages}
+        </span>
+
+        <button
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          disabled={page === totalPages}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          다음
+        </button>
+      </div>
     </div>
-  )
+  );
 }

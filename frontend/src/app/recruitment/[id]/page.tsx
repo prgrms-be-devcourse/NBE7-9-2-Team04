@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation"; // ✅ 추가
 import { fetchApi } from "@/lib/client";
-import { useParams } from "next/navigation";
 import { PostResponse } from "@/types/post";
 import { CommentResponse, CommentRequest, CommentPageResponse } from "@/types/comment";
 
@@ -13,7 +13,9 @@ type CommentWithEdit = CommentResponse & {
 };
 
 export default function RecruitmentDetailPage() {
+  const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams(); // ✅ 추가
   const postId = params.id as string;
 
   const [post, setPost] = useState<PostResponse | null>(null);
@@ -23,8 +25,32 @@ export default function RecruitmentDetailPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(30);
+  const [role, setRole] = useState<"USER" | "ADMIN" | null>(null);
+  const [roleLoading, setRoleLoading] = useState(true);
 
-  // 게시글 불러오기
+  // ✅ from=admin 플래그 확인
+  const fromAdmin = searchParams.get("from") === "admin";
+
+  // ✅ 로그인한 유저의 role 가져오기
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const res = await fetchApi("/api/v1/users/me", { method: "GET" });
+        if (res.status === "OK" && res.data?.role) {
+          setRole(res.data.role);
+        } else {
+          setRole("USER");
+        }
+      } catch {
+        setRole("USER");
+      } finally {
+        setRoleLoading(false);
+      }
+    };
+    fetchRole();
+  }, []);
+
+  // ✅ 게시글 불러오기
   const fetchPost = async () => {
     try {
       const res = (await fetchApi(`/api/v1/posts/${postId}`)) as {
@@ -53,7 +79,7 @@ export default function RecruitmentDetailPage() {
     fetchPost();
   }, [postId]);
 
-  // 댓글 불러오기
+  // ✅ 댓글 불러오기
   const fetchComments = async (page = 1) => {
     try {
       const res = (await fetchApi(
@@ -90,17 +116,17 @@ export default function RecruitmentDetailPage() {
     if (postId) fetchComments();
   }, [postId]);
 
-  // 댓글 작성
+  // ✅ 댓글 작성
   const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
 
     const body: CommentRequest = { content: newComment };
 
     try {
-      const res = (await fetchApi(
-        `/api/v1/posts/${postId}/comments`,
-        { method: "POST", body: JSON.stringify(body) }
-      )) as { status: string; data: CommentResponse; message?: string };
+      const res = (await fetchApi(`/api/v1/posts/${postId}/comments`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      })) as { status: string; data: CommentResponse; message?: string };
 
       if (res.status === "CREATED" && res.data) {
         setNewComment("");
@@ -116,7 +142,7 @@ export default function RecruitmentDetailPage() {
     }
   };
 
-  // 댓글 삭제
+  // ✅ 댓글 삭제
   const handleDeleteComment = async (commentId: number) => {
     if (!confirm("정말로 댓글을 삭제하시겠습니까?")) return;
 
@@ -138,7 +164,7 @@ export default function RecruitmentDetailPage() {
     }
   };
 
-  // 댓글 수정
+  // ✅ 댓글 수정
   const handleEditStart = (commentId: number) => {
     setComments((prev) =>
       prev.map((c) => ({
@@ -197,25 +223,40 @@ export default function RecruitmentDetailPage() {
     fetchComments(page);
   };
 
+  // ✅ 목록으로 버튼 동작 (from=admin 우선, role 보조)
+  const handleBack = () => {
+    if (fromAdmin) {
+      router.push("/admin/recruitments");
+    } else if (role === "ADMIN") {
+      router.push("/admin/recruitments");
+    } else {
+      router.push("/recruitment");
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      <Link
-        href="/recruitment"
-        className="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 mb-6"
+      {/* ✅ 관리자 여부에 따라 이동 경로 분기 (로딩 중이면 비활성화) */}
+      <button
+        disabled={roleLoading}
+        onClick={handleBack}
+        className={`inline-flex items-center text-sm mb-6 ${roleLoading
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:text-blue-600"
+          }`}
       >
         ← 목록으로
-      </Link>
+      </button>
 
       {post && (
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
           <div className="mb-6">
             <div className="flex items-start justify-between mb-3">
               <span
-                className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                  post.categoryType === "PROJECT"
-                    ? "bg-indigo-50 text-indigo-700"
-                    : "bg-green-50 text-green-700"
-                }`}
+                className={`px-2 py-0.5 text-xs font-medium rounded-full ${post.categoryType === "PROJECT"
+                  ? "bg-indigo-50 text-indigo-700"
+                  : "bg-green-50 text-green-700"
+                  }`}
               >
                 {post.categoryType === "PROJECT" ? "프로젝트" : "스터디"}
               </span>
@@ -277,7 +318,7 @@ export default function RecruitmentDetailPage() {
 
           <hr className="my-8 border-gray-300" />
 
-          {/* 댓글 영역 */}
+          {/* ✅ 댓글 영역 이하 동일 */}
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold">댓글 {totalCount}개</h3>
             <div className="flex items-center gap-2">
@@ -299,6 +340,7 @@ export default function RecruitmentDetailPage() {
             </div>
           </div>
 
+          {/* ✅ 댓글 리스트 이하 동일 */}
           <div className="space-y-4 mb-6">
             {comments.map((comment) => (
               <div key={comment.id} className="flex gap-3 items-start">
@@ -309,8 +351,12 @@ export default function RecruitmentDetailPage() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm">{comment.authorNickName}</span>
-                      <span className="text-xs text-gray-400">{comment.createDate.split("T")[0]}</span>
+                      <span className="font-semibold text-sm">
+                        {comment.authorNickName}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {comment.createDate.split("T")[0]}
+                      </span>
                     </div>
 
                     {!comment.isEditing ? (
@@ -365,6 +411,7 @@ export default function RecruitmentDetailPage() {
             ))}
           </div>
 
+          {/* ✅ 댓글 작성 */}
           <div className="mb-6">
             <textarea
               placeholder="댓글을 작성해주세요"
@@ -383,14 +430,16 @@ export default function RecruitmentDetailPage() {
             </div>
           </div>
 
+          {/* ✅ 페이지네이션 */}
           <div className="flex gap-2 justify-center">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
                 onClick={() => handlePageChange(page)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === page ? "bg-blue-600 text-white" : "bg-gray-200 hover:bg-gray-300 cursor-pointer"
-                }`}
+                className={`px-3 py-1 rounded ${currentPage === page
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 hover:bg-gray-300 cursor-pointer"
+                  }`}
               >
                 {page}
               </button>

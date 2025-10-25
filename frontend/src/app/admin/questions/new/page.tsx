@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client";
-import { QuestionCategoryType } from "@/types/question";
+import {
+  QuestionCategoryType,
+  QUESTION_CATEGORY_LIST,
+} from "@/types/question";
 
 export default function AdminQuestionAddPage() {
   const router = useRouter();
 
-  // ✅ 폼 데이터 상태 (isApproved 포함)
+  // ✅ 폼 데이터 상태
   const [formData, setFormData] = useState({
     title: "",
     category: "" as QuestionCategoryType | "",
@@ -17,7 +20,6 @@ export default function AdminQuestionAddPage() {
     isApproved: false,
   });
 
-  // 로그인 및 권한 확인 상태
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,7 +44,7 @@ export default function AdminQuestionAddPage() {
     checkAdmin();
   }, [router]);
 
-  // ✅ 인증 확인 중일 때 로딩 화면
+  // ✅ 로딩 화면
   if (isCheckingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
@@ -62,12 +64,11 @@ export default function AdminQuestionAddPage() {
       return;
     }
 
-    // ✅ AdminCreateQuestionRequest DTO 형태로 전송
     const payload = {
       title: formData.title,
       content: formData.content,
       categoryType: formData.category as QuestionCategoryType,
-      isApproved: formData.isApproved, // 최초 등록 시 false or true 가능
+      isApproved: formData.isApproved,
       score: Number(formData.score),
     };
 
@@ -145,11 +146,11 @@ export default function AdminQuestionAddPage() {
               required
             >
               <option value="">카테고리 선택</option>
-              <option value="NETWORK">네트워크</option>
-              <option value="OS">운영체제</option>
-              <option value="DATABASE">데이터베이스</option>
-              <option value="DATA_STRUCTURE">자료구조</option>
-              <option value="ALGORITHM">알고리즘</option>
+              {QUESTION_CATEGORY_LIST.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
             </select>
           </div>
 
