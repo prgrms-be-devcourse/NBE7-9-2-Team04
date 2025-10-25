@@ -4,6 +4,7 @@ import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.dto.request.AnswerUpdateRequest;
 import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
+import com.backend.api.answer.dto.response.AnswerReadWithScoreResponse;
 import com.backend.api.feedback.service.FeedbackService;
 import com.backend.api.question.service.QuestionService;
 import com.backend.api.ranking.service.RankingService;
@@ -90,16 +91,19 @@ public class AnswerService {
         answerRepository.delete(answer);
     }
 
-    public AnswerPageResponse<AnswerReadResponse> findAnswersByQuestionId(int page, Long questionId) {
+    public AnswerPageResponse<AnswerReadWithScoreResponse> findAnswersByQuestionId(int page, Long questionId) {
         questionService.findByIdOrThrow(questionId);
 
         if(page < 1) page = 1;
-        Pageable pageable = PageRequest.of(page - 1, 10, Sort.by("createDate").descending());
-        Page<Answer> answersPage = answerRepository.findByQuestionIdAndIsPublicTrue(questionId, pageable);
+        Pageable pageable = PageRequest.of(page - 1, 10);
+        Page<Answer> answersPage = answerRepository.findByQuestionIdAndIsPublicTrueOrderByFeedbackScoreDesc(questionId, pageable);
 
-        List<AnswerReadResponse> answers = answersPage.getContent()
+        List<AnswerReadWithScoreResponse> answers = answersPage.getContent()
                 .stream()
-                .map(AnswerReadResponse::new)
+                .map(answer -> {
+                    Integer score = answer.getFeedback() != null ? answer.getFeedback().getAiScore() : 0;
+                    return new AnswerReadWithScoreResponse(answer, score);
+                })
                 .toList();
 
         return new AnswerPageResponse<>(answersPage, answers);

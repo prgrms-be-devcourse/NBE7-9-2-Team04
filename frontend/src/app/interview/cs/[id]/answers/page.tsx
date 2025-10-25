@@ -5,7 +5,7 @@ import Link from "next/link"
 import { fetchApi } from "@/lib/client";
 import { useState, useEffect } from "react";
 import {
-  AnswerReadResponse,
+  AnswerReadWithScoreResponse,
   AnswerPageResponse,
 } from "@/types/answer"
 
@@ -13,7 +13,7 @@ export default function AnswersPage() {
   const params = useParams()
   const questionId = params.id as string
 
-  const [answers, setAnswers] = useState<AnswerReadResponse[]>([])
+  const [answers, setAnswers] = useState<AnswerReadWithScoreResponse[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -25,7 +25,7 @@ export default function AnswersPage() {
         `/api/v1/questions/${questionId}/answers?page=${page}`
       )) as {
         status: string
-        data: AnswerPageResponse<AnswerReadResponse>
+        data: AnswerPageResponse<AnswerReadWithScoreResponse>
         message?: string
       }
   
@@ -94,24 +94,24 @@ export default function AnswersPage() {
                   </div>
                 </div>
 
-                {/* <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">AI 점수</span>
                   <div
                     className={`px-3 py-1 rounded-full font-semibold text-sm ${
-                      answer.aiScore !== null
-                        ? answer.aiScore >= 90
+                      answer.score !== null
+                        ? answer.score >= 90
                           ? "bg-green-100 text-green-700"
-                          : answer.aiScore >= 80
+                          : answer.score >= 80
                             ? "bg-blue-100 text-blue-700"
-                            : answer.aiScore >= 70
+                            : answer.score >= 70
                               ? "bg-yellow-100 text-yellow-700"
                               : "bg-gray-100 text-gray-700"
                         : "bg-gray-100 text-gray-700"
                     }`}
                   >
-                    {answer.aiScore ?? "-"}점
+                    {answer.score ?? "-"}점
                   </div>
-                </div> */}
+                </div>
               </div>
 
               {/* 답변 내용 */}

@@ -21,6 +21,7 @@ public class Feedback extends BaseEntity {
     private Integer aiScore;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "answer_id", unique = true) // FK는 Feedback이 갖음
     private Answer answer;
 
     public void update(Answer answer, int score, String content) {
