@@ -22,48 +22,74 @@ export default function QuestionDetailPage() {
   const [submitted, setSubmitted] = useState(false)
   const [isJustSubmitted, setIsJustSubmitted] = useState(false)
   const [submittedAnswer, setSubmittedAnswer] = useState<AnswerCreateResponse | null>(null)
-  const [feedback, setFeedback] = useState<FeedbackReadResponse>(null)
+  const [feedback, setFeedback] = useState<FeedbackReadResponse | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isPublic, setIsPublic] = useState(true) // 공개 여부 상태
+  const [isPublic, setIsPublic] = useState(true)
 
-  // 질문 + 내 답변 + 피드백 불러오기
+  // ✅ 질문 + 내 답변 + 피드백 불러오기
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
 
-        // 질문 조회
-        const res = (await fetchApi(`/api/v1/questions/${questionId}`)) as {
+        // 🔹 질문 조회
+        const questionRes = (await fetchApi(`/api/v1/questions/${questionId}`)) as {
           status: string
           data: QuestionResponse
           message?: string
         }
-        if (res.status === "OK") setQuestion(res.data)
-        else alert(`질문 조회 실패: ${res.message}`)
+        if (questionRes.status === "OK") setQuestion(questionRes.data)
+        else alert(`질문 조회 실패: ${questionRes.message}`)
 
-        // 내 답변 조회
-        const myAnswerRes = (await fetchApi(
-          `/api/v1/questions/${questionId}/answers/mine`
-        )) as {
-          status: string
-          data: MyAnswerReadResponse
-          message?: string
-        }
-        if (myAnswerRes.status === "OK" && myAnswerRes.data) {
-          setSubmitted(true)
-          setSubmittedAnswer(myAnswerRes.data)
-          setAnswer(myAnswerRes.data.content)
-          setIsPublic(myAnswerRes.data.isPublic) // 기존 답변 공개 여부 반영
+        // 🔹 내 답변 조회 (존재하지 않아도 오류 안 나도록)
+        let hasAnswer = false
+        try {
+          const myAnswerRes = (await fetchApi(
+            `/api/v1/questions/${questionId}/answers/mine`
+          )) as {
+            status: string
+            data: MyAnswerReadResponse
+            message?: string
+          }
+
+          if (myAnswerRes.status === "OK" && myAnswerRes.data) {
+            hasAnswer = true
+            setSubmitted(true)
+            setSubmittedAnswer(myAnswerRes.data)
+            setAnswer(myAnswerRes.data.content)
+            setIsPublic(myAnswerRes.data.isPublic)
+          }
+        } catch (err: any) {
+          // 답변이 없는 경우는 정상 케이스
+          if (err.message?.includes("존재하지 않는 답변")) {
+            console.log("🟢 아직 작성한 답변이 없습니다.")
+          } else {
+            console.error("답변 조회 중 오류:", err)
+          }
         }
 
-        // 피드백 조회
-        const feedbackRes = (await fetchApi(`/api/v1/feedback/${questionId}`)) as {
-          status: string
-          data: FeedbackReadResponse
-          message?: string
+        // 🔹 피드백 조회 (답변 있을 때만)
+        if (hasAnswer) {
+          try {
+            const feedbackRes = (await fetchApi(`/api/v1/feedback/${questionId}`)) as {
+              status: string
+              data: FeedbackReadResponse
+              message?: string
+            }
+
+            if (feedbackRes.status === "OK" && feedbackRes.data) {
+              setFeedback(feedbackRes.data)
+            }
+          } catch (err: any) {
+            if (err.message?.includes("존재하지 않는 답변")) {
+              console.log("🟡 아직 피드백이 없습니다.")
+            } else {
+              console.error("피드백 조회 중 오류:", err)
+            }
+          }
+        } else {
+          setFeedback(null)
         }
-        if (feedbackRes.status === "OK") setFeedback(feedbackRes.data)
-        else setFeedback(null)
       } catch (err) {
         console.error(err)
         alert("데이터를 불러오는 중 오류가 발생했습니다.")
@@ -75,7 +101,7 @@ export default function QuestionDetailPage() {
     fetchData()
   }, [questionId])
 
-  // 답변 제출
+  // ✅ 답변 제출
   const handleSubmit = async () => {
     if (!answer.trim()) {
       alert("답변을 입력해주세요.")
@@ -107,7 +133,7 @@ export default function QuestionDetailPage() {
     }
   }
 
-  // 공개/비공개 전환 PATCH
+  // ✅ 공개/비공개 전환
   const handleToggleVisibility = async () => {
     if (!submittedAnswer) return
 
@@ -162,7 +188,6 @@ export default function QuestionDetailPage() {
 
       {/* 답변 상태별 렌더링 */}
       {!submitted ? (
-        // 작성 전
         <div className="border border-gray-200 bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold mb-1">답변 작성</h2>
           <p className="text-gray-500 text-sm mb-4">문제에 대한 답변을 작성해주세요.</p>
@@ -175,7 +200,6 @@ export default function QuestionDetailPage() {
             className="w-full border border-gray-300 rounded-md p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
 
-          {/* ✅ 작성 시 비공개 체크박스 */}
           <div className="flex items-center mt-2">
             <input
               type="checkbox"
@@ -202,7 +226,6 @@ export default function QuestionDetailPage() {
           </div>
         </div>
       ) : (
-        // 제출 후
         <div className="border border-green-400 bg-green-50 rounded-lg shadow-sm p-6">
           {isJustSubmitted && (
             <h2 className="text-xl font-semibold text-green-700 mb-2">✅ 답변이 제출되었습니다!</h2>
@@ -218,7 +241,6 @@ export default function QuestionDetailPage() {
               공개 여부: {isPublic ? "공개" : "비공개"}
             </p>
 
-            {/* ✅ 제출 후 공개/비공개 전환 버튼 */}
             <div className="mt-2">
               <button
                 onClick={handleToggleVisibility}
@@ -229,7 +251,7 @@ export default function QuestionDetailPage() {
             </div>
           </div>
 
-          {/* 피드백 박스 */}
+          {/* ✅ 피드백 영역 */}
           <div className="mb-4">
             <h3 className="font-semibold mb-2">AI 피드백:</h3>
             <div className="p-4 bg-sky-100 border rounded-md text-sm text-gray-800">
