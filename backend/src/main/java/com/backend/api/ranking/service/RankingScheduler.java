@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+//현재 스케줄러는 보조로 사용한다.
 @Component
 @RequiredArgsConstructor
 @Slf4j

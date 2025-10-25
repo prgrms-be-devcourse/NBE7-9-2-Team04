@@ -66,7 +66,6 @@ public class FeedbackService {
 
         userQuestionService.updateUserQuestionScore(answer.getAuthor(), question, finalScore);
         rankingService.updateUserRanking(answer.getAuthor());
-        //rankingService.recalculateAllRankings();
     }
 
     @Async("feedbackExecutor")
