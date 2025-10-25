@@ -114,15 +114,15 @@ export default function RankingPage() {
         </div>
 
         {/* 통계 */}
-        <div className="grid md:grid-cols-3 gap-4 mt-6">
+        <div className="grid md:grid-cols-3 gap-4 mt-6 mb-6">
           <StatBox label="해결한 문제" value={myRanking.solvedCount} />
           <StatBox label="총 점수" value={myRanking.totalScore} />
           <StatBox label="제출한 질문" value={myRanking.questionCount} />
         </div>
 
         {/* 다음 티어 진행률. 300,600 ``해당하면 해당 바 안 보임 */}
-        {myRanking.nextTier && myRanking.scoreToNextTier > 0 && (
-          <div className="mt-6 space-y-2">
+        {myRanking.nextTier && myRanking.scoreToNextTier > 0 ? (
+          <>
             <div className="flex justify-between text-sm text-gray-600">
               <span>다음 티어까지</span>
               <span className="font-semibold">
@@ -150,6 +150,14 @@ export default function RankingPage() {
                 {tierOf(myRanking.nextTier).icon} {myRanking.nextTier}
               </span>
             </div>
+          </>
+        ) : (
+          // ✅ 다음 티어가 없거나 이미 달성한 경우
+          <div className="flex flex-col items-center justify-center py-3">
+            <span className="text-lg">🎉</span>
+            <p className="text-blue-600 font-semibold mt-1">
+              다음 티어 달성 완료!
+            </p>
           </div>
         )}
       </div>

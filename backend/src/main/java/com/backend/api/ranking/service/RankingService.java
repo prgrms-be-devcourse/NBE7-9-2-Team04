@@ -62,6 +62,7 @@ public class RankingService {
         ranking.updateRank(higherRankCount + 1);
 
         rankingRepository.save(ranking);
+        recalculateAllRankings();
     }
 
     //마이페이지용

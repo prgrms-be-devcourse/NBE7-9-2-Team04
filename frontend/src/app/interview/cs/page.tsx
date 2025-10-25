@@ -166,9 +166,9 @@ export default function CsQuestionPage() {
   }, [selectedCategory, currentPage]);
 
   const getDifficultyColor = (score: number) => {
-    if (score <= 5) return "bg-green-500/10 text-green-700 dark:text-green-400";
-    if (score <= 10) return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400";
-    return "bg-red-500/10 text-red-700 dark:text-red-400";
+    if (score <= 5) return "rounded-full px-3 bg-green-500/10 text-green-700 dark:text-green-400";
+    if (score <= 10) return "rounded-full px-3 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400";
+    return "bg-red-500/10 rounded-full px-3 text-red-700 dark:text-red-400";
   };
 
   return (
