@@ -35,10 +35,11 @@ Toss Payments를 통한 구독 서비스를 통해 프리미엄 서비스를 이
 > 2025.10.10 (금) 09:00 ~ 2025.10.27 (월) 18:00
 
 ### **팀원**
-| 김은경 | 김규섭 | 서명진 | 이유찬 | 조영주 | 최병준 |
+| <a href="https://github.com/kimeunkyoungg"><img src="https://github.com/kimeunkyoungg.png" width="100"/></a> | <a href="https://github.com/seopgyu"><img src="https://github.com/seopgyu.png" width="100"/></a> | <a href="https://github.com/myoungjinseo"><img src="https://github.com/myoungjinseo.png" width="100"/></a> | <a href="https://github.com/Labtory-82"><img src="https://github.com/Labtory-82.png" width="100"/></a> | <a href="https://github.com/ascal34"><img src="https://github.com/ascal34.png" width="100"/></a> | <a href="https://github.com/larama-C"><img src="https://github.com/larama-C.png" width="100"/></a> |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| [github.com/kimeunkyoungg](https://github.com/kimeunkyoungg) | [github.com/seopgyu](https://github.com/seopgyu) | [github.com/myoungjinseo](https://github.com/myoungjinseo) | [github.com/Labtory-82](https://github.com/Labtory-82) | [github.com/ascal34](https://github.com/ascal34) | [github.com/larama-C](https://github.com/larama-C) |
+| **김은경** | **김규섭** | **서명진** | **이유찬** | **조영주** | **최병준** |
 | 팀장 | 팀원 | 팀원 | 팀원 | 팀원 | 팀원 |
+
 
 ---
 
