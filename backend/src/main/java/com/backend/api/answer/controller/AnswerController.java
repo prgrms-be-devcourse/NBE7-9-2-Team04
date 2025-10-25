@@ -94,18 +94,18 @@ public class AnswerController {
         );
     }
 
-    @GetMapping(value = "/{questionId}/answers/{answerId}")
+    @GetMapping(value = "/{questionId}/answers/mine")
     @Transactional(readOnly = true)
-    @Operation(summary = "답변 단건 조회")
-    public ApiResponse<AnswerReadResponse> readAnswer(
-            @PathVariable Long questionId,
-            @PathVariable Long answerId
+    @Operation(summary = "내 답변 조회")
+    public ApiResponse<AnswerReadResponse> readMyAnswer(
+            @PathVariable Long questionId
     ) {
-        Answer answer = answerService.findAnswer(questionId, answerId);
+
+        AnswerReadResponse answerResponse = answerService.findMyAnswer(questionId);
 
         return ApiResponse.ok(
-                "%d번 질문의 %d번 답변 조회 성공".formatted(questionId, answerId),
-                new AnswerReadResponse(answer)
+                "%d번 질문의 내 답변 조회 성공".formatted(questionId),
+                answerResponse
         );
     }
 
