@@ -13,7 +13,7 @@ public class SchedulerConfig{
     @Bean
     public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(5);
+        scheduler.setPoolSize(20); //cpu 코어 개수 2배로 설정
         scheduler.setThreadNamePrefix("BillingScheduler-");
         scheduler.initialize();
         return scheduler;
