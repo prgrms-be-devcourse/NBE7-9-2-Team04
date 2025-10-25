@@ -88,7 +88,7 @@ export default function CsQuestionCreatePage() {
       <div className="border border-yellow-200 bg-yellow-50 p-4 rounded-md mb-6">
         <p className="font-semibold mb-1">질문 등록 안내</p>
         <p className="text-sm">
-          등록한 질문은 관리자의 검토 후 승인됩니다. 승인된 질문은 일정 포인트를 획득합니다.
+          등록한 질문은 관리자의 검토 후 승인됩니다.
         </p>
       </div>
 
