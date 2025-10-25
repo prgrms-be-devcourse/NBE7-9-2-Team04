@@ -14,7 +14,6 @@ public class SchedulerConfig{
     public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(Runtime.getRuntime().availableProcessors() * 2); //cpu 코어 개수 2배로 설정
-        scheduler.setThreadNamePrefix("BillingScheduler-");
         scheduler.initialize();
         return scheduler;
     }
