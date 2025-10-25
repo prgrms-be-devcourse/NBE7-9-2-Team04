@@ -1,85 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import Pagination from "@/components/pagination";
-
-const solvedProblems = [
-  {
-    id: "1",
-    title: "TCP와 UDP의 차이점",
-    category: "네트워크",
-    solvedAt: "2025-10-15",
-  },
-  {
-    id: "2",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "3",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "4",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "5",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "6",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "7",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "8",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "9",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "10",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "11",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-  {
-    id: "12",
-    title: "프로세스와 스레드",
-    category: "운영체제",
-    solvedAt: "2025-10-14",
-  },
-];
+import {fetchApi} from "@/lib/client";
+import {SolvedProblem} from "@/lib/solved";
 
 export default function MySolvedPage() {
+  const [solvedList, setSolvedList] = useState<SolvedProblem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [questionPage, setQuestionPage] = useState(1);
   const itemsPerPage = 6;
@@ -89,7 +18,23 @@ export default function MySolvedPage() {
     return data.slice(start, start + itemsPerPage);
   };
 
-  const pagedQuestions = getPagedData(solvedProblems, questionPage);
+  const pagedQuestions = getPagedData(solvedList, questionPage);
+
+    useEffect(() => {
+        async function loadUserMyPage() {
+            try {
+                const apiResponse = await fetchApi(`/api/v1/users`, {
+                    method: "GET",
+                });
+                setSolvedList(apiResponse.data);
+            } catch (err) {
+                console.error("해결한 문제 탐색 중 오류 발생:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadUserMyPage();
+    }, []);
 
   return (
     <>
@@ -124,7 +69,7 @@ export default function MySolvedPage() {
 
           <Pagination
             currentPage={questionPage}
-            totalItems={solvedProblems.length}
+            totalItems={solvedList.length}
             itemsPerPage={itemsPerPage}
             onPageChange={setQuestionPage}
           />
