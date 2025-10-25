@@ -52,7 +52,6 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom{
                 .select(Projections.constructor(
                         PortfolioReadResponse.class,
                         question.id,
-                        question.title,
                         question.content
                 ))
                 .from(question)
@@ -65,7 +64,8 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom{
             return Optional.empty();
         }
         Long count = count(groupId);
-        return Optional.of(PortfolioListReadResponse.from(count,questions));
+        String title = getTitle(groupId);
+        return Optional.of(PortfolioListReadResponse.from(title,count,questions));
     }
 
     private Long count(UUID groupId){
@@ -75,6 +75,17 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom{
                 .where(
                         question.groupId.eq(groupId)
                 )
+                .fetchOne();
+    }
+
+    private String getTitle(UUID groupID){
+        return queryFactory
+                .select(question.title)
+                .from(question)
+                .where(
+                        question.groupId.eq(groupID)
+                )
+                .groupBy(question.title)
                 .fetchOne();
     }
 }
