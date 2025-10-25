@@ -2,6 +2,7 @@ package com.backend.api.feedback.service;
 
 
 
+import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.backend.api.feedback.dto.response.AiFeedbackResponse;
 import com.backend.api.feedback.dto.request.AiFeedbackRequest;
 import com.backend.api.feedback.dto.response.FeedbackReadResponse;
@@ -27,6 +28,9 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.context.event.EventListener;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -81,15 +85,28 @@ public class FeedbackService {
 
     private AiFeedbackResponse createAiFeedback(Question question, Answer answer){
 
-        ChatClient chatClient = ChatClient.create(openAiChatModel);
         // 리퀘스트 dto 정의
         AiFeedbackRequest request = AiFeedbackRequest.of(question.getContent(),answer.getContent());
 
         Prompt prompt = createPrompt(request.systemMessage(), request.userMessage(), request.assistantMessage());
 
+        return connectChatClient(prompt);
+    }
+    @Retryable(
+            retryFor = Exception.class,
+            recover = "falseConnect",
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 5000, multiplier = 2.0))
+    private AiFeedbackResponse connectChatClient(Prompt prompt){
+        ChatClient chatClient = ChatClient.create(openAiChatModel);
         return chatClient.prompt(prompt)
                 .call()
                 .entity(AiFeedbackResponse.class);
+    }
+
+    @Recover
+    private ErrorException falseConnect(){
+        return new ErrorException(ErrorCode.FETCH_FEEDBACK_FAILED);
     }
 
     private Prompt createPrompt(String system, String user, String assistant){
