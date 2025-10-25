@@ -142,4 +142,10 @@ public class QuestionService {
     public void createListQuestion(List<Question> questions){
         questionRepository.saveAll(questions);
     }
+
+    @Transactional(readOnly = true)
+    public int countByUser(User user) {
+        validateUserAuthority(user);
+        return questionRepository.countByAuthor(user);
+    }
 }
