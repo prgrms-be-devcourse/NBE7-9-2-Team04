@@ -51,6 +51,7 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom{
         List<PortfolioReadResponse> questions = queryFactory
                 .select(Projections.constructor(
                         PortfolioReadResponse.class,
+                        question.id,
                         question.title,
                         question.content
                 ))
@@ -59,7 +60,6 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom{
                         question.groupId.eq(groupId),
                         question.author.eq(user)
                 )
-                .groupBy(question.groupId, question.title, question.content)
                 .fetch();
         if(questions.isEmpty()){
             return Optional.empty();
