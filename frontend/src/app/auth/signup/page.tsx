@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { fetchApi } from "@/lib/client";
 import { UserSignupRequest } from "@/types/user";
+import {UserResponse} from "@/lib/userResponse";
 
 export default function SignupPage() {
+  const [userResponse, setUserResponse] = useState<UserResponse | null>(null);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,6 +21,24 @@ export default function SignupPage() {
     github: "",
     image: "",
   });
+
+
+    useEffect(() => {
+        async function loadUserResponse() {
+            try {
+                const apiResponse = await fetchApi(`/api/v1/users/signup`, {
+                    method: "POST",
+                });
+                setUserResponse(apiResponse.data);
+            } catch (err) {
+                console.error("회원가입 중 오류 발생:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadUserResponse();
+    }, []);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

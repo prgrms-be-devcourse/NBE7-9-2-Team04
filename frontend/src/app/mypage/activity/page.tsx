@@ -1,109 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import CategoryTab from "@/components/categoryTab";
 import Pagination from "@/components/pagination";
+import {fetchApi} from "@/lib/client";
+import {UserMyPageResponse} from "@/lib/userMyPage";
+import React from "react";
+import {
+    userPosts,
+    userComments,
+    userQuestions,
+    UserPostDto,
+    UserCommentDto,
+    UserQuestionDto,
+} from "@/lib/activity";
 
-const userPosts = [
-  {
-    id: "1",
-    title: "Next.js 14 프로젝트 팀원 모집",
-    status: "모집중",
-    date: "2025-10-10",
-  },
-  { id: "2", title: "React 스터디 모집", status: "마감", date: "2025-10-08" },
-];
-
-const userComments = [
-  {
-    id: "1",
-    postId: "1",
-    content: "좋은 프로젝트네요! 참여하고 싶습니다.",
-    postTitle: "Next.js 14 프로젝트 팀원 모집",
-    date: "2025-10-12",
-  },
-  {
-    id: "2",
-    postId: "2",
-    content: "저도 같은 문제를 겪었는데...",
-    postTitle: "React 스터디 모집",
-    date: "2025-10-11",
-  },
-];
-
-const userQuestions = [
-  {
-    id: "1",
-    title: "TCP와 UDP의 차이점을 설명하세요",
-    category: "네트워크",
-    score: 10,
-    isApproved: false,
-  },
-  {
-    id: "2",
-    title: "프로세스와 스레드의 차이는 무엇인가요?",
-    category: "운영체제",
-    score: 5,
-    isApproved: true,
-  },
-  {
-    id: "3",
-    title: "데이터베이스 정규화에 대해 설명하세요",
-    category: "데이터베이스",
-    score: 10,
-    isApproved: false,
-  },
-  {
-    id: "4",
-    title: "데이터베이스 정규화에 대해 설명하세요",
-    category: "데이터베이스",
-    score: 10,
-    isApproved: false,
-  },
-  {
-    id: "5",
-    title: "데이터베이스 정규화에 대해 설명하세요",
-    category: "데이터베이스",
-    score: 10,
-    isApproved: false,
-  },
-  {
-    id: "6",
-    title: "데이터베이스 정규화에 대해 설명하세요",
-    category: "데이터베이스",
-    score: 10,
-    isApproved: false,
-  },
-  {
-    id: "7",
-    title: "데이터베이스 정규화에 대해 설명하세요",
-    category: "데이터베이스",
-    score: 10,
-    isApproved: false,
-  },
-  {
-    id: "8",
-    title: "데이터베이스 정규화에 대해 설명하세요",
-    category: "데이터베이스",
-    score: 10,
-    isApproved: false,
-  },
-  {
-    id: "9",
-    title: "데이터베이스 정규화에 대해dd 설명하세요",
-    category: "데이터베이스",
-    score: 10,
-    isApproved: false,
-  },
-];
 
 export default function MyActivityPage() {
+  const [userMyPage, setUserMyPage] = useState<UserMyPageResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [postPage, setPostPage] = useState(1);
   const [commentPage, setCommentPage] = useState(1);
   const [questionPage, setQuestionPage] = useState(1);
   const itemsPerPage = 6;
+
+
+
+    useEffect(() => {
+        async function loadUserMyPage() {
+            try {
+                const apiResponse = await fetchApi(`/api/v1/users/{userId}/posts`, {
+                    method: "GET",
+                });
+                setUserMyPage(apiResponse.data);
+            } catch (err) {
+                console.error("작성한 글 탐색 중 오류 발생:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadUserMyPage();
+    }, []);
+
+    useEffect(() => {
+        async function loadUserMyPage() {
+            try {
+                const apiResponse = await fetchApi(`/api/v1/users/{userId}/comments`, {
+                    method: "GET",
+                });
+                setUserMyPage(apiResponse.data);
+            } catch (err) {
+                console.error("작성한 댓글 탐색 중 오류 발생:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadUserMyPage();
+    }, []);
+
+    useEffect(() => {
+        async function loadUserMyPage() {
+            try {
+                const apiResponse = await fetchApi(`/api/v1/users/{userId}/answers`, {
+                    method: "GET",
+                });
+                setUserMyPage(apiResponse.data);
+            } catch (err) {
+                console.error("작성한 답글 탐색 중 오류 발생:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadUserMyPage();
+    }, []);
+
+
 
   const getPagedData = (data: any[], page: number) => {
     const start = (page - 1) * itemsPerPage;
