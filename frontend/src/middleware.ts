@@ -23,5 +23,6 @@ export const config = {
         "/interview/cs/new",
         "/interview/cs/:path",
         "/admin/:path*", 
+        "/ranking"
     ]
 }
