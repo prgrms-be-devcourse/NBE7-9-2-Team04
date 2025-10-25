@@ -17,9 +17,11 @@ Toss Payments를 통한 구독 서비스를 통해 프리미엄 서비스를 이
 1. **개발자 간 협업 및 네트워킹 촉진**
     - 스터디 및 프로젝트 팀 매칭 기능
     - 게시판을 통한 커뮤니티 형성
+      
 2. **AI를 통한 맞춤형 면접 준비**
     - 포트폴리오 기반 기술 면접 질문 제공
     - 답변 피드백 및 꼬리질문 자동 생성
+      
 3. **지속 가능한 구독 기반 서비스 운영**
     - 유료 구독자를 위한 프리미엄 AI 기능 제공
     - Toss Payments 자동결제 연동
@@ -48,7 +50,7 @@ Toss Payments를 통한 구독 서비스를 통해 프리미엄 서비스를 이
     - BcryptPasswordEncoder 적용
 - **회원 정보 수정**
 
----
+
 
 ### 📰 2. **게시판 및 커뮤니티 기능**
 
@@ -62,7 +64,6 @@ Toss Payments를 통한 구독 서비스를 통해 프리미엄 서비스를 이
 - **유료 기능**
     - Toss Payments 결제 후, **모집글 상단 고정 기능** 제공
 
----
 
 ### 🤖 3. **AI 면접 지원 시스템 (OpenAI API 기반)**
 
@@ -74,18 +75,15 @@ Toss Payments를 통한 구독 서비스를 통해 프리미엄 서비스를 이
     - 사용자의 면접 답변 분석 및 피드백 제공
 - **오늘의 추천 문제**
     
-    
-- **QnA 게시판**
-    - AI 학습 질문 및 답변 공유 커뮤니티
-
----
 
 ### 🏆 4. **랭킹 시스템**
 
 - **사용자별 랭킹 및 티어 시스템**
     - AI 면접 점수 기반 자동 랭킹 산정
+      
 - **리더보드 제공**
     - 상위 유저 노출 및 경쟁 유도
+      
 - **마이페이지 연동**
     - 본인의 랭킹 및 등급 조회 가능
 
@@ -93,8 +91,9 @@ Toss Payments를 통한 구독 서비스를 통해 프리미엄 서비스를 이
 
 ### 💬 5. **QnA 게시판**
 
-- **서비스 관련 질문 및 학습 커뮤니티**
+- **서비스 관련 질문**
     - 사용자가 질문을 등록하고 답변 공유 가능
+      
 - **태그 및 카테고리 기반 검색**
     - 주제별로 질문 필터링 및 조회
 
@@ -134,7 +133,7 @@ Toss Payments를 통한 구독 서비스를 통해 프리미엄 서비스를 이
 
 ## ⚙️ 환경 변수 설정
 
-BACKEND (IntelliJ 환경 변수 설정)
+**BACKEND (IntelliJ 환경 변수 설정)**
 
 ```java
 # Database
@@ -157,7 +156,7 @@ PAYMENT_SECRET_KEY=your_payment_secret_key
 SECRET_PATTERN=your_secret_pattern
 ```
 
-FRONTEND (.env)
+**FRONTEND (.env)**
 
 ```
 NEXT_PUBLIC_API_BASE_URL ="http://localhost:8080"
@@ -179,7 +178,7 @@ NEXT_PUBLIC_TOSS_CLIENT_KEY = your_payment_secret_key
 ---
 
 ## 🧱 기술 스택
-### 💻 **Frontend**
+**Frontend**
 
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
@@ -187,7 +186,7 @@ NEXT_PUBLIC_TOSS_CLIENT_KEY = your_payment_secret_key
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)
 
 
-### ⚙️ **Backend**
+**Backend**
 
 ![Java](https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
@@ -207,7 +206,7 @@ NEXT_PUBLIC_TOSS_CLIENT_KEY = your_payment_secret_key
 
 ## 🤖 Github Actions CI 자동화 Test
 
-### 🧩 Workflow 개요
+### Workflow 개요
 
 - **트리거 조건**
     - 브랜치: `main`, `feature/*`, `fix/*`, `refactor/*`
