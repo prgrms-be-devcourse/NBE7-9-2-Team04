@@ -5,19 +5,15 @@ import { useRouter } from "next/navigation";
 import CategoryTab from "@/components/categoryTab";
 import Pagination from "@/components/pagination";
 import {fetchApi} from "@/lib/client";
+import { UserPostDto, UserCommentDto, UserQuestionDto } from "@/lib/activity";
 import {UserMyPageResponse} from "@/lib/userMyPage";
 import React from "react";
-import {
-    userPosts,
-    userComments,
-    userQuestions,
-    UserPostDto,
-    UserCommentDto,
-    UserQuestionDto,
-} from "@/lib/activity";
 
 
 export default function MyActivityPage() {
+  const [posts, setPosts] = useState<UserPostDto[]>([]);
+  const [comments, setComments] = useState<UserCommentDto[]>([]);
+  const [questions, setQuestions] = useState<UserQuestionDto[]>([]);
   const [userMyPage, setUserMyPage] = useState<UserMyPageResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -83,9 +79,9 @@ export default function MyActivityPage() {
     return data.slice(start, start + itemsPerPage);
   };
 
-  const pagedPosts = getPagedData(userPosts, postPage);
-  const pagedComments = getPagedData(userComments, commentPage);
-  const pagedQuestions = getPagedData(userQuestions, questionPage);
+  const pagedPosts = getPagedData(posts, postPage);
+  const pagedComments = getPagedData(comments, commentPage);
+  const pagedQuestions = getPagedData(questions, questionPage);
 
   const [selectedCategory, setSelectedCategory] = useState("작성한 글");
   const categories = ["작성한 글", "작성한 댓글", "등록한 질문"];
@@ -141,7 +137,7 @@ export default function MyActivityPage() {
 
               <Pagination
                 currentPage={postPage}
-                totalItems={userPosts.length}
+                totalItems={posts.length}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setPostPage}
               />
@@ -169,7 +165,7 @@ export default function MyActivityPage() {
 
               <Pagination
                 currentPage={commentPage}
-                totalItems={userComments.length}
+                totalItems={comments.length}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setCommentPage}
               />
@@ -208,7 +204,7 @@ export default function MyActivityPage() {
 
               <Pagination
                 currentPage={questionPage}
-                totalItems={userQuestions.length}
+                totalItems={questions.length}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setQuestionPage}
               />

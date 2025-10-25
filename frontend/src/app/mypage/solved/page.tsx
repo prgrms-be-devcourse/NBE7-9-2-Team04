@@ -4,10 +4,10 @@ import {useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import Pagination from "@/components/pagination";
 import {fetchApi} from "@/lib/client";
-import {SolvedProblem, solvedProblems} from "@/lib/solved";
+import {SolvedProblem} from "@/lib/solved";
 
 export default function MySolvedPage() {
-  const [solved, setSolved] = useState<SolvedProblem | null>(null);
+  const [solvedList, setSolvedList] = useState<SolvedProblem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [questionPage, setQuestionPage] = useState(1);
@@ -18,7 +18,7 @@ export default function MySolvedPage() {
     return data.slice(start, start + itemsPerPage);
   };
 
-  const pagedQuestions = getPagedData(solvedProblems, questionPage);
+  const pagedQuestions = getPagedData(solvedList, questionPage);
 
     useEffect(() => {
         async function loadUserMyPage() {
@@ -26,7 +26,7 @@ export default function MySolvedPage() {
                 const apiResponse = await fetchApi(`/api/v1/users`, {
                     method: "GET",
                 });
-                setSolved(apiResponse.data);
+                setSolvedList(apiResponse.data);
             } catch (err) {
                 console.error("해결한 문제 탐색 중 오류 발생:", err);
             } finally {
@@ -69,7 +69,7 @@ export default function MySolvedPage() {
 
           <Pagination
             currentPage={questionPage}
-            totalItems={solvedProblems.length}
+            totalItems={solvedList.length}
             itemsPerPage={itemsPerPage}
             onPageChange={setQuestionPage}
           />
