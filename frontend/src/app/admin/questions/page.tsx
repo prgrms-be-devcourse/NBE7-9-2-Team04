@@ -241,19 +241,68 @@ export default function AdminQuestionsPage() {
               {selectedQuestion.content}
             </div>
 
+            {/* ✅ 점수 수정 영역 추가 */}
             <div className="flex justify-between items-center border-t pt-4 mt-4">
               <div className="flex gap-3 items-center">
                 {getStatusBadge(selectedQuestion.isApproved)}
-                {/*모달 내 카테고리도 한글 변환 */}
                 <span className="text-sm text-gray-500">
                   {getCategoryLabel(selectedQuestion.categoryType)}
                 </span>
               </div>
-              <div className="text-sm text-gray-500">
-                점수: {selectedQuestion.score}
+
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <label htmlFor="scoreInput" className="text-gray-600 font-medium">
+                  점수:
+                </label>
+                <input
+                  id="scoreInput"
+                  type="number"
+                  min={0}
+                  value={selectedQuestion.score}
+                  onChange={(e) =>
+                    setSelectedQuestion({
+                      ...selectedQuestion,
+                      score: Number(e.target.value),
+                    })
+                  }
+                  className="w-20 px-2 py-1 border rounded-md text-center"
+                />
+                <button
+                  className="px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700"
+                  onClick={async () => {
+                    try {
+                      const res = await fetchApi(
+                        `/api/v1/admin/questions/${selectedQuestion.questionId}/score`,
+                        {
+                          method: "PATCH",
+                          body: JSON.stringify({ score: selectedQuestion.score }),
+                        }
+                      );
+
+                      if (res.status === "OK") {
+                        alert("점수가 수정되었습니다.");
+                        // 목록에서도 즉시 반영
+                        setQuestions((prev) =>
+                          prev.map((q) =>
+                            q.questionId === selectedQuestion.questionId
+                              ? { ...q, score: selectedQuestion.score }
+                              : q
+                          )
+                        );
+                      } else {
+                        alert(res.message || "점수 수정 실패");
+                      }
+                    } catch (err) {
+                      alert("서버 오류로 점수 수정에 실패했습니다.");
+                    }
+                  }}
+                >
+                  수정
+                </button>
               </div>
             </div>
 
+            {/* 하단 승인/삭제 버튼 */}
             <div className="flex justify-end gap-3 mt-6">
               {selectedQuestion.isApproved ? (
                 <>
@@ -267,9 +316,7 @@ export default function AdminQuestionsPage() {
                   </button>
                   <button
                     className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                    onClick={() =>
-                      handleDelete(selectedQuestion.questionId)
-                    }
+                    onClick={() => handleDelete(selectedQuestion.questionId)}
                   >
                     삭제
                   </button>
@@ -286,9 +333,7 @@ export default function AdminQuestionsPage() {
                   </button>
                   <button
                     className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                    onClick={() =>
-                      handleDelete(selectedQuestion.questionId)
-                    }
+                    onClick={() => handleDelete(selectedQuestion.questionId)}
                   >
                     삭제
                   </button>
