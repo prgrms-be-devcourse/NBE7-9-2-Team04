@@ -1,11 +1,13 @@
 package com.backend.api.question.service;
 
 import com.backend.api.question.dto.request.AiQuestionRequest;
-import com.backend.api.question.dto.response.AiQuestionResponse;
-import com.backend.api.question.dto.response.ChatGptResponse;
+import com.backend.api.question.dto.response.*;
+
 import com.backend.api.resume.service.ResumeService;
 import com.backend.api.review.dto.request.AiReviewbackRequest;
+import com.backend.api.user.service.UserService;
 import com.backend.domain.question.entity.Question;
+import com.backend.domain.question.entity.QuestionCategoryType;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
@@ -14,6 +16,7 @@ import com.backend.global.exception.ErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.CascadeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,14 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AiQuestionService {
 
+    private final UserService userService;
     @Value("${openai.url}")
     private String apiUrl;
 
@@ -41,7 +46,7 @@ public class AiQuestionService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public List<AiQuestionResponse> createAiQuestion(Long userId) throws JsonProcessingException {
+    public AIQuestionCreateResponse createAiQuestion(Long userId) throws JsonProcessingException {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
@@ -58,7 +63,8 @@ public class AiQuestionService {
         List<Question> questions = listDtoToEntity(responses, user, resume);
 
         questionService.createListQuestion(questions);
-        return AiQuestionResponse.toDtoList(questions);
+        List<AiQuestionResponse> questionDto = AiQuestionResponse.toDtoList(questions);
+        return AIQuestionCreateResponse.from(questions.getFirst().getGroupId(),questionDto);
     }
 
     public String getAiReviewContent(AiReviewbackRequest request) throws JsonProcessingException {
@@ -106,6 +112,7 @@ public class AiQuestionService {
     }
 
     public List<Question> listDtoToEntity(List<AiQuestionResponse> responses, User user, Resume resume){
+        UUID groupId = UUID.randomUUID();
         return responses.stream()
                 .map(dto -> Question.builder()
                         .title(resume.getPortfolioUrl())
@@ -115,10 +122,21 @@ public class AiQuestionService {
                         .score(2)
                         .isApproved(true)
                         .author(user)
+                        .groupId(groupId)
+                        .categoryType(QuestionCategoryType.PORTFOLIO)
                         .build()
                 )
                 .toList();
     }
 
 
+    public AiQuestionReadAllResponse readAllAiQuestion(Long userId) {
+        User user = userService.getUser(userId);
+        return questionService.getByCategoryType( QuestionCategoryType.PORTFOLIO, user);
+    }
+
+    public PortfolioListReadResponse readAiQuestion(Long userId, UUID groupId) {
+        User user = userService.getUser(userId);
+        return questionService.getByUserAndGroupId(user, groupId);
+    }
 }
