@@ -59,7 +59,12 @@ public class FeedbackService {
                 .build();
 
         feedbackRepository.save(feedback);
-        userQuestionService.updateUserQuestionScore(answer.getAuthor(), question, feedback.getAiScore());
+
+        int baseScore = question.getScore();
+        double ratio = aiFeedback.score() / 100.0;
+        int finalScore = (int)Math.round(ratio * baseScore);
+
+        userQuestionService.updateUserQuestionScore(answer.getAuthor(), question, finalScore);
         rankingService.updateUserRanking(answer.getAuthor());
     }
 
