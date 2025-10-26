@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PostAddRequest as CreatePost } from "@/types/post";
 import { fetchApi } from "@/lib/client";
 
@@ -21,6 +21,31 @@ export default function RecruitmentCreatePage() {
     recruitCount: 1,
     categoryType: "PROJECT", // 기본값을 PostCategoryType으로 설정
   });
+
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const res = await fetchApi("/api/v1/users/me", { method: "GET", cache: "no-store" });
+        if (res.status === "OK" && res.data?.role) {
+          setUserRole(res.data.role);
+        } else {
+          setUserRole("BASIC");
+        }
+      } catch {
+        setUserRole("BASIC");
+      }
+    };
+    fetchUserRole();
+  }, []);
+
+  // Ensure pinStatus is reset for BASIC users
+  useEffect(() => {
+    if (userRole === "BASIC") {
+      setFormData((prev) => ({ ...prev, pinStatus: "NOT_PINNED" }));
+    }
+  }, [userRole]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,6 +94,28 @@ export default function RecruitmentCreatePage() {
           onSubmit={handleSubmit}
           className="space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6"
         >
+          {/* 상단 고정 여부 */}
+          {userRole === "PREMIUM" && (
+            <div>
+              <label htmlFor="pinStatus" className="block text-sm font-medium text-gray-700 mb-1">
+                상단 고정 여부
+              </label>
+              <select
+                id="pinStatus"
+                value={formData.pinStatus}
+                onChange={(e) =>
+                  setFormData({ ...formData, pinStatus: e.target.value as "PINNED" | "NOT_PINNED" })
+                }
+                required
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="NOT_PINNED">고정 안함</option>
+                <option value="PINNED">고정</option>
+              </select>
+            </div>
+          )}
+
+          {/* 제목 */}
           <div>
             <label
               htmlFor="title"
