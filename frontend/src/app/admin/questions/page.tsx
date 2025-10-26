@@ -258,6 +258,7 @@ export default function AdminQuestionsPage() {
                   id="scoreInput"
                   type="number"
                   min={0}
+                  max={50}
                   value={selectedQuestion.score}
                   onChange={(e) =>
                     setSelectedQuestion({

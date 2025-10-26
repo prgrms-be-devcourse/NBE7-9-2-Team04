@@ -163,14 +163,19 @@ export default function AdminQuestionAddPage() {
               id="score"
               type="number"
               min="0"
-              placeholder="점수를 입력하세요"
+              max="50"
+              placeholder="0~50 사이의 점수를 입력하세요"
               value={formData.score}
-              onChange={(e) =>
-                setFormData({ ...formData, score: Number(e.target.value) })
-              }
+              onChange={(e) => {
+                const value = Number(e.target.value)
+                if (value >= 0 && value <= 50) {
+                  setFormData({ ...formData, score: value })
+                }
+              }}
               className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
               required
             />
+            <p className="text-xs text-gray-500 mt-1">0~50점 사이의 값만 입력 가능합니다.</p>
           </div>
 
           {/* 승인 여부 */}
@@ -222,11 +227,10 @@ export default function AdminQuestionAddPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`px-4 py-2 rounded-md text-white transition-colors ${
-                isLoading
+              className={`px-4 py-2 rounded-md text-white transition-colors ${isLoading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
-              }`}
+                }`}
             >
               {isLoading ? "등록 중..." : "질문 등록"}
             </button>

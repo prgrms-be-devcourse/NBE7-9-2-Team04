@@ -655,7 +655,7 @@ public class BaseInitData {
         questionRepository.save(q4);
         adminQuestionService.approveQuestion(q4.getId(), true, userRepository.findById(16L).get());
 
-        Question q6 = Question.builder()
+        Question q5 = Question.builder()
                 .title("데드락(Deadlock)은 어떤 상황에서 발생하나요?")
                 .content("데드락의 4가지 필요 조건과, 이를 예방하거나 해결할 수 있는 방법을 구체적으로 설명해주세요.")
                 .author(user1)

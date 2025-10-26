@@ -172,7 +172,7 @@ export default function MySettingsPage() {
                 type="password"
                 className="w-full border border-gray-300 rounded-md p-2"
                 placeholder="새 비밀번호 입력 (선택)"
-                value={formData.password}
+                value={""}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }

@@ -2,15 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client"; // Adjust the import based on your project structure
 
 export default function NewFeedbackPage() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
-
-  // ✅ 임시 피드백 ID
-  const mockNewFeedbackId = 3;
+  const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
+    // Check if the user is a premium member
+    const checkPremiumStatus = async () => {
+      try {
+        const response = await fetchApi("/api/v1/user"); // Adjust endpoint as needed
+        setIsPremium(response.data.isPremium);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        alert("사용자 정보를 불러오는 데 실패했습니다.");
+        router.replace("/portfolio_review");
+      }
+    };
+
+    checkPremiumStatus();
+  }, [router]);
+
+  useEffect(() => {
+    if (!isPremium) return; // Prevent non-premium users from proceeding
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -21,17 +38,52 @@ export default function NewFeedbackPage() {
       });
     }, 300);
 
-    // 3초 후 결과 페이지 이동
-    const timer = setTimeout(() => {
-      alert("✅ AI 포트폴리오 분석이 완료되었습니다!");
-      router.replace(`/portfolio_review/${mockNewFeedbackId}`);
-    }, 3000);
-
     return () => {
       clearInterval(interval);
-      clearTimeout(timer);
     };
-  }, [router]);
+  }, [isPremium]);
+
+  useEffect(() => {
+    if (!isPremium) return; // Prevent non-premium users from proceeding
+
+    const createFeedback = async () => {
+      try {
+        const response = await fetchApi("/api/v1/portfolio-review", {
+          method: "POST",
+        });
+        const reviewId = response.data.reviewId; // API 응답에서 reviewId 추출
+        alert("✅ AI 포트폴리오 분석이 완료되었습니다!");
+        router.replace(`/portfolio_review/${reviewId}`); // reviewId를 사용해 결과 페이지로 이동
+      } catch (error) {
+        if (error.response?.data?.code === "AI_FEEDBACK_FOR_PREMIUM_ONLY") {
+          alert("프리미엄 사용자만 AI 분석을 사용할 수 있습니다.");
+        } else {
+          alert("AI 포트폴리오 분석 생성에 실패했습니다.");
+        }
+        console.error("Failed to create feedback:", error);
+        router.replace("/portfolio_review");
+      }
+    };
+
+    createFeedback();
+  }, [router, isPremium]);
+
+  if (!isPremium) {
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <h1 className="text-3xl font-bold mb-4">프리미엄 전용 기능</h1>
+        <p className="text-gray-600 mb-10">
+          이 기능은 프리미엄 사용자만 사용할 수 있습니다. 프리미엄으로 업그레이드하세요.
+        </p>
+        <button
+          onClick={() => router.push("/upgrade")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-semibold text-sm transition"
+        >
+          프리미엄 업그레이드
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-20 text-center">

@@ -2,61 +2,31 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-
-// 임시 로그인 / 구독 / 포트폴리오 상태
-const mockUser = {
-  isLoggedIn: true,
-  isPremium: false,
-  hasPortfolio: true,
-};
-
-// 임시 피드백 데이터
-const mockFeedbacks = [
-  {
-    id: 1,
-    createdAt: "2025-10-18T14:23:00",
-    summary: "프로젝트 구조와 성과가 명확히 정리되어 있음",
-  },
-  {
-    id: 2,
-    createdAt: "2025-10-21T09:15:00",
-    summary: "협업 과정과 문제 해결 과정에 대한 기술적 설명이 우수함",
-  },
-];
+import { fetchApi } from "@/lib/client"; // API 호출을 위한 헬퍼 함수 임포트
 
 export default function PortfolioReviewMainPage() {
   const router = useRouter();
-  const [feedbacks, setFeedbacks] = useState<typeof mockFeedbacks>([]);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 임시 로딩 시뮬레이션
-    const timer = setTimeout(() => {
-      setFeedbacks(mockFeedbacks);
-      setIsLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    const fetchFeedbacks = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetchApi("/api/v1/portfolio-review/reviews");
+        setFeedbacks(response.data);
+      } catch (error) {
+        console.error("Failed to fetch feedbacks:", error);
+        alert("피드백 목록을 불러오는 데 실패했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeedbacks();
   }, []);
 
   const handleStartAnalyze = () => {
-    if (!mockUser.isLoggedIn) {
-      alert("로그인이 필요합니다.");
-      router.push("/auth");
-      return;
-    }
-
-    if (!mockUser.isPremium) {
-      alert("이 기능은 프리미엄 회원 전용입니다.");
-      router.push("/mypage/premium");
-      return;
-    }
-
-    if (!mockUser.hasPortfolio) {
-      alert("등록된 포트폴리오가 없습니다. 마이페이지에서 등록해주세요.");
-      router.push("/mypage/resume");
-      return;
-    }
-
     router.push("/portfolio_review/new");
   };
 
@@ -71,7 +41,6 @@ export default function PortfolioReviewMainPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">포트폴리오 첨삭</h1>
         <p className="text-gray-500">
