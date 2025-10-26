@@ -104,11 +104,10 @@ public class User extends BaseEntity {
     }
 
     public int getAiQuestionLimit() {
-        if (this.subscription != null) {
+        if (isPremium()) {
             return this.subscription.getQuestionLimit();
         }
-        // 혹시나 subscription == null 일 경우 기본 값
-        return 5;
+        return 5; // 구독 정보가 없는 예외적인 경우, 기본값 5를 반환합니다.
     }
 
     public void incrementAiQuestionUsedCount() {
