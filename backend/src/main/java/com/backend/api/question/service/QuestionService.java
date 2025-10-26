@@ -111,8 +111,13 @@ public class QuestionService {
         Pageable pageable = PageRequest.of(page - 1, 9, Sort.by("createDate").descending());
 
         if (categoryType == null) {
-            questionsPage = questionRepository.findByIsApprovedTrue(pageable);
-        } else {
+            questionsPage = questionRepository.findApprovedQuestionsExcludingCategory(QuestionCategoryType.PORTFOLIO, pageable);
+        }
+        else if (categoryType == QuestionCategoryType.PORTFOLIO) {
+            // 포트폴리오만 조회
+            questionsPage = questionRepository.findApprovedQuestionsByCategory(QuestionCategoryType.PORTFOLIO, pageable);
+        }
+        else {
             questionsPage = questionRepository.findByCategoryTypeAndIsApprovedTrue(categoryType, pageable);
         }
 
