@@ -72,3 +72,14 @@ export const ROLE_LABELS: Record<Role, string> = {
   USER: "사용자",
   ADMIN: "관리자",
 };
+
+export type UserMyPageResponse = {
+  userId: number,
+  email: string,
+  password: string,
+  name: string,
+  nickname: string,
+  age: number,
+  github: string | null,
+};
+
