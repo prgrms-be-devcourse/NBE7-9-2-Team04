@@ -146,6 +146,7 @@ public class QuestionService {
         questionRepository.saveAll(questions);
     }
 
+
     public AiQuestionReadAllResponse getByCategoryType(QuestionCategoryType questionCategoryType, User user) {
         return questionRepository.getQuestionByCategoryTypeAndUserId(questionCategoryType,user)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
@@ -154,5 +155,11 @@ public class QuestionService {
     public PortfolioListReadResponse getByUserAndGroupId(User user, UUID groupId) {
         return questionRepository.getByUserAndGroupId(user,groupId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+
+    @Transactional(readOnly = true)
+    public int countByUser(User user) {
+        validateUserAuthority(user);
+        return questionRepository.countByAuthor(user);
+
     }
 }

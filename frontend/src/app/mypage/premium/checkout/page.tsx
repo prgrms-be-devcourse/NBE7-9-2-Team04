@@ -17,19 +17,12 @@ export default function PaymentCheckoutPage() {
   // 서버에서 customerKey 불러오기
   useEffect(() => {
     async function initCustomerKey() {
-      try {
-        let res = await fetchApi("/api/v1/subscriptions/me", { method: "GET" });
-        setCustomerKey(res.data.customerKey);
-      } catch (err) {
-        // 구독이 없으면 새로 생성
-        const newSub = await fetchApi("/api/v1/subscriptions", {
-          method: "POST",
-        });
-        setCustomerKey(newSub.data.customerKey);
-      }
+      const res = await fetchApi("/api/v1/subscriptions/me", { method: "GET" });
+      setCustomerKey(res.data.customerKey);
     }
     initCustomerKey();
   }, []);
+
 
   useEffect(() => {
     async function initTossPayment() {
@@ -52,8 +45,8 @@ export default function PaymentCheckoutPage() {
     try {
       await payment.requestBillingAuth({
         method: "CARD",
-        successUrl: window.location.origin + "/mypage/premium/success",
-        failUrl: window.location.origin + "/mypage/premium/fail",
+        successUrl: window.location.origin + "/billing/success",
+        failUrl: window.location.origin + "/billing/fail",
       });
     } catch (err: any) {
       if (err?.code === "USER_CANCEL" || err?.message?.includes("취소")) {

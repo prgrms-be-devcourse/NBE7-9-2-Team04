@@ -12,6 +12,12 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Table(
+        indexes = {
+                @Index(name = "idx_comment_post_create", columnList = "post_id, create_date"),
+                @Index(name = "idx_comment_author_create", columnList = "author_id, create_date")
+        }
+)
 public class Comment extends BaseEntity {
 
     @Column(nullable = false, length = 500)

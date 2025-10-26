@@ -11,6 +11,9 @@ public record RankingResponse (
         @Schema(description = "닉네임", example = "김개발")
         String nickName,
 
+        @Schema(description = "이메일", example = "kim@example.com")
+        String email,
+
         @Schema(description = "총 점수", example = "870")
         int totalScore,
 
@@ -18,16 +21,22 @@ public record RankingResponse (
         Tier currentTier,
 
         @Schema(description = "순위", example = "15")
-        int rank,
+        int rankValue,
 
         @Schema(description = "다음 티어", example = "PLATINUM")
         Tier nextTier,
 
         @Schema(description = "다음 티어까지 남은 점수", example = "130")
-        int scoreToNextTier
+        int scoreToNextTier,
+
+        @Schema(description = "해결한 문제 수", example = "100")
+        int solvedCount,
+
+        @Schema(description = "제출한 질문 수", example = "5")
+        int questionCount
 )
 {
-    public static RankingResponse from(Ranking ranking) {
+    public static RankingResponse from(Ranking ranking, int solvedCount, int questionCount) {
         int totalScore = ranking.getTotalScore();
         Tier currentTier = ranking.getTier();
         Tier nextTier = currentTier.nextTier();
@@ -41,12 +50,15 @@ public record RankingResponse (
 
         return new RankingResponse(
                 ranking.getUser().getId(),
+                ranking.getUser().getEmail(),
                 ranking.getUser().getNickname(),
                 totalScore,
                 currentTier,
-                ranking.getRank(),
+                ranking.getRankValue(),
                 nextTier,
-                scoreToNextTier
+                scoreToNextTier,
+                solvedCount,
+                questionCount
         );
     }
 }

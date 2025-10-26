@@ -2,6 +2,7 @@ package com.backend.api.qna.service;
 
 import com.backend.api.qna.dto.request.QnaAddRequest;
 import com.backend.api.qna.dto.request.QnaUpdateRequest;
+import com.backend.api.qna.dto.response.QnaPageResponse;
 import com.backend.api.qna.dto.response.QnaResponse;
 import com.backend.domain.qna.entity.Qna;
 import com.backend.domain.qna.entity.QnaCategoryType;
@@ -12,6 +13,10 @@ import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,9 +104,28 @@ public class QnaService {
         qnaRepository.delete(qna);
     }
 
-    public List<QnaResponse> getQnaAll() {
-        List<Qna> qnaList = qnaRepository.findAll();
-        return qnaList.stream()
+    public QnaPageResponse<QnaResponse> getQnaAll(int page, QnaCategoryType categoryType) {
+        if (page < 1) page = 1;
+
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Page<Qna> qnaPage;
+
+        if (categoryType == null) {
+            qnaPage = qnaRepository.findAll(pageable);
+        } else {
+            qnaPage = qnaRepository.findByCategoryType(categoryType, pageable);
+        }
+
+        if (qnaPage.isEmpty()) {
+            throw new ErrorException(ErrorCode.QNA_NOT_FOUND);
+        }
+
+        List<QnaResponse> qnaList = mapToResponseList(qnaPage);
+        return QnaPageResponse.from(qnaPage, qnaList);
+    }
+    private List<QnaResponse> mapToResponseList(Page<Qna> qnaPage) {
+        return qnaPage.getContent()
+                .stream()
                 .map(QnaResponse::from)
                 .toList();
     }
@@ -109,12 +133,5 @@ public class QnaService {
     public QnaResponse getQna(Long qnaId) {
         Qna qna = findByIdOrThrow(qnaId);
         return QnaResponse.from(qna);
-    }
-
-    public List<QnaResponse> getQnaByCategory(QnaCategoryType categoryType) {
-        List<Qna> qnaList = qnaRepository.findByCategoryType(categoryType);
-        return qnaList.stream()
-                .map(QnaResponse::from)
-                .toList();
     }
 }
