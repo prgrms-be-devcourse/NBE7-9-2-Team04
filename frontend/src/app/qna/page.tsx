@@ -151,7 +151,7 @@ export default function QnAPage() {
               <div
                 key={qna.qnaId}
                 onClick={() => router.push(`/qna/${qna.qnaId}`)}
-                className={`rounded-md shadow p-6 transition-all cursor-pointer border ${
+                className={`rounded-md border border-gray-200 shadow p-6 transition-all cursor-pointer ${
                   qna.isAnswered
                     ? "bg-green-50 hover:border-green-300"
                     : "bg-gray-50 hover:border-gray-300"
