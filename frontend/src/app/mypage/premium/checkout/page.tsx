@@ -45,8 +45,8 @@ export default function PaymentCheckoutPage() {
     try {
       await payment.requestBillingAuth({
         method: "CARD",
-        successUrl: window.location.origin + "/mypage/premium/success",
-        failUrl: window.location.origin + "/mypage/premium/fail",
+        successUrl: window.location.origin + "/billing/success",
+        failUrl: window.location.origin + "/billing/fail",
       });
     } catch (err: any) {
       if (err?.code === "USER_CANCEL" || err?.message?.includes("취소")) {
