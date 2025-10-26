@@ -83,3 +83,10 @@ export type UserMyPageResponse = {
   github: string | null,
 };
 
+
+export type SolvedResponse = {
+  id: number;
+  title: string;
+  category: string;
+  solvedAt: string; // LocalDateTime or String
+};

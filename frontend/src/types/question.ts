@@ -70,3 +70,12 @@ export type QuestionResponse = {
   createdDate: string;               // 작성일 (ISO 문자열)
   modifiedDate: string;              // 수정일 (ISO 문자열)
 };
+
+
+export type QuestionPageResponse<T = QuestionResponse> = {
+  questions: T[]; // 질문 목록
+  currentPage: number; // 현재 페이지
+  totalPages: number; // 전체 페이지 수
+  totalCount: number; // 전체 질문 수
+  pageSize: number; // 페이지당 질문 수
+};
