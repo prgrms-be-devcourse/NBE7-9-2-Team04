@@ -16,8 +16,8 @@ export default function AiQuestionPage() {
   const router = useRouter();
   const fetchQuestions = async () => {
     setLoading(true);
-    try {
-      const res = await fetchApi("/api/v1/ai/questions", { method: "GET" });
+      try{
+        const res = await fetchApi("/api/v1/ai/questions", { method: "GET" });
 
       console.log("AI 질문 응답 데이터:", res.data);
 
@@ -28,12 +28,14 @@ export default function AiQuestionPage() {
       }
 
       setQuestions(res.data); // AiQuestionReadAllResponse 타입
-    } catch (err: any) {
-      console.error("AI 질문 조회 실패:", err);
-      setError(err.message || "알 수 없는 오류");
-    } finally {
+    
+    
       setLoading(false);
-    }
+      } catch(Error){
+        return;
+      }
+      
+    
   };
 
   const createQuestions = async () => {

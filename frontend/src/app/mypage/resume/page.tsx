@@ -13,15 +13,20 @@ export default function MyResumePage() {
   //   const [experiences, setExperiences] = useState<any[]>([]);
   // ✅ 이력서 조회
   const fetchResume = async () => {
+    try{
+      const res = await fetchApi("/api/v1/users/resumes", { method: "GET" });
     
-    const res = await fetchApi("/api/v1/users/resumes", { method: "GET" });
-  
-    if (!res || !res.data) {
-      setIsEditing(false);
+      if (!res || !res.data) {
+        setIsEditing(false);
+        return;
+      }
+      setIsEditing(true);
+      setResumeData(res.data);
+    } catch{
       return;
     }
-    setIsEditing(true);
-    setResumeData(res.data);
+    
+     
   };
 
   // ✅ 이력서 등록 (POST)
@@ -43,7 +48,6 @@ export default function MyResumePage() {
 
   // ✅ 이력서 수정 (PUT)
   const updateResume = async () => {
-    if(!resumeData) return 
     try {
       const res = await fetchApi(`/api/v1/users/resumes`, {
         method: "PUT",
