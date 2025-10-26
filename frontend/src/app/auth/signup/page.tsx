@@ -28,24 +28,6 @@ export default function SignupPage() {
     github: "",
   });
 
-
-    useEffect(() => {
-        async function loadUserResponse() {
-            try {
-                const apiResponse = await fetchApi(`/api/v1/users/signup`, {
-                    method: "POST",
-                });
-                setUserResponse(apiResponse.data);
-            } catch (err) {
-                console.error("회원가입 중 오류 발생:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        loadUserResponse();
-    }, []);
-
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
