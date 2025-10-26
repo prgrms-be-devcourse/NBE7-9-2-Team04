@@ -82,7 +82,7 @@ export default function FeedbackDetailPage() {
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
         <div
           className="prose prose-gray max-w-none whitespace-pre-wrap leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: feedback.content }}
+          dangerouslySetInnerHTML={{ __html: feedback.feedbackContent }}
         />
       </div>
     </div>

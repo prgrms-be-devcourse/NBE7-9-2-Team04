@@ -79,6 +79,7 @@ public enum ErrorCode {
     AI_FEEDBACK_FOR_PREMIUM_ONLY(HttpStatus.FORBIDDEN,"포트폴리오 첨삭은 PREMIUM 등급 사용자만 이용 가능합니다."),
     NOT_FOUND_REVIEW(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다"),
     ACCESS_DENIED_REVIEW(HttpStatus.FORBIDDEN,"해당 리뷰에 접근할 권한이 없습니다."),
+    INVALID_PARAMETER(HttpStatus.BAD_REQUEST,"잘못된 파라미터입니다."),
 
 
     //payment

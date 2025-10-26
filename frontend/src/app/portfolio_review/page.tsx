@@ -78,9 +78,9 @@ export default function PortfolioReviewMainPage() {
           <ul className="divide-y divide-gray-200">
             {feedbacks.map((f) => (
               <li
-                key={f.id}
+                key={f.reviewId} // 수정: reviewId 사용
                 className="py-4 cursor-pointer hover:bg-gray-50 transition px-2 rounded-md"
-                onClick={() => router.push(`/portfolio_review/${f.id}`)}
+                onClick={() => router.push(`/portfolio_review/${f.reviewId}`)} // 수정: reviewId 사용
               >
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-800">{f.summary}</span>
