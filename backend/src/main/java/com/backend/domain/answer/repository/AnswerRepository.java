@@ -17,5 +17,5 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
     @EntityGraph(attributePaths = {"author", "question"})
     Page<Answer> findByAuthorId(Long authorId, Pageable pageable);
 
-    Optional<Answer> findFirstByQuestionIdAndAuthorIdOrderByCreateDateDesc(Long questionId, Long authorId);
+    Optional<Answer> findFirstByQuestionIdAndAuthorId(Long questionId, Long authorId);
 }

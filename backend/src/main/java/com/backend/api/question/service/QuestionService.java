@@ -153,13 +153,13 @@ public class QuestionService {
     }
 
     public PortfolioListReadResponse getByUserAndGroupId(User user, UUID groupId) {
-        return questionRepository.getByUserAndGroupId(user,groupId)
+        return questionRepository.getByUserAndGroupId(user, groupId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_QUESTION));
+    }
 
     @Transactional(readOnly = true)
     public int countByUser(User user) {
         validateUserAuthority(user);
         return questionRepository.countByAuthor(user);
-
     }
 }

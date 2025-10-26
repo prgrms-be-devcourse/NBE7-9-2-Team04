@@ -135,7 +135,7 @@ public class FeedbackService {
     @Transactional(readOnly = true)
 
     public FeedbackReadResponse readFeedback(Long questionId,User user) {
-        Answer answer = answerRepository.findFirstByQuestionIdAndAuthorIdOrderByCreateDateDesc(questionId,user.getId())
+        Answer answer = answerRepository.findFirstByQuestionIdAndAuthorId(questionId,user.getId())
                 .orElseThrow(() -> new ErrorException(ErrorCode.ANSWER_NOT_FOUND));
         Feedback feedback = getFeedbackByAnswerId(answer.getId());
 

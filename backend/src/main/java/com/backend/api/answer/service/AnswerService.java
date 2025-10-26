@@ -7,9 +7,7 @@ import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.dto.response.AnswerReadWithScoreResponse;
 import com.backend.api.feedback.service.FeedbackService;
 import com.backend.api.question.service.QuestionService;
-import com.backend.api.ranking.service.RankingService;
 import com.backend.api.user.service.UserService;
-import com.backend.api.userQuestion.service.UserQuestionService;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.question.entity.Question;
@@ -27,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +37,6 @@ public class AnswerService {
     private final UserService userService;
 
     private final FeedbackService feedbackService;
-    private final RankingService rankingService;
-    private final UserQuestionService userQuestionService;
 
     public Answer findByIdOrThrow(Long id) {
         return answerRepository.findById(id)
@@ -116,7 +111,7 @@ public class AnswerService {
         User currentUser = rq.getUser();
 
         // 질문에 대해 현재 사용자가 작성한 답변 조회
-        return answerRepository.findByQuestionIdAndAuthorId(questionId, currentUser.getId())
+        return answerRepository.findFirstByQuestionIdAndAuthorId(questionId, currentUser.getId())
                 .map(AnswerReadResponse::new) // 있으면 DTO로 변환
                 .orElse(null); // 없으면 null 반환
     }
