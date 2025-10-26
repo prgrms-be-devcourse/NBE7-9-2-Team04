@@ -4,49 +4,112 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchApi } from "@/lib/client";
 
+import {Question, Feedback} from "@/types/aiquestion";
+
 export default function PortfolioQuestionDetailPage() {
   const router = useRouter();
   const params = useParams();
   const groupId = params?.id;
 
-  const [questions, setQuestions] = useState<{ id: string; content: string }[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [title, setTitle] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [feedback, setFeedback] = useState<Record<string, { score: number; comment: string }>>({});
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [feedback, setFeedback] = useState<Record<number, Feedback>>({});
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
 
+  const current = questions[currentIndex];
+  const progress = ((currentIndex + 1) / questions.length) * 100;
+  const hasFeedback = !!feedback[current?.id];
+  const isLastQuestion = currentIndex === questions.length - 1;
+
+  // -------------------------------
+  // 피드백 재조회 함수
+  // -------------------------------
+  const fetchFeedbackWithRetry = async (questionId: number, attempt = 1, maxAttempts = 10) => {
+    try {
+      const fbRes = await fetchApi(`/api/v1/feedback/${questionId}`, { method: "GET" });
+      if (fbRes?.data) {
+        setFeedback(prev => ({
+          ...prev,
+          [questionId]: {
+            score: fbRes.data.score ?? 0,
+            comment: fbRes.data.comment ?? fbRes.data.content ?? "",
+          },
+        }));
+        setAnswers(prev => ({ ...prev, [questionId]: input }));
+        setShowFeedback(true);
+        setFeedbackLoading(false);
+        return true; // 성공
+      }
+      throw new Error("피드백 데이터 없음");
+    } catch {
+      if (attempt < maxAttempts) {
+        setTimeout(() => fetchFeedbackWithRetry(questionId, attempt + 1, maxAttempts), 3000);
+      } else {
+        setAlertMsg("❌ 피드백 조회 실패");
+        setShowFeedback(true);
+        setFeedbackLoading(false);
+      }
+    }
+  };
+
+  // -------------------------------
+  // 질문 목록 및 기존 답변/피드백 조회
+  // -------------------------------
   useEffect(() => {
     const fetchQuestions = async () => {
       if (!groupId) return;
-      setLoading(true);
       try {
         const res = await fetchApi(`/api/v1/ai/questions/${groupId}`, { method: "GET" });
         if (res?.data) {
-          const mapped = res.data.questions.map((q: any) => ({
-            id: q.id,
-            content: q.content, // 서버가 보내는 content 사용
-          }));
+          const mapped = res.data.questions
+            .map((q: any) => ({ id: q.id, content: q.content }))
+            .sort((a: Question, b: Question) => a.id - b.id);
+
           setQuestions(mapped);
           setTitle(res.data.title);
+
+          const tempAnswers: Record<number, string> = {};
+          const tempFeedback: Record<number, Feedback> = {};
+
+          for (const q of mapped) {
+            try {
+              const ansRes = await fetchApi(`/api/v1/questions/${q.id}/answers/mine`, { method: "GET" });
+              if (ansRes?.data?.content) tempAnswers[q.id] = ansRes.data.content;
+
+              const fbRes = await fetchApi(`/api/v1/feedback/${q.id}`, { method: "GET" });
+              if (fbRes?.data) {
+                tempFeedback[q.id] = {
+                  score: fbRes.data.score ?? 0,
+                  comment: fbRes.data.comment ?? fbRes.data.content ?? "",
+                };
+              }
+            } catch {
+              // 조회 실패 무시
+            }
+          }
+
+          setAnswers(tempAnswers);
+          setFeedback(tempFeedback);
         }
       } catch (err) {
-        console.error("질문 조회 실패:", err);
-      } finally {
-        setLoading(false);
+        console.error("❌ 질문 조회 실패:", err);
+        setAlertMsg("질문 조회 중 오류가 발생했습니다.");
       }
     };
+
     fetchQuestions();
   }, [groupId]);
 
-  const current = questions[currentIndex];
-  const progress = ((currentIndex + 1) / questions.length) * 100;
-  const isLast = currentIndex === questions.length - 1 && showFeedback;
-
-  const handleSubmit = () => {
+  // -------------------------------
+  // 답변 제출 및 피드백 조회
+  // -------------------------------
+  const handleSubmit = async () => {
     if (!input.trim()) {
       setAlertMsg("답변을 입력해주세요!");
       setTimeout(() => setAlertMsg(null), 2000);
@@ -54,33 +117,40 @@ export default function PortfolioQuestionDetailPage() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      const score = Math.floor(Math.random() * 31) + 70;
-      const comment =
-        score > 90
-          ? "훌륭한 답변입니다! 실무적인 이해도가 잘 드러나네요."
-          : score > 80
-          ? "좋은 답변이에요. 조금 더 구체적인 예시를 들어주면 완벽할 것 같습니다."
-          : "조금 더 구체적인 기술적 근거를 추가해보세요.";
+    setFeedbackLoading(true);
+    try {
+      // 답변 생성
+      const answerRes = await fetchApi(`/api/v1/questions/${current.id}/answers`, {
+        method: "POST",
+        body: JSON.stringify({ content: input, isPublic: true }),
+      });
 
-      setAnswers(prev => ({ ...prev, [current.id]: input }));
-      setFeedback(prev => ({ ...prev, [current.id]: { score, comment } }));
+      if (!answerRes?.data) throw new Error("답변 생성 실패");
 
+      // 피드백 조회 재시도
+      fetchFeedbackWithRetry(current.id);
+    } catch (err) {
+      console.error("❌ 답변 생성 실패:", err);
+      setAlertMsg("답변 생성 중 오류가 발생했습니다.");
       setLoading(false);
-      setShowFeedback(true);
-      setTimeout(() => setAlertMsg(null), 2000);
-    }, 1000);
-  };
-
-  const handleNext = () => {
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-      setInput("");
-      setShowFeedback(false);
+      setFeedbackLoading(false);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) return <p className="text-center mt-10">로딩 중...</p>;
+  // -------------------------------
+  // 다음 질문
+  // -------------------------------
+  const handleNext = () => {
+    if (!isLastQuestion) {
+      setCurrentIndex(prev => prev + 1);
+      setInput("");
+      setShowFeedback(false);
+      setAlertMsg(null);
+    }
+  };
+
   if (!questions.length) return <p className="text-center mt-10">질문이 없습니다.</p>;
 
   return (
@@ -117,56 +187,58 @@ export default function PortfolioQuestionDetailPage() {
         </div>
       </div>
 
-      {/* 답변 입력 or 피드백 */}
-      {!showFeedback ? (
-        <div className="space-y-4">
-          <textarea
-            className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            rows={6}
-            placeholder="이 질문에 대한 답변을 작성하세요"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={loading}
-          />
+      {/* 답변 입력 */}
+      <div className="space-y-4">
+        <textarea
+          className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          rows={6}
+          placeholder="이 질문에 대한 답변을 작성하세요"
+          value={hasFeedback ? answers[current.id] ?? "" : input}
+          onChange={(e) => setInput(e.target.value)}
+          disabled={loading || hasFeedback}
+        />
+        {!hasFeedback && (
           <div className="flex justify-end">
             <button
               onClick={handleSubmit}
               disabled={loading}
               className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 disabled:opacity-60"
             >
-              {loading ? "AI 분석 중..." : "답변 제출"}
+              답변 제출
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {/* 내 답변 */}
+        )}
+      </div>
+
+      {/* 피드백 */}
+      {(hasFeedback || feedbackLoading) && (
+        <div className="space-y-6 mt-4">
           <div>
-            <h4 className="font-semibold mb-2">내 답변</h4>
-            <div className="p-4 bg-gray-50 border rounded-md text-gray-800 whitespace-pre-line">
-              {answers[current.id]}
+            <h4 className="font-semibold mb-2">💡 AI 피드백</h4>
+            <div className="p-4 border border-blue-200 bg-blue-50 rounded-md min-h-[80px] flex items-center justify-center">
+              {feedbackLoading ? (
+                <span className="text-gray-500">AI 분석 중...</span>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between w-full mb-2">
+                    <span className="px-2 py-1 bg-blue-500 text-white text-sm rounded-md">
+                      {feedback[current.id]?.score ?? "-"}점
+                    </span>
+                  </div>
+                  <p className="text-gray-700 text-sm">{feedback[current.id]?.comment}</p>
+                </>
+              )}
             </div>
           </div>
 
-          {/* AI 피드백 */}
-          <div className="p-4 border border-blue-200 bg-blue-50 rounded-md">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-blue-700">💡 AI 피드백</h4>
-              <span className="px-2 py-1 bg-blue-500 text-white text-sm rounded-md">
-                {feedback[current.id]?.score}점
-              </span>
-            </div>
-            <p className="text-gray-700 text-sm">{feedback[current.id]?.comment}</p>
-          </div>
-
-          {/* 다음 질문 or 완료 */}
-          <div className="flex justify-end">
-            {isLast ? (
+          {/* 버튼 영역 */}
+          <div className="flex justify-end mt-2">
+            {isLastQuestion ? (
               <button
                 onClick={() => router.replace("/interview/portfolio")}
                 className="bg-green-500 text-white px-5 py-2 rounded-md hover:bg-green-600"
               >
-                면접 완료
+                목록으로 돌아가기
               </button>
             ) : (
               <button
