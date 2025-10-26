@@ -8,9 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface QuestionRepository extends JpaRepository<Question, Long>, QuestionRepositoryCustom {
 
     @EntityGraph(attributePaths = {"author"})
@@ -20,4 +17,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long>, Quest
     Page<Question> findByCategoryTypeAndIsApprovedTrue(QuestionCategoryType categoryType, Pageable pageable);
 
     int countByAuthor(User author);
+
+    @EntityGraph(attributePaths = {"author"})
+    Page<Question> findByAuthorId(Long authorId, Pageable pageable);
 }

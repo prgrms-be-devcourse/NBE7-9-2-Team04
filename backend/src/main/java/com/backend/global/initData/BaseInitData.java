@@ -405,13 +405,53 @@ public class BaseInitData {
                 .build();
         questionRepository.save(q4);
 
-        Question q5 = Question.builder()
+        Question q6 = Question.builder()
                 .title("데드락(Deadlock)은 어떤 상황에서 발생하나요?")
                 .content("데드락의 4가지 필요 조건과, 이를 예방하거나 해결할 수 있는 방법을 구체적으로 설명해주세요.")
                 .author(user1)
                 .score(10)
                 .build();
-        questionRepository.save(q5);
+        questionRepository.save(q6);
+
+        Question q7 = Question.builder()
+                .title("운영체제에서 프로세스와 스레드의 차이점은 무엇인가요?")
+                .content("프로세스와 스레드는 모두 실행 단위를 나타내지만, 메모리 구조나 자원 공유 방식이 다릅니다. 각각의 차이점을 설명해주세요.")
+                .author(user1)
+                .score(30)
+                .build();
+        questionRepository.save(q7);
+
+        Question q8 = Question.builder()
+                .title("데이터베이스에서 인덱스(Index)는 어떤 역할을 하나요?")
+                .content("인덱스를 사용하면 검색 속도가 빨라지지만, 삽입/삭제 시 오버헤드가 생깁니다. 인덱스의 동작 원리와 장단점을 설명해주세요.")
+                .author(user1)
+                .score(50)
+                .build();
+        questionRepository.save(q8);
+
+        Question q9 = Question.builder()
+                .title("TCP와 UDP의 차이점을 설명해주세요.")
+                .content("두 프로토콜의 연결 방식, 신뢰성, 속도 측면에서의 차이와 각각이 주로 사용되는 사례를 알려주세요.")
+                .author(user1)
+                .score(40)
+                .build();
+        questionRepository.save(q9);
+
+        Question q10 = Question.builder()
+                .title("자바의 Garbage Collection은 어떻게 동작하나요?")
+                .content("GC의 기본 원리와 주요 알고리즘(Mark and Sweep, Generational GC 등)을 설명하고, 성능 최적화 방법에 대해 설명해주세요.")
+                .author(user1)
+                .score(70)
+                .build();
+        questionRepository.save(q10);
+
+        Question q11 = Question.builder()
+                .title("데드락(Deadlock)은 어떤 상황에서 발생하나요?")
+                .content("데드락의 4가지 필요 조건과, 이를 예방하거나 해결할 수 있는 방법을 구체적으로 설명해주세요.")
+                .author(user1)
+                .score(10)
+                .build();
+        questionRepository.save(q11);
     }
 
     @Transactional
@@ -429,7 +469,20 @@ public class BaseInitData {
 
         answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("1번 답변", true));
         answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("2번 답변", false));
-        answerService.writeAnswer(user2, questionId, new AnswerCreateRequest("3번 답변", true));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("3번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("4번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("5번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("6번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("7번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("8번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("9번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("10번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("11번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("12번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("13번 답변", false));
+        answerService.writeAnswer(user1, questionId, new AnswerCreateRequest("14번 답변", false));
+
+        answerService.writeAnswer(user2, questionId, new AnswerCreateRequest("15번 답변", true));
     }
 
     @Transactional
