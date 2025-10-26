@@ -1,24 +1,30 @@
 package com.backend.api.user.controller;
 
 import com.backend.api.answer.dto.response.AnswerPageResponse;
-import com.backend.api.comment.dto.response.CommentMypageResponse;
-import com.backend.api.post.dto.response.PostPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.service.AnswerService;
+import com.backend.api.comment.dto.response.CommentMypageResponse;
 import com.backend.api.comment.dto.response.CommentPageResponse;
 import com.backend.api.comment.service.CommentService;
+import com.backend.api.post.dto.response.PostPageResponse;
 import com.backend.api.post.dto.response.PostResponse;
 import com.backend.api.post.service.PostService;
+import com.backend.api.question.dto.response.QuestionPageResponse;
+import com.backend.api.question.dto.response.QuestionResponse;
+import com.backend.api.question.service.QuestionService;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.service.UserMyPageService;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -32,6 +38,7 @@ public class UserMyPageController {
     private final Rq rq;
     private final CommentService commentService;
     private final AnswerService answerService;
+    private final QuestionService questionService;
 
     @GetMapping("/me")
     @Operation(summary = "개인 정보 조회")
@@ -71,6 +78,21 @@ public class UserMyPageController {
         );
     }
 
+    @GetMapping("/{userId}/questions")
+    @Operation(summary = "사용자가 작성한 질문 목록 조회")
+    public ApiResponse<QuestionPageResponse<QuestionResponse>> getUserQuestions(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        QuestionPageResponse<QuestionResponse> userQuestionsPage =
+                questionService.findQuestionsByUserId(page, userId);
+
+        return ApiResponse.ok(
+                "사용자가 작성한 질문 목록 조회를 완료했습니다.",
+                userQuestionsPage
+        );
+    }
+
     @GetMapping("/{userId}/comments")
     @Operation(summary = "사용자가 작성한 댓글 목록 조회")
     public ApiResponse<CommentPageResponse<CommentMypageResponse>> getUserComments(
@@ -84,6 +106,7 @@ public class UserMyPageController {
                 userCommentsPage
         );
     }
+
 
     @GetMapping
     @Operation(summary = "해결한 문제")
@@ -106,4 +129,25 @@ public class UserMyPageController {
                 userAnswersPage
         );
     }
+
+    @PostMapping("/verifyPassword")
+    @Operation(summary = "비밀번호 확인")
+    public ApiResponse<Boolean> verifyPassword(@RequestBody Map<String, String> requestBody) {
+        Long userId = rq.getUser().getId();
+        String inputPassword = requestBody.get("password");
+
+        boolean isValid = userMyPageService.verifyPassword(userId, inputPassword);
+
+        if (!isValid) {
+            // 비밀번호 틀릴 경우 커스텀 예외 발생
+            throw new ErrorException(ErrorCode.WRONG_PASSWORD);
+        }
+
+        return ApiResponse.ok("비밀번호가 확인되었습니다.", true);
+    }
+
+
+
+
+
 }

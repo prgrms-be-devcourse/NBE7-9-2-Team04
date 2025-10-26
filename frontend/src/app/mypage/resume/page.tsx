@@ -22,7 +22,6 @@ export default function MyResumePage() {
     }
     setIsEditing(true);
     setResumeData(res.data);
-     
   };
 
   // ✅ 이력서 등록 (POST)

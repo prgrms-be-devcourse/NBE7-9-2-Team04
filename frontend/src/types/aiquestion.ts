@@ -26,7 +26,7 @@ export type AiQuestionResponse = {
   }
   
   export type PortfolioListReadResponse = {
-    title: String,
+    title: string,
     count: number;
     questions: PortfolioReadResponse[];
   }

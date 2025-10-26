@@ -67,4 +67,11 @@ public class UserMyPageService {
                         .build())
                 .toList();
     }
+
+    public boolean verifyPassword(Long userId, String rawPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        return passwordEncoder.matches(rawPassword, user.getPassword());
+    }
 }

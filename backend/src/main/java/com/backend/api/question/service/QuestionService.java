@@ -2,25 +2,24 @@ package com.backend.api.question.service;
 
 import com.backend.api.question.dto.request.QuestionAddRequest;
 import com.backend.api.question.dto.request.QuestionUpdateRequest;
-import com.backend.api.question.dto.response.AiQuestionReadAllResponse;
-import com.backend.api.question.dto.response.PortfolioListReadResponse;
-import com.backend.api.question.dto.response.QuestionPageResponse;
-import com.backend.api.question.dto.response.QuestionResponse;
+import com.backend.api.question.dto.response.*;
+import com.backend.api.user.service.UserService;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.entity.QuestionCategoryType;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
-import com.backend.global.exception.ErrorCode;
 import com.backend.domain.user.entity.User;
+import com.backend.global.Rq.Rq;
+import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +30,8 @@ import java.util.UUID;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final UserService userService;
+    private final Rq rq;
 
     //사용자 권한 검증
     private void validateUserAuthority(User user) {
@@ -111,8 +112,13 @@ public class QuestionService {
         Pageable pageable = PageRequest.of(page - 1, 9, Sort.by("createDate").descending());
 
         if (categoryType == null) {
-            questionsPage = questionRepository.findByIsApprovedTrue(pageable);
-        } else {
+            questionsPage = questionRepository.findApprovedQuestionsExcludingCategory(QuestionCategoryType.PORTFOLIO, pageable);
+        }
+        else if (categoryType == QuestionCategoryType.PORTFOLIO) {
+            // 포트폴리오만 조회
+            questionsPage = questionRepository.findApprovedQuestionsByCategory(QuestionCategoryType.PORTFOLIO, pageable);
+        }
+        else {
             questionsPage = questionRepository.findByCategoryTypeAndIsApprovedTrue(categoryType, pageable);
         }
 
@@ -161,5 +167,28 @@ public class QuestionService {
     public int countByUser(User user) {
         validateUserAuthority(user);
         return questionRepository.countByAuthor(user);
+    }
+
+    @Transactional(readOnly = true)
+    public QuestionPageResponse<QuestionResponse> findQuestionsByUserId(int page, Long userId) {
+        userService.getUser(userId);
+        User currentUser = rq.getUser();
+
+        if (!currentUser.getId().equals(userId) && !currentUser.getRole().equals(Role.ADMIN)) {
+            throw new ErrorException(ErrorCode.QUESTION_INVALID_USER);
+        }
+
+        if (page < 1) page = 1;
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+
+        Page<Question> questionsPage = questionRepository.findByAuthorId(userId, pageable);
+
+        List<QuestionResponse> questions = questionsPage
+                .getContent()
+                .stream()
+                .map(QuestionResponse::from)
+                .toList();
+
+        return QuestionPageResponse.from(questionsPage, questions);
     }
 }

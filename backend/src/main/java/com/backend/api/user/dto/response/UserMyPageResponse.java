@@ -16,7 +16,6 @@ public class UserMyPageResponse {
 
     private Long userId;
     private String email;
-    private String password;
     private String name;
     private String nickname;
     private int age;
@@ -27,7 +26,6 @@ public class UserMyPageResponse {
         return UserMyPageResponse.builder()
                 .userId(users.getId())
                 .email(users.getEmail())
-                .password(users.getPassword())
                 .name(users.getName())
                 .nickname(users.getNickname())
                 .age(users.getAge())

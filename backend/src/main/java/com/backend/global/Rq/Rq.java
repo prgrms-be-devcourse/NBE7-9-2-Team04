@@ -42,7 +42,7 @@ public class Rq {
         cookie.setDomain("localhost");
         cookie.setSecure(true);
         cookie.setMaxAge(maxAge);
-        cookie.setAttribute("SameSite", "Strict");
+        cookie.setAttribute("SameSite", "None");
 
         if (value.isBlank()) {
             cookie.setMaxAge(0);
