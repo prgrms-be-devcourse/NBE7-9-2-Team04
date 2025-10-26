@@ -2,6 +2,7 @@ package com.backend.api.qna.controller;
 
 import com.backend.api.qna.dto.request.QnaAddRequest;
 import com.backend.api.qna.dto.request.QnaUpdateRequest;
+import com.backend.api.qna.dto.response.QnaPageResponse;
 import com.backend.api.qna.dto.response.QnaResponse;
 import com.backend.api.qna.service.QnaService;
 import com.backend.domain.qna.entity.QnaCategoryType;
@@ -52,9 +53,11 @@ public class QnaController {
 
     @GetMapping
     @Operation(summary = "Qna 전체 조회", description = "사용자가 모든 Qna를 조회합니다.")
-    public ApiResponse<List<QnaResponse>> getMyQnaList() {
-        List<QnaResponse> qnaList = qnaService.getQnaAll();
-        return ApiResponse.ok("Qna 목록 조회 성공", qnaList);
+    public ApiResponse<QnaPageResponse<QnaResponse>> getAllQna(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        QnaPageResponse<QnaResponse> qnaPage = qnaService.getQnaAll(page, null);
+        return ApiResponse.ok("Qna 목록 조회 성공", qnaPage);
     }
 
     @GetMapping("/{qnaId}")
@@ -66,8 +69,11 @@ public class QnaController {
 
     @GetMapping("/category/{categoryType}")
     @Operation(summary = "카테고리별 Qna 조회", description = "사용자가 특정 카테고리의 Qna를 조회합니다.")
-    public ApiResponse<List<QnaResponse>> getMyQnaByCategory(@PathVariable QnaCategoryType categoryType) {
-        List<QnaResponse> qnaList = qnaService.getQnaByCategory(categoryType);
-        return ApiResponse.ok("%s 카테고리 Qna 조회 성공".formatted(categoryType.name()), qnaList);
+    public ApiResponse<QnaPageResponse<QnaResponse>> getMyQnaByCategory(
+            @PathVariable QnaCategoryType categoryType,
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        QnaPageResponse<QnaResponse> qnaPage = qnaService.getQnaAll(page, categoryType);
+        return ApiResponse.ok("%s 카테고리 Qna 조회 성공".formatted(categoryType.name()), qnaPage);
     }
 }
