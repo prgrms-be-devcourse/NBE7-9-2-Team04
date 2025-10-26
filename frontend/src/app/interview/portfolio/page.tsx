@@ -42,10 +42,10 @@ export default function AiQuestionPage() {
         method: "POST"
       });
       alert("질문이 생성되었습니다.");
-
-    } catch (error) {
-      console.error("이력서 등록 실패:", error);
-      alert("이력서 등록 중 오류가 발생했습니다.");
+      
+      await fetchQuestions();
+    } catch (err : any) {
+      handleAddAiQuestion();
     }
   };
 

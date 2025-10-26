@@ -30,3 +30,14 @@ export type AiQuestionResponse = {
     count: number;
     questions: PortfolioReadResponse[];
   }
+
+  // src/types/ai.ts
+export type Question = {
+  id: number;
+  content: string;
+}
+
+export type Feedback = {
+  score: number;
+  comment: string;
+}
