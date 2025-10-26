@@ -42,8 +42,9 @@ export default function AiQuestionPage() {
         method: "POST"
       });
       alert("질문이 생성되었습니다.");
-
-    } catch (error) {
+      
+      await fetchQuestions();
+    } catch (err : any) {
       handleAddAiQuestion();
     }
   };
