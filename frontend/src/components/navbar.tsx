@@ -15,7 +15,7 @@ export default function Navbar() {
 
   const fetchUser = async () => {
     try {
-      const res = await fetchApi("/api/v1/users/check", { method: "GET" });
+      const res = await fetchApi(`/api/v1/users/check`, { method: "GET" });
 
       if ((res.status === "OK" || res.resultCode?.includes("OK")) && res.data) {
         setIsLoggedIn(true);
