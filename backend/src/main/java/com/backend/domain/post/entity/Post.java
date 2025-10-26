@@ -33,7 +33,7 @@ public class Post extends BaseEntity {
     private String introduction; // 한 줄 소개
 
     @NotNull
-    @Size(min = 10)
+    @Size(min = 10, max = 5000)
     private String content; // 내용
 
     @NotNull
