@@ -13,9 +13,6 @@ import lombok.*;
 @AllArgsConstructor
 public class Review extends BaseEntity {
 
-    @Column(name = "review_id")
-    private Long reviewId;
-
     @Column(name = "ai_review_content", columnDefinition = "TEXT", nullable = false)
     private String AiReviewContent;
 
