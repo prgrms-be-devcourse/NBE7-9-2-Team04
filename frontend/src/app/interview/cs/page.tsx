@@ -12,7 +12,7 @@ import {
   QUESTION_CATEGORY_LIST,
 } from "@/types/question";
 
-/* UI 컴포넌트들 */
+/* UI 컴포넌트 */
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
@@ -24,14 +24,18 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 }
 
 function CardHeader({ children }: { children: React.ReactNode }) {
-  return <div className="p-4 border-b border-gray-100 dark:border-gray-800 min-h-[120px] flex flex-col">{children}</div>;
+  return (
+    <div className="p-4 border-b border-gray-100 dark:border-gray-800 min-h-[120px] flex flex-col">
+      {children}
+    </div>
+  );
 }
 
 function CardTitle({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <h3 
+    <h3
       className={`font-semibold text-gray-900 dark:text-white line-clamp-2 ${className}`}
-      title={typeof children === 'string' ? children : ''}
+      title={typeof children === "string" ? children : ""}
     >
       {children}
     </h3>
@@ -112,44 +116,9 @@ export default function CsQuestionPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [questions, setQuestions] = useState<QuestionResponse[]>([]);
   const [totalItems, setTotalItems] = useState(0);
-  const [answeredIds, setAnsweredIds] = useState<number[]>([]); // ✅ 사용자가 푼 문제 ID 저장
+  const [answeredIds, setAnsweredIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const itemsPerPage = 9;
-
-  // ✅ 내 답변 목록 불러오기 (각 질문별로 확인)
-  const fetchMyAnswers = async () => {
-    try {
-      // 먼저 모든 질문 목록을 가져옴
-      const allQuestionsRes = await fetchApi("/api/v1/questions?page=1&size=1000");
-      const allQuestions = allQuestionsRes?.data?.questions ?? [];
-      
-      if (allQuestions.length === 0) {
-        setAnsweredIds([]);
-        return;
-      }
-
-      // 각 질문에 대해 내 답변이 있는지 확인
-      const answeredPromises = allQuestions.map(async (q: QuestionResponse) => {
-        try {
-          const res = await fetchApi(`/api/v1/questions/${q.questionId}/answers/mine`);
-          if (res.status === "OK" && res.data) {
-            return q.questionId;
-          }
-          return null;
-        } catch {
-          return null;
-        }
-      });
-
-      const results = await Promise.all(answeredPromises);
-      const ids = results.filter((id): id is number => id !== null);
-      console.log("추출된 questionIds:", ids); // 디버깅용
-      setAnsweredIds(ids);
-    } catch (err) {
-      console.warn("내 답변 조회 실패:", err);
-      setAnsweredIds([]);
-    }
-  };
 
   // ✅ 질문 목록 불러오기
   const fetchQuestions = async () => {
@@ -167,7 +136,7 @@ export default function CsQuestionPage() {
       setQuestions(items);
       setTotalItems(totalCount);
     } catch (err: any) {
-      console.warn("질문 조회 결과 없음:", err.message);
+      console.warn("질문 조회 실패:", err.message);
       setQuestions([]);
       setTotalItems(0);
     } finally {
@@ -175,36 +144,7 @@ export default function CsQuestionPage() {
     }
   };
 
-  // ✅ 로그인 확인 후 문제 풀이로 이동
-  const handleSolveClick = async (id: number) => {
-    try {
-      const res = await fetchApi("/api/v1/users/check", { method: "GET" });
-      if (res.status === "OK") {
-        router.push(`/interview/cs/${id}`);
-      } else {
-        alert("로그인 후 이용해주세요.");
-        router.push("/auth");
-      }
-    } catch (err) {
-      console.error("로그인 확인 실패:", err);
-      alert("로그인 후 이용해주세요.");
-      router.push("/auth");
-    }
-  };
-
-  // ✅ 초기 렌더링 시 질문 목록을 먼저 로드한 후 내 답변 확인
-  useEffect(() => {
-    fetchQuestions();
-  }, [selectedCategory, currentPage]);
-
-  // ✅ 질문 목록이 로드되면 답변 상태 확인
-  useEffect(() => {
-    if (questions.length > 0) {
-      checkAnsweredQuestions();
-    }
-  }, [questions]);
-
-  // ✅ 현재 페이지의 질문들에 대해서만 답변 여부 확인
+  // ✅ 현재 페이지 질문들에 대해 답변 여부 확인
   const checkAnsweredQuestions = async () => {
     const answeredPromises = questions.map(async (q) => {
       try {
@@ -221,6 +161,23 @@ export default function CsQuestionPage() {
     const results = await Promise.all(answeredPromises);
     const ids = results.filter((id): id is number => id !== null);
     setAnsweredIds(ids);
+  };
+
+  // ✅ 초기 로드
+  useEffect(() => {
+    fetchQuestions();
+  }, [selectedCategory, currentPage]);
+
+  // ✅ 질문 목록 변경 시 푼 문제 체크
+  useEffect(() => {
+    if (questions.length > 0) {
+      checkAnsweredQuestions();
+    }
+  }, [questions]);
+
+  // ✅ 로그인 체크는 미들웨어가 처리하므로 단순 이동만
+  const handleSolveClick = (id: number) => {
+    router.push(`/interview/cs/${id}`);
   };
 
   const getDifficultyColor = (score: number) => {
@@ -271,7 +228,7 @@ export default function CsQuestionPage() {
       {/* 질문 카드 리스트 */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {questions.map((q) => {
-          const isSolved = answeredIds.includes(q.questionId); // ✅ 푼 문제 여부 확인
+          const isSolved = answeredIds.includes(q.questionId);
 
           return (
             <Card key={q.questionId}>
