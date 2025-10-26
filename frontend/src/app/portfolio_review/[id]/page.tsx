@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchApi } from "@/lib/client"; // Adjust the import based on your project structure
+import { fetchApi } from "@/lib/client";
 
 export default function FeedbackDetailPage() {
   const router = useRouter();
@@ -15,6 +15,7 @@ export default function FeedbackDetailPage() {
       setIsLoading(true);
       try {
         const response = await fetchApi(`/api/v1/portfolio-review/${id}`);
+        console.log("Feedback data:", response.data); // 디버깅용 로그 추가
         setFeedback(response.data);
       } catch (error) {
         console.error("Failed to fetch feedback:", error);
@@ -29,7 +30,14 @@ export default function FeedbackDetailPage() {
   }, [id, router]);
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    if (!dateStr) return "***";
+
+    // 소수점 이하의 초 제거
+    const cleanedDateStr = dateStr.split(".")[0];
+
+    const date = new Date(cleanedDateStr);
+    if (isNaN(date.getTime())) return "유효하지 않은 날짜";
+
     return date.toLocaleString("ko-KR", {
       year: "numeric",
       month: "2-digit",

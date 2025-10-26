@@ -31,7 +31,14 @@ export default function PortfolioReviewMainPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    if (!dateStr) return "날짜 정보 없음"; // dateStr이 없을 때 표시할 메시지
+
+    // 소수점 이하의 초 제거
+    const cleanedDateStr = dateStr.split(".")[0];
+
+    const date = new Date(cleanedDateStr);
+    if (isNaN(date.getTime())) return "유효하지 않은 날짜"; // dateStr이 유효하지 않을 때 표시할 메시지
+
     return date.toLocaleString("ko-KR", {
       year: "numeric",
       month: "2-digit",

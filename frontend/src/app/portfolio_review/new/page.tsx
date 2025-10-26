@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchApi } from "@/lib/client"; // Adjust the import based on your project structure
+import { fetchApi } from "@/lib/client"; 
 import { marked } from "marked"; // Markdown 변환 라이브러리 추가
 
 export default function NewFeedbackPage() {
@@ -11,6 +11,8 @@ export default function NewFeedbackPage() {
   const [feedbackContent, setFeedbackContent] = useState(""); // 상태 추가
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false); // 분석 완료 상태 추가
   const [createDate, setCreateDate] = useState(""); // 생성일 상태 추가
+  
+  
 
   useEffect(() => {
     const interval = setInterval(() => {
