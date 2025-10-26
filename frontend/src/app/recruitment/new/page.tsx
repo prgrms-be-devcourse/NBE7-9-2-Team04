@@ -27,7 +27,7 @@ export default function RecruitmentCreatePage() {
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const res = await fetchApi("/api/v1/users/me", { method: "GET", cache: "no-store" });
+        const res = await fetchApi("/api/v1/subscriptions/me", { method: "GET", cache: "no-store" });
         if (res.status === "OK" && res.data?.role) {
           setUserRole(res.data.role);
         } else {
