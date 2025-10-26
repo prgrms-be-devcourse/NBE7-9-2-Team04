@@ -38,6 +38,7 @@ public class Question extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     private QuestionCategoryType categoryType;
+
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Answer> answers;
 

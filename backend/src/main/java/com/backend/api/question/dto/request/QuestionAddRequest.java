@@ -14,6 +14,7 @@ public record QuestionAddRequest (
         @Schema(description = "질문 내용", example = "Bean이 생성되고 초기화되고 소멸되는 과정에 대해 설명해주세요.")
         String content,
 
+        @NotNull(message = "질문 카테고리 타입은 필수입니다.")
         @Schema(description = "질문 카테고리 타입", example = "SPRING")
         QuestionCategoryType categoryType
 ) {}
