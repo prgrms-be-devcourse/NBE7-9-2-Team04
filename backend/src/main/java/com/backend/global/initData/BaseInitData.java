@@ -3,6 +3,9 @@ package com.backend.global.initData;
 import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.service.AnswerService;
 import com.backend.api.comment.service.CommentService;
+import com.backend.api.user.dto.request.UserSignupRequest;
+import com.backend.api.user.service.EmailService;
+import com.backend.api.user.service.UserService;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.comment.repository.CommentRepository;
 import com.backend.domain.post.entity.PinStatus;
@@ -17,7 +20,9 @@ import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.user.entity.VerificationCode;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.domain.user.repository.VerificationCodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -28,6 +33,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.IntStream;
 
 
 @Configuration
@@ -47,6 +54,9 @@ public class BaseInitData {
     private final QnaRepository qnaRepository;
     private final AnswerService answerService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final VerificationCodeRepository verificationCodeRepository;
+    private final UserService userService;
 
     @Bean
     ApplicationRunner initDataRunner() {
@@ -65,29 +75,60 @@ public class BaseInitData {
         if(userRepository.count() > 0) {
             return;
         }
-        User generalUser = User.builder()
-                .email("general@user.com")
-                .password(passwordEncoder.encode("asdf1234!"))
-                .name("홍길동")
-                .nickname("gildong")
-                .age(20)
-                .github("abc123")
-                .image(null)
-                .role(Role.USER)
-                .build();
-        userRepository.save(generalUser);
 
-        User generalUser2 = User.builder()
-                .email("general2@user.com")
-                .password(passwordEncoder.encode("asdf1234!"))
-                .name("홍길똥")
-                .nickname("gilddong")
-                .age(25)
-                .github("abc1233")
-                .image(null)
-                .role(Role.USER)
-                .build();
-        userRepository.save(generalUser2);
+        // 15개의 이메일 리스트
+        List<String> emails = IntStream.rangeClosed(1, 15)
+                .mapToObj(i -> "user" + i + "@test.com")
+                .toList();
+
+        for (int i = 0; i < emails.size(); i++) {
+            String email = emails.get(i);
+
+            // 1️⃣ 이메일 인증 코드 더미 데이터 생성
+            VerificationCode verification = VerificationCode.builder()
+                    .email(email)
+                    .code("INITOK" + i) // 임의의 더미 코드
+                    .expiresAt(LocalDateTime.now().plusHours(1))
+                    .verified(true) // ✅ 인증 완료 상태로 저장
+                    .build();
+            verificationCodeRepository.save(verification);
+
+            // 2️⃣ 회원가입 요청 객체 생성
+            UserSignupRequest request = new UserSignupRequest(
+                    email,
+                    "abc12345",                              // 비밀번호
+                    "홍길동" + (i + 1),                       // 이름
+                    "user" + (i + 1),                        // 닉네임
+                    20 + (i % 5),                            // 나이 (20~24)
+                    "https://github.com/user" + (i + 1),     // 깃허브
+                    null                                     // 프로필 이미지 없음
+            );
+
+            userService.signUp(request);
+        }
+//        User generalUser = User.builder()
+//                .email("general@user.com")
+//                .password(passwordEncoder.encode("asdf1234!"))
+//                .name("홍길동")
+//                .nickname("gildong")
+//                .age(20)
+//                .github("abc123")
+//                .image(null)
+//                .role(Role.USER)
+//                .build();
+//        userRepository.save(generalUser);
+//
+//        User generalUser2 = User.builder()
+//                .email("general2@user.com")
+//                .password(passwordEncoder.encode("asdf1234!"))
+//                .name("홍길똥")
+//                .nickname("gilddong")
+//                .age(25)
+//                .github("abc1233")
+//                .image(null)
+//                .role(Role.USER)
+//                .build();
+//        userRepository.save(generalUser2);
     }
 
     @Transactional
@@ -331,6 +372,46 @@ public class BaseInitData {
                 .author(user1)
                 .build();
         questionRepository.save(question);
+
+        Question q1 = Question.builder()
+                .title("운영체제에서 프로세스와 스레드의 차이점은 무엇인가요?")
+                .content("프로세스와 스레드는 모두 실행 단위를 나타내지만, 메모리 구조나 자원 공유 방식이 다릅니다. 각각의 차이점을 설명해주세요.")
+                .author(user1)
+                .score(30)
+                .build();
+        questionRepository.save(q1);
+
+        Question q2 = Question.builder()
+                .title("데이터베이스에서 인덱스(Index)는 어떤 역할을 하나요?")
+                .content("인덱스를 사용하면 검색 속도가 빨라지지만, 삽입/삭제 시 오버헤드가 생깁니다. 인덱스의 동작 원리와 장단점을 설명해주세요.")
+                .author(user1)
+                .score(50)
+                .build();
+        questionRepository.save(q2);
+
+        Question q3 = Question.builder()
+                .title("TCP와 UDP의 차이점을 설명해주세요.")
+                .content("두 프로토콜의 연결 방식, 신뢰성, 속도 측면에서의 차이와 각각이 주로 사용되는 사례를 알려주세요.")
+                .author(user1)
+                .score(40)
+                .build();
+        questionRepository.save(q3);
+
+        Question q4 = Question.builder()
+                .title("자바의 Garbage Collection은 어떻게 동작하나요?")
+                .content("GC의 기본 원리와 주요 알고리즘(Mark and Sweep, Generational GC 등)을 설명하고, 성능 최적화 방법에 대해 설명해주세요.")
+                .author(user1)
+                .score(70)
+                .build();
+        questionRepository.save(q4);
+
+        Question q5 = Question.builder()
+                .title("데드락(Deadlock)은 어떤 상황에서 발생하나요?")
+                .content("데드락의 4가지 필요 조건과, 이를 예방하거나 해결할 수 있는 방법을 구체적으로 설명해주세요.")
+                .author(user1)
+                .score(10)
+                .build();
+        questionRepository.save(q5);
     }
 
     @Transactional

@@ -3,6 +3,9 @@ package com.backend.api.user.service;
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
+import com.backend.domain.ranking.entity.Ranking;
+import com.backend.domain.ranking.entity.Tier;
+import com.backend.domain.ranking.repository.RankingRepository;
 import com.backend.domain.subscription.entity.Subscription;
 import com.backend.domain.subscription.entity.SubscriptionType;
 import com.backend.domain.subscription.repository.SubscriptionRepository;
@@ -31,6 +34,7 @@ public class UserService {
     private final SubscriptionRepository subscriptionRepository;
     private final EmailService emailService;
     private final VerificationCodeRepository verificationCodeRepository;
+    private final RankingRepository rankingRepository;
 
     public User signUp(UserSignupRequest request) {
 
@@ -76,6 +80,15 @@ public class UserService {
                 .build();
 
         subscriptionRepository.save(basicSubscription);
+
+        Ranking ranking = Ranking.builder()
+                .user(user)
+                .totalScore(0)
+                .tier(Tier.UNRATED)
+                .rankValue(0)
+                .build();
+
+        rankingRepository.save(ranking);
 
         return user;
     }

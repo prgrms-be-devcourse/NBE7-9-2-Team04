@@ -27,20 +27,20 @@ export default function QuestionDetailPage() {
   const [loading, setLoading] = useState(true)
   const [isPublic, setIsPublic] = useState(true)
 
-  // 질문 + 내 답변 + 피드백 불러오기
+  // ✅ 질문 + 내 답변 + 피드백 불러오기
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
 
-        // 질문 조회
-        const res = (await fetchApi(`/api/v1/questions/${questionId}`)) as {
+        // 🔹 질문 조회
+        const questionRes = (await fetchApi(`/api/v1/questions/${questionId}`)) as {
           status: string
           data: QuestionResponse
           message?: string
         }
-        if (res.status === "OK") setQuestion(res.data)
-        else alert(`질문 조회 실패: ${res.message}`)
+        if (questionRes.status === "OK") setQuestion(questionRes.data)
+        else alert(`질문 조회 실패: ${questionRes.message}`)
 
         // 내 답변 조회
         const myAnswerRes = (await fetchApi(
@@ -57,11 +57,27 @@ export default function QuestionDetailPage() {
           setIsPublic(myAnswerRes.data.isPublic)
         }
 
-        // 피드백 조회
-        const feedbackRes = (await fetchApi(`/api/v1/feedback/${questionId}`)) as {
-          status: string
-          data: FeedbackReadResponse
-          message?: string
+        // 🔹 피드백 조회 (답변 있을 때만)
+        if (hasAnswer) {
+          try {
+            const feedbackRes = (await fetchApi(`/api/v1/feedback/${questionId}`)) as {
+              status: string
+              data: FeedbackReadResponse
+              message?: string
+            }
+
+            if (feedbackRes.status === "OK" && feedbackRes.data) {
+              setFeedback(feedbackRes.data)
+            }
+          } catch (err: any) {
+            if (err.message?.includes("존재하지 않는 답변")) {
+              console.log("🟡 아직 피드백이 없습니다.")
+            } else {
+              console.error("피드백 조회 중 오류:", err)
+            }
+          }
+        } else {
+          setFeedback(null)
         }
 
         if (feedbackRes.status === "OK") {

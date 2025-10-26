@@ -3,43 +3,48 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CreatePost } from "@/types/post";
+import { PostAddRequest as CreatePost } from "@/types/post";
 import { fetchApi } from "@/lib/client";
 
 //구독한 회원 처리 필요함
 //일단은 fetch코드만 넣어둠둠
 export default function RecruitmentCreatePage() {
   const router = useRouter();
-  
+
   const [formData, setFormData] = useState<CreatePost>({
     title: "",
     content: "",
     introduction: "",
-    deadline : "",
-    status :  "ING",
-    pinStatus : "NOT_PINNED",
+    deadline: "",
+    status: "ING",
+    pinStatus: "NOT_PINNED",
     recruitCount: 1,
-    categoryType: "PROJECT",  
+    categoryType: "PROJECT", // 기본값을 PostCategoryType으로 설정
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const formattedFormData = {
+      ...formData,
+      deadline: `${formData.deadline}T00:00:00`,
+      categoryType: formData.categoryType === "PROJECT" ? "PROJECT" : "STUDY",
+    };
 
     try {
       const apiResponse = await fetchApi(`/api/v1/posts`, {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formattedFormData),
       });
 
       if (apiResponse.status === "OK") {
-        alert(apiResponse.message);
-        router.replace("/recruitment"); // 로그인 페이지로 이동
+        alert(apiResponse.message || "게시글이 성공적으로 작성되었습니다.");
+        router.replace("/recruitment");
       } else {
-        alert(apiResponse.message);
+        alert(apiResponse.message || "게시글 작성 중 오류가 발생했습니다.");
       }
     } catch (err: any) {
-      alert(err.message);
+      alert("API 통신 실패: " + err.message);
     }
   };
 

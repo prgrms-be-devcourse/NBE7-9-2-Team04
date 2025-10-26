@@ -7,7 +7,9 @@ import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.dto.response.AnswerReadWithScoreResponse;
 import com.backend.api.feedback.service.FeedbackService;
 import com.backend.api.question.service.QuestionService;
+import com.backend.api.ranking.service.RankingService;
 import com.backend.api.user.service.UserService;
+import com.backend.api.userQuestion.service.UserQuestionService;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.question.entity.Question;
@@ -38,6 +40,8 @@ public class AnswerService {
     private final UserService userService;
 
     private final FeedbackService feedbackService;
+    private final RankingService rankingService;
+    private final UserQuestionService userQuestionService;
 
     public Answer findByIdOrThrow(Long id) {
         return answerRepository.findById(id)
@@ -56,10 +60,10 @@ public class AnswerService {
                 .isPublic(isPublic)
                 .author(currentUser)
                 .question(question)
-                .aiScore((int) (Math.random() * 100))  // 임시 AI 점수 부여
                 .build();
         Answer savedAnswer = answerRepository.save(answer);
         feedbackService.createFeedback(savedAnswer);
+
         return savedAnswer;
     }
 
@@ -112,7 +116,7 @@ public class AnswerService {
         User currentUser = rq.getUser();
 
         // 질문에 대해 현재 사용자가 작성한 답변 조회
-        return answerRepository.findFirstByQuestionIdAndAuthorIdOrderByCreateDateDesc(questionId, currentUser.getId())
+        return answerRepository.findByQuestionIdAndAuthorId(questionId, currentUser.getId())
                 .map(AnswerReadResponse::new) // 있으면 DTO로 변환
                 .orElse(null); // 없으면 null 반환
     }

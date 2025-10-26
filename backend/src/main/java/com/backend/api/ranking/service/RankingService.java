@@ -1,5 +1,6 @@
 package com.backend.api.ranking.service;
 
+import com.backend.api.question.service.QuestionService;
 import com.backend.api.ranking.dto.response.RankingResponse;
 import com.backend.api.ranking.dto.response.RankingSummaryResponse;
 import com.backend.api.userQuestion.service.UserQuestionService;
@@ -21,6 +22,7 @@ public class RankingService {
 
     private final RankingRepository rankingRepository;
     private final UserQuestionService userQuestionService;
+    private final QuestionService questionService;
 
     @Transactional
     public Ranking createRanking(User user) {
@@ -33,7 +35,7 @@ public class RankingService {
                 .user(user)
                 .totalScore(0)
                 .tier(Tier.UNRATED)
-                .rankValue(null)
+                .rankValue(0)
                 .build();
 
         return rankingRepository.save(ranking);
@@ -43,13 +45,24 @@ public class RankingService {
     @Transactional
     public void updateUserRanking(User user){
 
+
         int totalScore = userQuestionService.getTotalUserQuestionScore(user);
 
-        Ranking ranking = createRanking(user);
+        Ranking ranking = rankingRepository.findByUser(user)
+                .orElseGet(() -> createRanking(user)); // 존재하지 않으면 생성
+
+        // 점수 / 티어 업데이트
         ranking.updateTotalScore(totalScore);
         ranking.updateTier(Tier.fromScore(totalScore));
 
+        // 현재 유저보다 점수 높은 사람 수 계산
+        int higherRankCount = rankingRepository.countByTotalScoreGreaterThan(totalScore);
+
+        // 현재 유저의 순위 = 점수 높은 사람 수 + 1
+        ranking.updateRank(higherRankCount + 1);
+
         rankingRepository.save(ranking);
+        recalculateAllRankings();
     }
 
     //마이페이지용
@@ -58,7 +71,10 @@ public class RankingService {
         Ranking ranking = rankingRepository.findByUser(user)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
 
-        return RankingResponse.from(ranking);
+        int solvedCount = userQuestionService.countSolvedQuestion(user);
+        int questionCount = questionService.countByUser(user);
+
+        return RankingResponse.from(ranking, solvedCount, questionCount);
     }
 
 
@@ -66,9 +82,14 @@ public class RankingService {
     @Transactional(readOnly = true)
     public List<RankingResponse> getTopRankings() {
 
-        return rankingRepository.findTop10ByOrderByTotalScoreDesc()
-                .stream()
-                .map(RankingResponse::from)
+        List<Ranking> top10 = rankingRepository.findTop10ByOrderByTotalScoreDescUser_NicknameAsc();
+
+        return top10.stream()
+                .map(r -> {
+                    int solved = userQuestionService.countSolvedQuestion(r.getUser());
+                    int submitted = questionService.countByUser(r.getUser());
+                    return RankingResponse.from(r, solved, submitted);
+                })
                 .toList();
     }
 
