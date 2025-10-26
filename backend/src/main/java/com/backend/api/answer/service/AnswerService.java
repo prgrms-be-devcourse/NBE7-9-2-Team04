@@ -4,9 +4,12 @@ import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.dto.request.AnswerUpdateRequest;
 import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
+import com.backend.api.answer.dto.response.AnswerReadWithScoreResponse;
 import com.backend.api.feedback.service.FeedbackService;
 import com.backend.api.question.service.QuestionService;
+import com.backend.api.ranking.service.RankingService;
 import com.backend.api.user.service.UserService;
+import com.backend.api.userQuestion.service.UserQuestionService;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.question.entity.Question;
@@ -37,6 +40,8 @@ public class AnswerService {
     private final UserService userService;
 
     private final FeedbackService feedbackService;
+    private final RankingService rankingService;
+    private final UserQuestionService userQuestionService;
 
     public Answer findByIdOrThrow(Long id) {
         return answerRepository.findById(id)
@@ -55,10 +60,10 @@ public class AnswerService {
                 .isPublic(isPublic)
                 .author(currentUser)
                 .question(question)
-                .aiScore((int) (Math.random() * 100))  // 임시 AI 점수 부여
                 .build();
         Answer savedAnswer = answerRepository.save(answer);
         feedbackService.createFeedback(savedAnswer);
+
         return savedAnswer;
     }
 
@@ -86,16 +91,19 @@ public class AnswerService {
         answerRepository.delete(answer);
     }
 
-    public AnswerPageResponse<AnswerReadResponse> findAnswersByQuestionId(int page, Long questionId) {
+    public AnswerPageResponse<AnswerReadWithScoreResponse> findAnswersByQuestionId(int page, Long questionId) {
         questionService.findByIdOrThrow(questionId);
 
         if(page < 1) page = 1;
-        Pageable pageable = PageRequest.of(page - 1, 10, Sort.by("createDate").descending());
-        Page<Answer> answersPage = answerRepository.findByQuestionIdAndIsPublicTrue(questionId, pageable);
+        Pageable pageable = PageRequest.of(page - 1, 10);
+        Page<Answer> answersPage = answerRepository.findByQuestionIdAndIsPublicTrueOrderByFeedbackScoreDesc(questionId, pageable);
 
-        List<AnswerReadResponse> answers = answersPage.getContent()
+        List<AnswerReadWithScoreResponse> answers = answersPage.getContent()
                 .stream()
-                .map(AnswerReadResponse::new)
+                .map(answer -> {
+                    Integer score = answer.getFeedback() != null ? answer.getFeedback().getAiScore() : 0;
+                    return new AnswerReadWithScoreResponse(answer, score);
+                })
                 .toList();
 
         return new AnswerPageResponse<>(answersPage, answers);
@@ -108,7 +116,7 @@ public class AnswerService {
         User currentUser = rq.getUser();
 
         // 질문에 대해 현재 사용자가 작성한 답변 조회
-        return answerRepository.findFirstByQuestionIdAndAuthorIdOrderByCreateDateDesc(questionId, currentUser.getId())
+        return answerRepository.findByQuestionIdAndAuthorId(questionId, currentUser.getId())
                 .map(AnswerReadResponse::new) // 있으면 DTO로 변환
                 .orElse(null); // 없으면 null 반환
     }

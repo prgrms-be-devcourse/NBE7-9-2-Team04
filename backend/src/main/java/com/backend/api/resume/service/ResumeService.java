@@ -57,10 +57,10 @@ public class ResumeService {
     }
 
     @Transactional
-    public ResumeUpdateResponse updateResume(Long userId, Long resumeId, ResumeUpdateRequest request) {
+    public ResumeUpdateResponse updateResume(Long userId,  ResumeUpdateRequest request) {
         User user = userService.getUser(userId);
 
-        Resume resume = getResume(resumeId);
+        Resume resume = getResumeByUser(user);
         validateResumeAuthor(resume, user);
         resume.update(request);
 

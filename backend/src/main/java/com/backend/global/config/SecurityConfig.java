@@ -58,7 +58,10 @@ public class SecurityConfig {
                                 "/api/v1/posts/category/*",
                                 "/api/v1/posts/{postId}",
                                 "/api/v1/payments/*",
+                                "/api/v1/qna",
                                 "/api/v1/qna/**",
+                                "/api/v1/questions",
+                                "/api/v1/questions/**",
                                 "/api/v1/questions/{questionId}/answers",
                                 "/api/v1/questions/{questionId}/answers/*").permitAll()
                         .requestMatchers(HttpMethod.POST,
@@ -68,6 +71,7 @@ public class SecurityConfig {
                                 "/api/v1/users/sendEmail",
                                 "/api/v1/users/verifyCode"
                         ).permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
 
 

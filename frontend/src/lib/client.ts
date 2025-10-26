@@ -23,14 +23,3 @@ export async function fetchApi(url: string, options?: RequestInit) {
   return apiResponse;
 }
 
-// console.log("fetch url:", `${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`, options);
-
-// return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`, options).then(
-//   async (res) => {
-//     if (!res.ok) {
-//       const apiResponse = await res.json();
-//       throw new Error(apiResponse.message || "요청 실패");
-//     }
-//     return res.json();
-//   }
-// );

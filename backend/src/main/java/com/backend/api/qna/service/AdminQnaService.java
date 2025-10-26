@@ -1,6 +1,7 @@
 package com.backend.api.qna.service;
 
 import com.backend.api.qna.dto.request.QnaAnswerRequest;
+import com.backend.api.qna.dto.response.QnaPageResponse;
 import com.backend.api.qna.dto.response.QnaResponse;
 import com.backend.api.user.service.AdminUserService;
 import com.backend.domain.qna.entity.Qna;
@@ -11,6 +12,11 @@ import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.converters.SchemaPropertyDeprecatingConverter;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +29,7 @@ public class AdminQnaService {
 
     private final QnaRepository qnaRepository;
     private final AdminUserService adminUserService;
+    private final SchemaPropertyDeprecatingConverter schemaPropertyDeprecatingConverter;
 
     private Qna findByIdOrThrow(Long qnaId) {
         return qnaRepository.findById(qnaId)
@@ -47,10 +54,31 @@ public class AdminQnaService {
         qnaRepository.delete(qna);
     }
 
-    public List<QnaResponse> getAllQna(User user) {
+    public QnaPageResponse<QnaResponse> getAllQna(int page, User user, QnaCategoryType categoryType) {
         adminUserService.validateAdminAuthority(user);
-        List<Qna> qnaList = qnaRepository.findAll();
-        return qnaList.stream()
+
+        if (page < 1) page = 1;
+
+        Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
+        Page<Qna> qnaPage;
+
+        if (categoryType == null) {
+            qnaPage = qnaRepository.findAll(pageable);
+        } else {
+            qnaPage = qnaRepository.findByCategoryType(categoryType, pageable);
+        }
+
+        if (qnaPage.isEmpty()) {
+            throw new ErrorException(ErrorCode.QNA_NOT_FOUND);
+        }
+
+        List<QnaResponse> qnaList = mapToResponseList(qnaPage);
+        return QnaPageResponse.from(qnaPage, qnaList);
+    }
+
+    private List<QnaResponse> mapToResponseList(Page<Qna> qnaPage) {
+        return qnaPage.getContent()
+                .stream()
                 .map(QnaResponse::from)
                 .toList();
     }
@@ -59,13 +87,5 @@ public class AdminQnaService {
         adminUserService.validateAdminAuthority(user);
         Qna qna = findByIdOrThrow(qnaId);
         return QnaResponse.from(qna);
-    }
-
-    public List<QnaResponse> getQnaByCategory(User user, QnaCategoryType categoryType) {
-        adminUserService.validateAdminAuthority(user);
-        List<Qna> qnaList = qnaRepository.findByCategoryType(categoryType);
-        return qnaList.stream()
-                .map(QnaResponse::from)
-                .toList();
     }
 }

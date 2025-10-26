@@ -1,6 +1,6 @@
 package com.backend.api.review.service;
 
-import com.backend.api.question.service.OpenAiService;
+import com.backend.api.question.service.AiQuestionService;
 import com.backend.api.resume.service.ResumeService;
 import com.backend.api.review.dto.request.AiReviewbackRequest;
 import com.backend.api.review.dto.response.AiReviewResponse;
@@ -26,7 +26,7 @@ public class AiReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ResumeService resumeService;
-    private final OpenAiService openAiService;
+    private final AiQuestionService aiQuestionService;
 
     @Transactional
     public AiReviewResponse createAiReview(User user) throws JsonProcessingException {
@@ -39,7 +39,7 @@ public class AiReviewService {
 
         AiReviewbackRequest request = AiReviewbackRequest.of(resume);
 
-        String feedbackContent = openAiService.getAiReviewContent(request);
+        String feedbackContent = aiQuestionService.getAiReviewContent(request);
 
         Review reviewEntity = Review.builder()
                 .user(user)

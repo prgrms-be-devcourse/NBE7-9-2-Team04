@@ -3,13 +3,11 @@ package com.backend.domain.question.entity;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
-import com.backend.global.exception.ErrorCode;
-import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -43,7 +41,8 @@ public class Question extends BaseEntity {
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Answer> answers;
 
-
+    @Column(name = "group_id", columnDefinition = "BINARY(16)")
+    private UUID groupId;
 
     public void updateApproved(Boolean isApproved) {
         this.isApproved = isApproved;
