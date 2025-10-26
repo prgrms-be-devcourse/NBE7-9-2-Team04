@@ -181,7 +181,7 @@ public class QuestionService {
         List<QuestionResponse> questions = questionsPage
                 .getContent()
                 .stream()
-                .map(QuestionResponse::from) // 생성자 또는 from() 메서드 사용
+                .map(QuestionResponse::from)
                 .toList();
 
         return QuestionPageResponse.from(questionsPage, questions);
