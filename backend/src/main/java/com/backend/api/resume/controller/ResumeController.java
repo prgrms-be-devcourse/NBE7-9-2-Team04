@@ -35,14 +35,12 @@ public class ResumeController {
         return ApiResponse.created("이력서가 생성되었습니다.", response);
     }
 
-    @PutMapping("/{resumeId}")
+    @PutMapping
     @Operation(summary = "이력서 수정", description = "사용자의 이력서를 수정합니다.")
     public ApiResponse<ResumeUpdateResponse> updateResume(
-            @Parameter(description = "이력서 ID", example = "1")
-            @Valid @PathVariable Long resumeId,
             @RequestBody ResumeUpdateRequest request) {
         Long userId = rq.getUser().getId();
-        ResumeUpdateResponse response = resumeService.updateResume(userId, resumeId, request);
+        ResumeUpdateResponse response = resumeService.updateResume(userId, request);
         return ApiResponse.ok("이력서가 수정되었습니다.", response);
     }
 

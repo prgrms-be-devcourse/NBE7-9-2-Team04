@@ -1,23 +1,75 @@
 "use client";
-
+import { fetchApi } from "@/lib/client";  
+import { ResumeCreateRequest } from "@/types/resume";
 import { useState, useEffect } from "react";
 
 export default function MyResumePage() {
   const [isLoading, setIsLoading] = useState(true);
 
-  const [resumeData, setResumeData] = useState({
-    content: "",
-    skill: "",
-    activity: "",
-    certification: "",
-    career: "",
-    portfolioUrl: "",
-  });
-
+  const [resumeData, setResumeData] = useState<ResumeCreateRequest | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   //   const [activities, setActivities] = useState<any[]>([]);
   //   const [certifications, setCertifications] = useState<any[]>([]);
   //   const [experiences, setExperiences] = useState<any[]>([]);
+  // ✅ 이력서 조회
+  const fetchResume = async () => {
+    try {
+      const res = await fetchApi("/api/v1/users/resumes", { method: "GET" });
+  
+      // 응답 데이터 확인
+      console.log("이력서 응답 데이터:", res.data);
+  
+      if (!res || !res.data) {
+        setIsEditing(false);
+        return;
+      }
+      setIsEditing(true);
+      setResumeData(res.data);
+    } catch (error) {
+      console.error("이력서 조회 실패:", error);
+    } 
+  };
 
+  // ✅ 이력서 등록 (POST)
+  const createResume = async () => {
+    if (!resumeData) return;
+    try {
+      const res = await fetchApi("/api/v1/users/resumes", {
+        method: "POST",
+        body: JSON.stringify(resumeData),
+      });
+      alert("이력서가 성공적으로 등록되었습니다.");
+      setResumeData(res.data);
+      setIsEditing(true);
+    } catch (error) {
+      console.error("이력서 등록 실패:", error);
+      alert("이력서 등록 중 오류가 발생했습니다.");
+    }
+  };
+
+  // ✅ 이력서 수정 (PUT)
+  const updateResume = async () => {
+    try {
+      const res = await fetchApi(`/api/v1/users/resumes`, {
+        method: "PUT",
+        body: JSON.stringify(resumeData),
+      });
+      alert("이력서가 성공적으로 수정되었습니다.");
+    } catch (error) {
+      console.error("이력서 수정 실패:", error);
+      alert("이력서 수정 중 오류가 발생했습니다.");
+    }
+  };
+
+
+
+  const handleSave = () => {
+    if (isEditing) updateResume();
+    else createResume();
+  };
+  useEffect(() => {
+    fetchResume();
+  }, []);
   // ✅ 임시 유저 가정
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 200);
@@ -30,7 +82,7 @@ export default function MyResumePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">💼 이력서 관리</h1>
           <p className="text-gray-500 mb-6">
-            이력서 정보를 등록하고 관리하세요.
+          {isEditing ? "이력서를 수정하세요." : "새로운 이력서를 작성하세요."}
           </p>
         </div>
 
@@ -40,9 +92,9 @@ export default function MyResumePage() {
             className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
             placeholder="자기소개 및 경력 요약을 작성하세요"
             rows={6}
-            value={resumeData.content}
+            value={resumeData?.content || ""}
             onChange={(e) =>
-              setResumeData({ ...resumeData, content: e.target.value })
+              setResumeData({ ...resumeData, content: e.target.value } as ResumeCreateRequest)
             }
           />
         </div>
@@ -53,9 +105,9 @@ export default function MyResumePage() {
             className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
             placeholder="예: React, Next.js, TypeScript, Node.js, PostgreSQL"
             rows={3}
-            value={resumeData.skill}
+            value={resumeData?.skill || ""}
             onChange={(e) =>
-              setResumeData({ ...resumeData, skill: e.target.value })
+              setResumeData({ ...resumeData, skill: e.target.value } as ResumeCreateRequest)
             }
           />
         </div>
@@ -66,9 +118,9 @@ export default function MyResumePage() {
             className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
             placeholder="예: 해커톤 대회 1등"
             rows={3}
-            value={resumeData.activity}
+            value={resumeData?.activity || ""}
             onChange={(e) =>
-              setResumeData({ ...resumeData, activity: e.target.value })
+              setResumeData({ ...resumeData, activity: e.target.value } as ResumeCreateRequest)
             }
           />
         </div>
@@ -79,9 +131,9 @@ export default function MyResumePage() {
             className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
             placeholder="예: 정보처리기사"
             rows={3}
-            value={resumeData.certification}
+            value={resumeData?.certification || ""}
             onChange={(e) =>
-              setResumeData({ ...resumeData, certification: e.target.value })
+              setResumeData({ ...resumeData, certification: e.target.value } as ResumeCreateRequest)
             }
           />
         </div>
@@ -92,9 +144,9 @@ export default function MyResumePage() {
             className="w-full border border-gray-300 rounded-md p-3 focus:outline-blue-500"
             placeholder="예: 데브 회사 2년차"
             rows={3}
-            value={resumeData.career}
+            value={resumeData?.career || ""}
             onChange={(e) =>
-              setResumeData({ ...resumeData, career: e.target.value })
+              setResumeData({ ...resumeData, career: e.target.value } as ResumeCreateRequest)
             }
           />
         </div>
@@ -107,16 +159,19 @@ export default function MyResumePage() {
               type="text"
               className="flex-1 border border-gray-300 rounded-md p-2"
               placeholder="https://github.com/username 또는 포트폴리오 사이트"
-              value={resumeData.portfolioUrl}
+              value={resumeData?.portfolioUrl || ""}
               onChange={(e) =>
-                setResumeData({ ...resumeData, portfolioUrl: e.target.value })
+                setResumeData({ ...resumeData, portfolioUrl: e.target.value } as ResumeCreateRequest)
               }
             />
           </div>
         </div>
 
-        <button className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-semibold">
-          저장
+        <button 
+          onClick={handleSave}
+          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-semibold">
+            {isEditing ? "이력서 수정" : "이력서 등록"}
+          
         </button>
       </div>
     </>
