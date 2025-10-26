@@ -183,12 +183,12 @@ export default function CsQuestionPage() {
         router.push(`/interview/cs/${id}`);
       } else {
         alert("로그인 후 이용해주세요.");
-        router.push("/login");
+        router.push("/auth");
       }
     } catch (err) {
       console.error("로그인 확인 실패:", err);
       alert("로그인 후 이용해주세요.");
-      router.push("/login");
+      router.push("/auth");
     }
   };
 
