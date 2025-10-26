@@ -6,23 +6,6 @@ import { useEffect, useState } from "react";
 
 export default function HomePage() {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const loggedIn =
-      typeof localStorage !== "undefined"
-        ? localStorage.getItem("isLoggedIn") === "true"
-        : false;
-    setIsLoggedIn(loggedIn);
-  }, []);
-
-  const handlePremiumClick = () => {
-    if (isLoggedIn) {
-      router.replace("/profile?tab=subscription");
-    } else {
-      router.replace("/login?returnUrl=/profile?tab=subscription");
-    }
-  };
 
   return (
     <>

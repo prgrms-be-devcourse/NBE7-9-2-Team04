@@ -59,7 +59,12 @@ public class FeedbackService {
                 .build();
 
         feedbackRepository.save(feedback);
-        userQuestionService.updateUserQuestionScore(answer.getAuthor(), question, feedback.getAiScore());
+
+        int baseScore = question.getScore();
+        double ratio = aiFeedback.score() / 100.0;
+        int finalScore = (int)Math.round(ratio * baseScore);
+
+        userQuestionService.updateUserQuestionScore(answer.getAuthor(), question, finalScore);
         rankingService.updateUserRanking(answer.getAuthor());
     }
 
@@ -71,6 +76,7 @@ public class FeedbackService {
         AiFeedbackResponse aiFeedback = createAiFeedback(question, answer);
         Feedback feedback = getFeedbackByAnswerId(answer.getId());
         feedback.update(answer,aiFeedback.score(),aiFeedback.content());
+        feedbackRepository.save(feedback);
     }
 
     public Feedback getFeedbackByAnswerId(Long answerId){
@@ -110,7 +116,7 @@ public class FeedbackService {
     @Transactional(readOnly = true)
 
     public FeedbackReadResponse readFeedback(Long questionId,User user) {
-        Answer answer = answerRepository.findByQuestionIdAndAuthorId(questionId,user.getId())
+        Answer answer = answerRepository.findFirstByQuestionIdAndAuthorIdOrderByCreateDateDesc(questionId,user.getId())
                 .orElseThrow(() -> new ErrorException(ErrorCode.ANSWER_NOT_FOUND));
         Feedback feedback = getFeedbackByAnswerId(answer.getId());
 

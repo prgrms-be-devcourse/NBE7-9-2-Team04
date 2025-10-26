@@ -5,7 +5,9 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("accessToken")?.value;
 
   if (!token) {
-    return NextResponse.redirect(new URL("/auth", request.url));
+    const redirectUrl = new URL("/auth", request.url);
+    redirectUrl.searchParams.set("returnUrl", request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();
@@ -21,5 +23,6 @@ export const config = {
         "/interview/cs/new",
         "/interview/cs/:path",
         "/admin/:path*", 
+        "/ranking"
     ]
 }
