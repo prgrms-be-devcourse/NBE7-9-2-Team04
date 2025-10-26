@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client"; // Adjust the import based on your project structure
+import { marked } from "marked"; // Markdown 변환 라이브러리 추가
 
 export default function NewFeedbackPage() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
   const [feedbackContent, setFeedbackContent] = useState(""); // 상태 추가
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false); // 분석 완료 상태 추가
+  const [createDate, setCreateDate] = useState(""); // 생성일 상태 추가
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,9 +35,12 @@ export default function NewFeedbackPage() {
       });
 
       console.log("생성된 리뷰 데이터:", response.data); // 디버깅 로그
-      const { feedbackContent } = response.data;
+      const { feedbackContent, createDate } = response.data;
 
-      setFeedbackContent(feedbackContent); // 상태 업데이트
+      // Markdown을 HTML로 변환하여 상태 업데이트
+      const parsedContent = await marked.parse(feedbackContent);
+      setFeedbackContent(parsedContent);
+      setCreateDate(createDate); // 생성일 상태 업데이트
       setIsAnalysisComplete(true); // 분석 완료 상태 설정
       alert("✅ AI 포트폴리오 분석이 완료되었습니다!");
     } catch (error) {
@@ -105,6 +110,10 @@ export default function NewFeedbackPage() {
           <h2 className="text-3xl font-bold mb-6 text-center">AI 첨삭 결과</h2>
           <div className="bg-white shadow-md rounded-lg p-6">
             <h3 className="text-2xl font-semibold mb-4">포트폴리오 분석 결과</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              생성일:{" "}
+              {new Date(createDate).toLocaleString()}
+            </p>
             <div
               className="prose prose-blue max-w-none"
               dangerouslySetInnerHTML={{ __html: feedbackContent }}

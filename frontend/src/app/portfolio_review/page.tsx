@@ -32,10 +32,12 @@ export default function PortfolioReviewMainPage() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("ko-KR", {
+    return date.toLocaleString("ko-KR", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -78,12 +80,14 @@ export default function PortfolioReviewMainPage() {
           <ul className="divide-y divide-gray-200">
             {feedbacks.map((f) => (
               <li
-                key={f.reviewId} // 수정: reviewId 사용
+                key={f.reviewId}
                 className="py-4 cursor-pointer hover:bg-gray-50 transition px-2 rounded-md"
-                onClick={() => router.push(`/portfolio_review/${f.reviewId}`)} // 수정: reviewId 사용
+                onClick={() => router.push(`/portfolio_review/${f.reviewId}`)}
               >
                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-800">{f.summary}</span>
+                  <span className="font-medium text-gray-800">
+                    📍 {f.reviewId}번째 포트폴리오 AI 첨삭
+                  </span>
                   <span className="text-sm text-gray-500">
                     {formatDate(f.createdAt)}
                   </span>

@@ -46,7 +46,7 @@ public class AiReviewService {
 
         reviewRepository.save(reviewEntity);
 
-        return AiReviewResponse.of(reviewEntity.getId(), feedbackContent);
+        return AiReviewResponse.of(reviewEntity.getId(), feedbackContent, reviewEntity.getCreateDate());
     }
 
     public AiReviewResponse findReviewById(Long reviewId, User user) {
@@ -57,14 +57,14 @@ public class AiReviewService {
             throw new ErrorException(ErrorCode.ACCESS_DENIED_REVIEW);
         }
 
-        return AiReviewResponse.of(review.getId(), review.getAiReviewContent());
+        return AiReviewResponse.of(review.getId(), review.getAiReviewContent(), review.getCreateDate());
     }
 
     public List<AiReviewResponse> findMyAiReviews(User user) {
         List<Review> reviews = reviewRepository.findByUserIdOrderByIdDesc(user.getId());
 
         return reviews.stream()
-                .map(review -> AiReviewResponse.of(review.getId(), review.getAiReviewContent()))
+                .map(review -> AiReviewResponse.of(review.getId(), review.getAiReviewContent(), review.getCreateDate()))
                 .collect(Collectors.toList());
     }
 }
