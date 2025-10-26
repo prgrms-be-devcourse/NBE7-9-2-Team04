@@ -135,7 +135,7 @@ export default function RecruitmentPage() {
           >
             {pinnedPosts.map((post) => (
               <div key={post.postId || post.id} className="w-full flex-shrink-0">
-                <div className="border border-blue-500 bg-blue-50 p-8 rounded-lg flex justify-between min-h-[160px]">
+                <div className="border border-blue-200 bg-blue-50 p-8 rounded-lg flex justify-between min-h-[160px]">
                   <div className="flex flex-col justify-between flex-1 pr-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
@@ -263,7 +263,7 @@ export default function RecruitmentPage() {
       />
 
       {/* 게시글 작성 버튼 */}
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end mt-6">
         <Link
           href="/recruitment/new"
           className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700"

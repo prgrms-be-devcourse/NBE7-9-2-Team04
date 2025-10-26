@@ -113,7 +113,7 @@ export default function NewQnAPage() {
               placeholder="질문 제목을 입력하세요"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
               required
             />
           </div>
@@ -132,7 +132,7 @@ export default function NewQnAPage() {
                   categoryType: e.target.value as QnaCategoryType,
                 })
               }
-              className="w-full border rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-200"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-200"
               required
             >
               <option value="">카테고리 선택</option>
@@ -155,7 +155,7 @@ export default function NewQnAPage() {
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               rows={10}
-              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-200"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-200"
               required
             />
           </div>
@@ -165,7 +165,7 @@ export default function NewQnAPage() {
             <button
               type="button"
               onClick={() => router.push("/qna")}
-              className="px-4 py-2 border rounded-md hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-200 rounded-md hover:bg-gray-50"
             >
               취소
             </button>

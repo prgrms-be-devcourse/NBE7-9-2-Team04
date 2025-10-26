@@ -120,7 +120,7 @@ export default function AdminQuestionAddPage() {
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
               required
             />
           </div>
@@ -142,7 +142,7 @@ export default function AdminQuestionAddPage() {
                   category: e.target.value as QuestionCategoryType,
                 })
               }
-              className="w-full border rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-200"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-200"
               required
             >
               <option value="">카테고리 선택</option>
@@ -168,7 +168,7 @@ export default function AdminQuestionAddPage() {
               onChange={(e) =>
                 setFormData({ ...formData, score: Number(e.target.value) })
               }
-              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
               required
             />
           </div>
@@ -205,7 +205,7 @@ export default function AdminQuestionAddPage() {
                 setFormData({ ...formData, content: e.target.value })
               }
               rows={10}
-              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-200"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-200"
               required
             />
           </div>
@@ -215,7 +215,7 @@ export default function AdminQuestionAddPage() {
             <button
               type="button"
               onClick={() => router.push("/admin/questions")}
-              className="px-4 py-2 border rounded-md hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-200 rounded-md hover:bg-gray-50"
             >
               취소
             </button>
