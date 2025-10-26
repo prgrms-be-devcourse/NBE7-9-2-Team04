@@ -13,21 +13,19 @@ export default function MyResumePage() {
   //   const [experiences, setExperiences] = useState<any[]>([]);
   // ✅ 이력서 조회
   const fetchResume = async () => {
-    try {
-      const res = await fetchApi("/api/v1/users/resumes", { method: "GET" });
+    
+    const res = await fetchApi("/api/v1/users/resumes", { method: "GET" });
   
       // 응답 데이터 확인
-      console.log("이력서 응답 데이터:", res.data);
+    console.log("이력서 응답 데이터:", res.data);
   
-      if (!res || !res.data) {
-        setIsEditing(false);
-        return;
-      }
-      setIsEditing(true);
-      setResumeData(res.data);
-    } catch (error) {
-      console.error("이력서 조회 실패:", error);
-    } 
+    if (!res || !res.data) {
+      setIsEditing(false);
+      return;
+    }
+    setIsEditing(true);
+    setResumeData(res.data);
+     
   };
 
   // ✅ 이력서 등록 (POST)

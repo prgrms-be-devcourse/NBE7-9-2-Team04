@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client"; // Adjust the import based on your project structure
 
 export default function NewFeedbackPage() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
-
-  // ✅ 임시 피드백 ID
-  const mockNewFeedbackId = 3;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -21,16 +19,28 @@ export default function NewFeedbackPage() {
       });
     }, 300);
 
-    // 3초 후 결과 페이지 이동
-    const timer = setTimeout(() => {
-      alert("✅ AI 포트폴리오 분석이 완료되었습니다!");
-      router.replace(`/portfolio_review/${mockNewFeedbackId}`);
-    }, 3000);
-
     return () => {
       clearInterval(interval);
-      clearTimeout(timer);
     };
+  }, []);
+
+  useEffect(() => {
+    const createFeedback = async () => {
+      try {
+        const response = await fetchApi("/api/v1/portfolio-review", {
+          method: "POST",
+        });
+        const reviewId = response.data.reviewId; // API 응답에서 reviewId 추출
+        alert("✅ AI 포트폴리오 분석이 완료되었습니다!");
+        router.replace(`/portfolio_review/${reviewId}`); // reviewId를 사용해 결과 페이지로 이동
+      } catch (error) {
+        console.error("Failed to create feedback:", error);
+        alert("AI 포트폴리오 분석 생성에 실패했습니다.");
+        router.replace("/portfolio_review");
+      }
+    };
+
+    createFeedback();
   }, [router]);
 
   return (
