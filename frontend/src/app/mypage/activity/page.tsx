@@ -9,26 +9,33 @@ import { UserResponse } from "@/types/user";
 import { PostResponse, PostPageResponse } from "@/types/post";
 import { CommentMypageResponse, CommentPageResponse } from "@/types/comment";
 import { QuestionResponse, QuestionPageResponse } from "@/types/question";
+import {
+  AnswerMypageResponse,
+  AnswerPage2Response,
+} from "@/types/answer";
 
 export default function MyActivityPage() {
   const router = useRouter();
 
   const [userId, setUserId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("작성한 글");
-  const categories = ["작성한 글", "작성한 댓글", "등록한 질문"];
+  const categories = ["작성한 글", "작성한 댓글", "작성한 답변", "등록한 질문"];
 
   const [userPosts, setUserPosts] = useState<PostResponse[]>([]);
   const [userComments, setUserComments] = useState<CommentMypageResponse[]>([]);
+  const [userAnswers, setUserAnswers] = useState<AnswerMypageResponse[]>([]);
   const [userQuestions, setUserQuestions] = useState<QuestionResponse[]>([]);
 
   const [postPage, setPostPage] = useState(1);
   const [commentPage, setCommentPage] = useState(1);
+  const [answerPage, setAnswerPage] = useState(1);
   const [questionPage, setQuestionPage] = useState(1);
 
   const itemsPerPage = 15;
 
   const [totalPost, setTotalPost] = useState(0);
   const [totalComment, setTotalComment] = useState(0);
+  const [totalAnswer, setTotalAnswer] = useState(0);
   const [totalQuestion, setTotalQuestion] = useState(0);
 
   // 로그인된 유저 정보
@@ -75,6 +82,21 @@ export default function MyActivityPage() {
     }
   };
 
+  const fetchUserAnswers = async (id: number) => {
+    try {
+      const res = await fetchApi(
+        `/api/v1/users/${id}/answers?page=${answerPage}`
+      );
+      if (res.status === "OK") {
+        const data: AnswerPage2Response<AnswerMypageResponse> = res.data;
+        setUserAnswers(data.answers);
+        setTotalAnswer(data.totalCount);
+      }
+    } catch (err) {
+      console.error("답변 조회 실패:", err);
+    }
+  };
+
   const fetchUserQuestions = async (id: number) => {
     try {
       const res = await fetchApi(
@@ -94,15 +116,23 @@ export default function MyActivityPage() {
     if (!userId) return;
     if (selectedCategory === "작성한 글") fetchUserPosts(userId);
     if (selectedCategory === "작성한 댓글") fetchUserComments(userId);
+    if (selectedCategory === "작성한 답변") fetchUserAnswers(userId);
     if (selectedCategory === "등록한 질문") fetchUserQuestions(userId);
-  }, [selectedCategory, userId, postPage, commentPage, questionPage]);
+  }, [
+    selectedCategory,
+    userId,
+    postPage,
+    commentPage,
+    answerPage,
+    questionPage,
+  ]);
 
   return (
     <div className="max-w-screen-lg mx-auto px-6 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">📝 내 활동</h1>
         <p className="text-gray-500">
-          내가 작성한 글, 댓글, 질문을 확인할 수 있습니다.
+          내가 작성한 글, 댓글, 답변, 질문을 확인할 수 있습니다.
         </p>
       </div>
 
@@ -113,6 +143,7 @@ export default function MyActivityPage() {
           setSelectedCategory(c);
           setPostPage(1);
           setCommentPage(1);
+          setAnswerPage(1);
           setQuestionPage(1);
         }}
       />
@@ -200,6 +231,42 @@ export default function MyActivityPage() {
           </div>
         )}
 
+        {/* 🔵 작성한 답변 */}
+        {selectedCategory === "작성한 답변" && (
+          <div>
+            <div className="space-y-3">
+              {userAnswers.length === 0 ? (
+                <div className="text-center text-gray-400 py-16 border border-gray-200 rounded-md">
+                  아직 작성한 답변이 없습니다.
+                </div>
+              ) : (
+                userAnswers.map((answer) => (
+                  <div
+                    key={answer.id}
+                    onClick={() =>
+                      router.replace(`/interview/cs/${answer.questionId}`)
+                    }
+                    className="p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition cursor-pointer"
+                  >
+                    <p className="font-medium line-clamp-2">{answer.content}</p>
+                    <p className="text-xs text-gray-500">
+                      {answer.title} •{" "}
+                      {new Date(answer.createDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <Pagination
+              currentPage={answerPage}
+              totalItems={totalAnswer}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setAnswerPage}
+            />
+          </div>
+        )}
+
         {/* 🟣 등록한 질문 */}
         {selectedCategory === "등록한 질문" && (
           <div>
@@ -239,7 +306,7 @@ export default function MyActivityPage() {
 
             <Pagination
               currentPage={questionPage}
-              totalItems={userQuestions.length}
+              totalItems={totalQuestion}
               itemsPerPage={itemsPerPage}
               onPageChange={setQuestionPage}
             />
