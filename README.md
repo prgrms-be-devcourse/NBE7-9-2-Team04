@@ -99,7 +99,7 @@ NEXT_PUBLIC_TOSS_CLIENT_KEY = your_payment_secret_key
 
 ---
 
-## 🧾 API 명세서
+## 🧾 API 명세서 (Swagger)
 
  http://localhost:8080/swagger-ui/index.html
 
@@ -107,6 +107,8 @@ NEXT_PUBLIC_TOSS_CLIENT_KEY = your_payment_secret_key
 
 ## 🔗 ERD
 
+ <img width="2161" height="941" alt="Image" src="https://github.com/user-attachments/assets/e787ad51-fe7e-4239-ac00-0b1ac38351bd" />
+ 
 ---
 
 ## ☁️ 시스템 아키텍처
