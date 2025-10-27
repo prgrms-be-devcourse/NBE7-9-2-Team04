@@ -2,18 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchApi } from "@/lib/client"; 
-import { marked } from "marked"; // Markdown 변환 라이브러리 추가
+import { fetchApi } from "@/lib/client";
+import { marked } from "marked";
 
 export default function NewFeedbackPage() {
   const router = useRouter();
-  const [progress, setProgress] = useState(0);
-  const [feedbackContent, setFeedbackContent] = useState(""); // 상태 추가
-  const [isAnalysisComplete, setIsAnalysisComplete] = useState(false); // 분석 완료 상태 추가
-  const [createDate, setCreateDate] = useState(""); // 생성일 상태 추가
-  
-  
 
+  // 상태 정의
+  const [progress, setProgress] = useState(0);
+  const [feedbackContent, setFeedbackContent] = useState("");
+  const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
+  const [createDate, setCreateDate] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [requested, setRequested] = useState(false); // Strict Mode 대응
+
+  // 진행 상태 애니메이션
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -25,39 +28,48 @@ export default function NewFeedbackPage() {
       });
     }, 300);
 
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []);
 
+  // 피드백 생성 함수
   const createFeedback = async () => {
+    if (isLoading) return; // 중복 방지
+    setIsLoading(true);
+
     try {
       const response = await fetchApi("/api/v1/portfolio-review", {
         method: "POST",
       });
 
-      console.log("생성된 리뷰 데이터:", response.data); // 디버깅 로그
+      console.log("생성된 리뷰 데이터:", response.data);
       const { feedbackContent, createDate } = response.data;
 
-      // Markdown을 HTML로 변환하여 상태 업데이트
       const parsedContent = await marked.parse(feedbackContent);
       setFeedbackContent(parsedContent);
-      setCreateDate(createDate); // 생성일 상태 업데이트
-      setIsAnalysisComplete(true); // 분석 완료 상태 설정
+      setCreateDate(createDate);
+      setIsAnalysisComplete(true);
       alert("✅ AI 포트폴리오 분석이 완료되었습니다!");
     } catch (error) {
       console.error("리뷰 생성 실패:", error);
-      alert("AI 포트폴리오 분석 생성에 실패했습니다.");
+      setIsAnalysisComplete(false);
+      setFeedbackContent("");
+      alert("❌ AI 포트폴리오 분석 생성에 실패했습니다.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // 마운트 시 한 번만 호출
   useEffect(() => {
-    createFeedback(); // 컴포넌트 마운트 시 한 번만 실행
-  }, []);
+    if (!requested) {
+      setRequested(true);
+      createFeedback();
+    }
+  }, [requested]);
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-20 relative">
-      {/* 첨삭 목록으로 되돌아가기 링크 */}
+      {/* 뒤로가기 버튼 */}
       {isAnalysisComplete && (
         <div className="absolute top-4 left-4">
           <a
@@ -83,6 +95,7 @@ export default function NewFeedbackPage() {
         </div>
       )}
 
+      {/* 분석 중 화면 */}
       {!isAnalysisComplete && (
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-4">AI 포트폴리오 분석 중...</h1>
@@ -90,7 +103,7 @@ export default function NewFeedbackPage() {
             AI가 당신의 포트폴리오를 정밀 분석하고 있습니다. 잠시만 기다려주세요.
           </p>
 
-          {/* 진행 상태 */}
+          {/* 진행 바 */}
           <div className="w-full max-w-md mx-auto bg-gray-200 rounded-full h-3 mb-6">
             <div
               className="bg-blue-600 h-3 rounded-full transition-all duration-300"
@@ -106,15 +119,14 @@ export default function NewFeedbackPage() {
         </div>
       )}
 
-      {/* 분석 결과 표시 */}
+      {/* 분석 결과 화면 */}
       {isAnalysisComplete && feedbackContent && (
         <div className="mt-10">
           <h2 className="text-3xl font-bold mb-6 text-center">AI 첨삭 결과</h2>
           <div className="bg-white shadow-md rounded-lg p-6">
             <h3 className="text-2xl font-semibold mb-4">포트폴리오 분석 결과</h3>
             <p className="text-sm text-gray-500 mb-4">
-              생성일:{" "}
-              {new Date(createDate).toLocaleString()}
+              생성일: {new Date(createDate).toLocaleString()}
             </p>
             <div
               className="prose prose-blue max-w-none"
