@@ -113,8 +113,7 @@ export default function NewFeedbackPage() {
           <div className="bg-white shadow-md rounded-lg p-6">
             <h3 className="text-2xl font-semibold mb-4">포트폴리오 분석 결과</h3>
             <p className="text-sm text-gray-500 mb-4">
-              생성일:{" "}
-              {new Date(createDate).toLocaleString()}
+              {createDate && `생성일: ${new Date(createDate).toLocaleString()}`}
             </p>
             <div
               className="prose prose-blue max-w-none"
