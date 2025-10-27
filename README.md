@@ -105,6 +105,10 @@ NEXT_PUBLIC_TOSS_CLIENT_KEY = your_payment_secret_key
 
 ---
 
+## 🔗 ERD
+
+---
+
 ## ☁️ 시스템 아키텍처
 <img width="690" height="575" alt="Image" src="https://github.com/user-attachments/assets/713206f2-fa0f-41ed-ab22-9df0228fa620" />
 
