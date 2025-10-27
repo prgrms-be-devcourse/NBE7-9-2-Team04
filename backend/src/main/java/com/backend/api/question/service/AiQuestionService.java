@@ -54,7 +54,7 @@ public class AiQuestionService {
         validateQuestionLimit(user);
 
         Resume resume = resumeService.getResumeByUser(user);
-        AiQuestionRequest request = AiQuestionRequest.of(resume.getSkill(),resume.getPortfolioUrl());
+        AiQuestionRequest request = AiQuestionRequest.of(resume.getSkill(), resume.getPortfolioUrl(), user.getAiQuestionLimit());
 
         String connectionAi = connectionAi(request);
 

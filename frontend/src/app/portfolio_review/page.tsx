@@ -31,11 +31,20 @@ export default function PortfolioReviewMainPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("ko-KR", {
+    if (!dateStr) return "날짜 정보 없음"; // dateStr이 없을 때 표시할 메시지
+
+    // 소수점 이하의 초 제거
+    const cleanedDateStr = dateStr.split(".")[0];
+
+    const date = new Date(cleanedDateStr);
+    if (isNaN(date.getTime())) return "유효하지 않은 날짜"; // dateStr이 유효하지 않을 때 표시할 메시지
+
+    return date.toLocaleString("ko-KR", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -78,12 +87,14 @@ export default function PortfolioReviewMainPage() {
           <ul className="divide-y divide-gray-200">
             {feedbacks.map((f) => (
               <li
-                key={f.id}
+                key={f.reviewId}
                 className="py-4 cursor-pointer hover:bg-gray-50 transition px-2 rounded-md"
-                onClick={() => router.push(`/portfolio_review/${f.id}`)}
+                onClick={() => router.push(`/portfolio_review/${f.reviewId}`)}
               >
                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-800">{f.summary}</span>
+                  <span className="font-medium text-gray-800">
+                    📍 {f.reviewId}번째 포트폴리오 AI 첨삭
+                  </span>
                   <span className="text-sm text-gray-500">
                     {formatDate(f.createdAt)}
                   </span>

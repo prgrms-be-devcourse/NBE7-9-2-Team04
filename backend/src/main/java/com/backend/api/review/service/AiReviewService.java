@@ -30,15 +30,12 @@ public class AiReviewService {
 
     @Transactional
     public AiReviewResponse createAiReview(User user) throws JsonProcessingException {
-
         if (!user.isPremium()) {
             throw new ErrorException(ErrorCode.AI_FEEDBACK_FOR_PREMIUM_ONLY);
         }
 
         Resume resume = resumeService.getResumeByUser(user);
-
         AiReviewbackRequest request = AiReviewbackRequest.of(resume);
-
         String feedbackContent = aiQuestionService.getAiReviewContent(request);
 
         Review reviewEntity = Review.builder()
@@ -49,7 +46,7 @@ public class AiReviewService {
 
         reviewRepository.save(reviewEntity);
 
-        return AiReviewResponse.of(feedbackContent);
+        return AiReviewResponse.of(reviewEntity.getId(), feedbackContent, reviewEntity.getCreateDate());
     }
 
     public AiReviewResponse findReviewById(Long reviewId, User user) {
@@ -59,16 +56,15 @@ public class AiReviewService {
         if (!Objects.equals(review.getUser().getId(), user.getId())) {
             throw new ErrorException(ErrorCode.ACCESS_DENIED_REVIEW);
         }
-        return AiReviewResponse.of(review.getAiReviewContent());
-    }
 
+        return AiReviewResponse.of(review.getId(), review.getAiReviewContent(), review.getCreateDate());
+    }
 
     public List<AiReviewResponse> findMyAiReviews(User user) {
         List<Review> reviews = reviewRepository.findByUserIdOrderByIdDesc(user.getId());
 
-
         return reviews.stream()
-                .map(review -> AiReviewResponse.of(review.getAiReviewContent()))
+                .map(review -> AiReviewResponse.of(review.getId(), review.getAiReviewContent(), review.getCreateDate()))
                 .collect(Collectors.toList());
     }
 }
