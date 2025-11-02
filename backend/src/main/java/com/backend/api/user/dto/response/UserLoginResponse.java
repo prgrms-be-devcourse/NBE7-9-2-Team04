@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
-public record UserResponse(
+public record UserLoginResponse(
         @Schema(description = "사용자 ID", example = "1")
         Long id,
 
@@ -34,10 +34,18 @@ public record UserResponse(
         LocalDateTime createDate,
 
         @Schema(description = "수정일", example = "2025-10-13T10:20:00")
-        LocalDateTime modifyDate
+        LocalDateTime modifyDate,
+
+        @Schema(description = "accessToken", example = "accessToken")
+        String accessToken,
+
+        @Schema(description = "refreshToken", example = "refreshToken")
+        String refreshToken
+
+
 ) {
-    public static UserResponse from(User user) {
-        return new UserResponse(
+    public static UserLoginResponse from(User user, String accessToken, String refreshToken) {
+        return new UserLoginResponse(
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
@@ -47,7 +55,27 @@ public record UserResponse(
                 user.getImage(),
                 user.getRole().name(),
                 user.getCreateDate(),
-                user.getModifyDate()
+                user.getModifyDate(),
+                accessToken,
+                refreshToken
+
+        );
+    }
+
+    public static UserLoginResponse from(User user) {
+        return new UserLoginResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getNickname(),
+                user.getAge(),
+                user.getGithub(),
+                user.getImage(),
+                user.getRole().name(),
+                user.getCreateDate(),
+                user.getModifyDate(),
+                null,
+                null
         );
     }
 }

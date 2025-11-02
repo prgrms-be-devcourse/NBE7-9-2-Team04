@@ -2,7 +2,6 @@ package com.backend.domain.user.entity;
 
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.subscription.entity.Subscription;
-import com.backend.domain.subscription.entity.SubscriptionType;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Entity
+@Builder
 @Table(name = "users")
 public class User extends BaseEntity {
 
@@ -49,25 +49,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private int aiQuestionUsedCount = 0; // AI 질문 사용 횟수
 
-    @Builder
-    public User(String email,
-                String password,
-                String name,
-                String nickname,
-                int age,
-                String github,
-                String image,
-                Role role)
-    {
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.nickname = nickname;
-        this.age = age;
-        this.github = github;
-        this.image = image;
-        this.role = role;
-    }
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Resume resume;
 

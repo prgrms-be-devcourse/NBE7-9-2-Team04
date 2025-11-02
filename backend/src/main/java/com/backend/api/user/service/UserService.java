@@ -3,6 +3,8 @@ package com.backend.api.user.service;
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
+import com.backend.api.user.dto.response.UserLoginResponse;
+import com.backend.api.user.dto.response.UserSignupResponse;
 import com.backend.domain.ranking.entity.Ranking;
 import com.backend.domain.ranking.entity.Tier;
 import com.backend.domain.ranking.repository.RankingRepository;
@@ -36,7 +38,7 @@ public class UserService {
     private final VerificationCodeRepository verificationCodeRepository;
     private final RankingRepository rankingRepository;
 
-    public User signUp(UserSignupRequest request) {
+    public UserSignupResponse signUp(UserSignupRequest request) {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ErrorException(ErrorCode.DUPLICATE_EMAIL);
@@ -90,10 +92,10 @@ public class UserService {
 
         rankingRepository.save(ranking);
 
-        return user;
+        return UserSignupResponse.from(user,ranking);
     }
 
-    public User login(UserLoginRequest request){
+    public UserLoginResponse login(UserLoginRequest request){
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_EMAIL));
 
@@ -110,7 +112,11 @@ public class UserService {
             throw new ErrorException(ErrorCode.WRONG_PASSWORD);
         }
 
-        return user;
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
+
+
+        return UserLoginResponse.from(user,accessToken,refreshToken);
     }
 
     public User getUser(Long userId) {
