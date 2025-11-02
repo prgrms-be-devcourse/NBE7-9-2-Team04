@@ -51,6 +51,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath password = createString("password");
 
+    public final com.backend.domain.ranking.entity.QRanking ranking;
+
     public final com.backend.domain.resume.entity.QResume resume;
 
     public final EnumPath<Role> role = createEnum("role", Role.class);
@@ -75,6 +77,7 @@ public class QUser extends EntityPathBase<User> {
 
     public QUser(Class<? extends User> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.ranking = inits.isInitialized("ranking") ? new com.backend.domain.ranking.entity.QRanking(forProperty("ranking"), inits.get("ranking")) : null;
         this.resume = inits.isInitialized("resume") ? new com.backend.domain.resume.entity.QResume(forProperty("resume"), inits.get("resume")) : null;
         this.subscription = inits.isInitialized("subscription") ? new com.backend.domain.subscription.entity.QSubscription(forProperty("subscription"), inits.get("subscription")) : null;
     }

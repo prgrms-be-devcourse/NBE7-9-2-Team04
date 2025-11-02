@@ -83,12 +83,16 @@ public class UserService {
 
         subscriptionRepository.save(basicSubscription);
 
+
         Ranking ranking = Ranking.builder()
                 .user(user)
                 .totalScore(0)
                 .tier(Tier.UNRATED)
                 .rankValue(0)
                 .build();
+
+        user.assignSubscription(basicSubscription);
+        user.assignRanking(ranking);
 
         rankingRepository.save(ranking);
 

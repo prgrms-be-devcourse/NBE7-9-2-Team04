@@ -1,5 +1,6 @@
 package com.backend.domain.user.entity;
 
+import com.backend.domain.ranking.entity.Ranking;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.subscription.entity.Subscription;
 import com.backend.global.entity.BaseEntity;
@@ -44,6 +45,7 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private AccountStatus accountStatus = AccountStatus.ACTIVE; // 기본값 ACTIVE
 
     @Column(nullable = false)
@@ -54,6 +56,21 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Subscription subscription;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Ranking ranking;
+
+
+    public void assignSubscription(Subscription subscription) {
+        this.subscription = subscription;
+    }
+
+    public void assignRanking(Ranking ranking) {
+        this.ranking = ranking;
+    }
+
+
+
 
     public void updateUser(String email, String password, String name,
                            String nickname, int age, String github, String image) {
