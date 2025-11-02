@@ -118,15 +118,4 @@ public class RankingService {
         rankingRepository.saveAll(rankings);
     }
 
-
-//
-//    private int calculateUserRank(Ranking myRanking) {
-//        List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
-//        for (int i = 0; i < rankings.size(); i++) {
-//            if (rankings.get(i).getUser().getId().equals(myRanking.getUser().getId())) {
-//                return i + 1;
-//            }
-//        }
-//        return rankings.size();
-//    }
 }

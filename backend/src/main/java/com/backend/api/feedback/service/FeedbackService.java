@@ -1,9 +1,6 @@
 package com.backend.api.feedback.service;
 
 
-
-import ch.qos.logback.classic.spi.IThrowableProxy;
-import com.backend.api.feedback.dto.response.AiFeedbackResponse;
 import com.backend.api.feedback.dto.request.AiFeedbackRequest;
 import com.backend.api.feedback.dto.response.AiFeedbackResponse;
 import com.backend.api.feedback.dto.response.FeedbackReadResponse;
@@ -133,7 +130,6 @@ public class FeedbackService {
     }
 
     @Transactional(readOnly = true)
-
     public FeedbackReadResponse readFeedback(Long questionId,User user) {
         Answer answer = answerRepository.findFirstByQuestionIdAndAuthorId(questionId,user.getId())
                 .orElseThrow(() -> new ErrorException(ErrorCode.ANSWER_NOT_FOUND));
