@@ -71,7 +71,7 @@ public class UserService {
                 .user(user)
                 .subscriptionType(SubscriptionType.BASIC)
                 .subscriptionName("BASIC")
-                .isActive(false)                     // 기본 회원은 활성화된 상태로 시작
+                .isActive(false)
                 .price(0L)
                 .questionLimit(5)                   // 무료 사용자는 질문 제한 5회
                 .startDate(LocalDateTime.now())
