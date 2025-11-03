@@ -38,6 +38,4 @@ public class RankingController {
         return ApiResponse.ok(myRanking);
     }
 
-
-
 }

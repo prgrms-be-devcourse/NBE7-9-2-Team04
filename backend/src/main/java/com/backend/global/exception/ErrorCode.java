@@ -27,7 +27,6 @@ public enum ErrorCode {
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다."),
     EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다."),
     USER_QUESTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 유저-문제 관계입니다."),
-    RANKING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 랭킹입니다."),
 
     //token
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Refresh Token입니다."),
@@ -100,8 +99,16 @@ public enum ErrorCode {
 
     // feedback
     FEEDBACK_NOT_FOUND(HttpStatus.NOT_FOUND,"피드백을 찾을 수 없습니다."),
-    FETCH_FEEDBACK_FAILED(HttpStatus.BAD_REQUEST,"AI 피드백 조회에 실패했습니다.");
+    FETCH_FEEDBACK_FAILED(HttpStatus.BAD_REQUEST,"AI 피드백 조회에 실패했습니다."),
 
+    //ranking
+    RANKING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 랭킹입니다."),
+    RANKING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자의 랭킹 정보를 찾을 수 없습니다."),
+    INVALID_SCORE(HttpStatus.BAD_REQUEST, "유효하지 않은 점수 값입니다."),
+    RANKING_NOT_AVAILABLE(HttpStatus.NO_CONTENT, "현재 랭킹 데이터가 없습니다."),
+
+
+    ;
     private final HttpStatus httpStatus;
     private final String message;
 }
