@@ -1,9 +1,6 @@
 package com.backend.api.question.controller;
 
-import com.backend.api.question.dto.request.AdminQuestionAddRequest;
-import com.backend.api.question.dto.request.QuestionApproveRequest;
-import com.backend.api.question.dto.request.QuestionScoreRequest;
-import com.backend.api.question.dto.request.QuestionUpdateRequest;
+import com.backend.api.question.dto.request.*;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.entity.QuestionCategoryType;
 import com.backend.domain.question.repository.QuestionRepository;
@@ -119,7 +116,7 @@ public class AdminQuestionControllerTest {
             AdminQuestionAddRequest request = new AdminQuestionAddRequest(
                     "", // 제목 누락
                     "내용은 있습니다.",
-                    null,
+                    QuestionCategoryType.OS,
                     true,
                     0
             );
@@ -139,7 +136,7 @@ public class AdminQuestionControllerTest {
             AdminQuestionAddRequest request = new AdminQuestionAddRequest(
                     "Spring Boot란?",
                     "", //내용 누락
-                    null,
+                    QuestionCategoryType.OS,
                     true,
                     0
             );
@@ -159,7 +156,7 @@ public class AdminQuestionControllerTest {
             AdminQuestionAddRequest request = new AdminQuestionAddRequest(
                     "Spring Boot란?",
                     "Spring Boot의 핵심 개념과 장점을 설명해주세요.",
-                    null,
+                    QuestionCategoryType.OS,
                     true,
                     -3 // 점수가 음수일때
             );
@@ -182,9 +179,11 @@ public class AdminQuestionControllerTest {
         @DisplayName("질문 수정 성공")
         void success() throws Exception {
             Long questionId = savedQuestion.getId();
-            QuestionUpdateRequest request = new QuestionUpdateRequest(
+            AdminQuestionUpdateRequest request = new AdminQuestionUpdateRequest(
                     "관리자 수정 제목",
                     "관리자 수정 내용",
+                    true,
+                    10,
                     QuestionCategoryType.DATABASE
             );
 
@@ -206,10 +205,12 @@ public class AdminQuestionControllerTest {
         @DisplayName("질문 수정 실패 - 존재하지 않는 ID")
         void fail1() throws Exception {
             Long questionId = 999L;
-            QuestionUpdateRequest request = new QuestionUpdateRequest(
+            AdminQuestionUpdateRequest request = new AdminQuestionUpdateRequest(
                     "수정 제목",
                     "수정 내용",
-                    null
+                    true,
+                    10,
+                    QuestionCategoryType.DATABASE
             );
 
             mockMvc.perform(put("/api/v1/admin/questions/{questionId}", questionId)
@@ -225,10 +226,12 @@ public class AdminQuestionControllerTest {
         @DisplayName("질문 수정 실패 - 제목 누락")
         void fail2() throws Exception {
             Long questionId = savedQuestion.getId();
-            QuestionUpdateRequest request = new QuestionUpdateRequest(
+            AdminQuestionUpdateRequest request = new AdminQuestionUpdateRequest(
                     "",
                     "내용만 있습니다.",
-                    null
+                    true,
+                        10,
+                    QuestionCategoryType.OS
             );
 
             mockMvc.perform(put("/api/v1/admin/questions/{questionId}", questionId)
@@ -244,10 +247,12 @@ public class AdminQuestionControllerTest {
         @DisplayName("질문 수정 실패 - 내용 누락")
         void fail3() throws Exception {
             Long questionId = savedQuestion.getId();
-            QuestionUpdateRequest request = new QuestionUpdateRequest(
+            AdminQuestionUpdateRequest request = new AdminQuestionUpdateRequest(
                     "제목만 있습니다.",
                     "",
-                    null
+                    true,
+                        10,
+                    QuestionCategoryType.OS
             );
 
             mockMvc.perform(put("/api/v1/admin/questions/{questionId}", questionId)
