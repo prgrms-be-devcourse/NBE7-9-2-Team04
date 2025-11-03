@@ -37,6 +37,14 @@ public class BillingService {
     @Transactional
     public BillingResponse issueBillingKey(BillingRequest request) {
 
+        if(request.authKey() == null){
+            throw new ErrorException(ErrorCode.INVALID_AUTH_KEY);
+        }
+
+        if(request.customerKey() == null){
+            throw new ErrorException(ErrorCode.INVALID_CUSTOMER_KEY);
+        }
+
         Map<String, Object> billingResponse = webClient.post()
                 .uri("v1/billing/authorizations/issue")
                 .bodyValue(Map.of(
@@ -48,6 +56,10 @@ public class BillingService {
                 .block();
 
         String billingKey = (String) billingResponse.get("billingKey");
+
+        if(billingKey == null){
+            throw new ErrorException(ErrorCode.BILLING_KEY_NOT_FOUND);
+        }
 
         // 구독 PREMIUM 전환
         SubscriptionResponse updated = subscriptionService.activatePremium(request.customerKey(), billingKey);

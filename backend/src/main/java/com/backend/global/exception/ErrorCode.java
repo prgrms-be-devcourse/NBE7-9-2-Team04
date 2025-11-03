@@ -94,6 +94,9 @@ public enum ErrorCode {
     SUBSCRIPTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 구독 중입니다."),
     SUBSCRIPTION_INACTIVE(HttpStatus.BAD_REQUEST, "비활성화된 구독입니다."),
     BILLING_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "빌링키를 찾을 수 없습니다."),
+    INVALID_AUTH_KEY(HttpStatus.BAD_REQUEST, "AUTH_KEY가 누락되었거나 유효하지 않습니다."),
+    INVALID_CUSTOMER_KEY(HttpStatus.BAD_REQUEST, "CUSTOMER_KEY가 누락되었거나 유효하지 않습니다."),
+
 
     // feedback
     FEEDBACK_NOT_FOUND(HttpStatus.NOT_FOUND,"피드백을 찾을 수 없습니다."),
