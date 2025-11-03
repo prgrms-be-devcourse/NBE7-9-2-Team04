@@ -25,6 +25,14 @@ public class SubscriptionService {
         Subscription subscription = subscriptionRepository.findByCustomerKey(customerKey)
                 .orElseThrow(() -> new ErrorException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
 
+        if(subscription.isActive()){
+            throw new ErrorException(ErrorCode.SUBSCRIPTION_ALREADY_EXISTS);
+        }
+
+        if(billingKey == null || billingKey.isBlank()){
+            throw new ErrorException(ErrorCode.BILLING_KEY_NOT_FOUND);
+        }
+
         subscription.activatePremium(billingKey);
         subscriptionRepository.save(subscription);
         return SubscriptionResponse.from(subscription);
@@ -77,6 +85,5 @@ public class SubscriptionService {
 
         return SubscriptionResponse.from(subscription);
     }
-
 
 }
