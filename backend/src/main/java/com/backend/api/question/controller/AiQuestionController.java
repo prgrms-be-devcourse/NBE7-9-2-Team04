@@ -44,7 +44,7 @@ public class AiQuestionController {
     }
 
     @GetMapping("/{groupId}")
-    @Operation(summary = "AI 면접 질문 목록", description = "AI 질문 목록을 조회합니다.")
+    @Operation(summary = "그룹별 AI 면접 질문 목록", description = "그룹별 AI 질문 목록을 조회합니다.")
     public ApiResponse<PortfolioListReadResponse> readAiQuestion(
             @PathVariable UUID groupId
     ) {
