@@ -78,7 +78,7 @@ public class RankingControllerTest {
 
         @Test
         @DisplayName("정상 작동")
-        void success() throws Exception{
+        void success1() throws Exception{
 
 
             //when
@@ -102,6 +102,21 @@ public class RankingControllerTest {
                     .andExpect(jsonPath("$.data.myRanking.userId").value(testUser.getId()))
                     .andDo(print());
 
+        }
+
+        @Test
+        @DisplayName("정상 작동 - 상위 10명만 반환하는지 확인")
+        void success2() throws Exception {
+
+            //when
+            ResultActions resultActions = mockMvc.perform(get("/api/v1/rankings")
+                    .accept(MediaType.APPLICATION_JSON));
+
+            //then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.topRankings.length()").value(10))
+                    .andDo(print());
         }
 
         @Test
