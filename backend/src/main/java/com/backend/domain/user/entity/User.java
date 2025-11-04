@@ -68,8 +68,6 @@ public class User extends BaseEntity {
         this.image = image;
         this.role = role;
     }
-    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Resume resume;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Subscription subscription;
