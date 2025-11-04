@@ -96,16 +96,21 @@ public class RankingControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("전체 랭킹 조회를 성공했습니다."))
-                    .andExpect(jsonPath("$.data.userId").value(testUser.getId()))
+                    .andExpect(jsonPath("$.data.myRanking.userId").value(testUser.getId()))
+                    .andExpect(jsonPath("$.data.topRankings").isArray())
+                    .andExpect(jsonPath("$.data.topRankings.length()").isNotEmpty())
+                    .andExpect(jsonPath("$.data.myRanking.userId").value(testUser.getId()))
                     .andDo(print());
 
         }
 
         @Test
-        @DisplayName("전체 랭킹 조회 실패 - 상위 10명 랭킹 정보가 없을 때")
+        @DisplayName("전체 랭킹 조회 실패 - 내 랭킹 정보가 없을 때")
         void fail() throws Exception{
 
             //given
+            rankingRepository.deleteAll();
+
             User newUser = userRepository.save(
                     User.builder()
                             .email("newuser@test.com")
@@ -116,6 +121,7 @@ public class RankingControllerTest {
                             .github("github.com/newUser")
                             .role(Role.USER)
                             .build());
+
 
             when(rq.getUser()).thenReturn(newUser);
 
@@ -134,7 +140,7 @@ public class RankingControllerTest {
                     .andExpect(handler().methodName("getRankings"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("해당 고객의 구독 정보를 찾을 수 없습니다."))
+                    .andExpect(jsonPath("$.message").value("해당 사용자의 랭킹 정보를 찾을 수 없습니다."))
                     .andDo(print());
 
         }
