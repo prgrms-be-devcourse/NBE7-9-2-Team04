@@ -68,6 +68,8 @@ public class AdminQuestionControllerTest {
 
         Mockito.when(rq.getUser()).thenReturn(testUser);
 
+        org.springframework.test.util.ReflectionTestUtils.setField(this, "rq", rq);
+
         Question question = Question.builder()
                 .title("기존 제목")
                 .content("기존 내용")
