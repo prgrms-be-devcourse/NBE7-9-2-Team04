@@ -386,11 +386,11 @@ public class AdminQuestionControllerTest {
     }
 
     @Nested
-    @DisplayName("관리자 질문 조회 API")
+    @DisplayName("관리자 질문 조회 API (페이징 기반)")
     class t5 {
 
         @Test
-        @DisplayName("관리자 질문 목록 조회 성공 - 승인 여부 관계없이 전체 반환")
+        @DisplayName("관리자 질문 목록 조회 성공 - 승인 여부 관계없이 전체 반환 (페이징)")
         void success() throws Exception {
             questionRepository.deleteAll();
 
@@ -413,12 +413,17 @@ public class AdminQuestionControllerTest {
             unapproved.updateApproved(false);
 
             mockMvc.perform(get("/api/v1/admin/questions")
+                            .param("page", "0")
+                            .param("size", "10")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("관리자 질문 목록 조회 성공"))
                     .andExpect(jsonPath("$.data.questions").isArray())
                     .andExpect(jsonPath("$.data.questions[*].title", hasItem("승인 질문")))
+                    .andExpect(jsonPath("$.data.totalCount").value(2))
+                    .andExpect(jsonPath("$.data.totalPages").value(1))
+                    .andExpect(jsonPath("$.data.pageSize").value(15))
                     .andDo(print());
         }
 
@@ -426,7 +431,10 @@ public class AdminQuestionControllerTest {
         @DisplayName("관리자 질문 목록 조회 실패 - 데이터 없음")
         void fail1() throws Exception {
             questionRepository.deleteAll();
+
             mockMvc.perform(get("/api/v1/admin/questions")
+                            .param("page", "0")
+                            .param("size", "10")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
