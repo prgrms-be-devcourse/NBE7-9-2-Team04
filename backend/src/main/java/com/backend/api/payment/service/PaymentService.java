@@ -78,4 +78,9 @@ public class PaymentService {
         return PaymentResponse.from(payment);
     }
 
+    @Transactional
+    public Payment savePayment(Payment payment) {
+        return paymentRepository.save(payment);
+    }
+
 }

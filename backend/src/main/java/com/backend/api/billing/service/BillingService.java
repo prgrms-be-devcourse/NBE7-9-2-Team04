@@ -5,6 +5,7 @@ import com.backend.api.billing.dto.request.BillingRequest;
 import com.backend.api.billing.dto.response.BillingPaymentResponse;
 import com.backend.api.billing.dto.response.BillingResponse;
 import com.backend.api.payment.dto.response.PaymentResponse;
+import com.backend.api.payment.service.PaymentService;
 import com.backend.api.subscription.dto.response.SubscriptionResponse;
 import com.backend.api.subscription.service.SubscriptionService;
 import com.backend.domain.payment.entity.Payment;
@@ -30,6 +31,7 @@ import java.util.UUID;
 public class BillingService {
 
     private final SubscriptionService subscriptionService;
+    private final PaymentService paymentService;
     private final PaymentRepository paymentRepository;
     private final WebClient webClient;
 
@@ -113,7 +115,7 @@ public class BillingService {
                 .subscription(subscription)
                 .build();
 
-        paymentRepository.save(payment);
+        paymentService.savePayment(payment);
 
         subscriptionService.updateNextBillingDate(managedSub, LocalDate.now().plusMonths(1));
         PaymentResponse.from(payment);
