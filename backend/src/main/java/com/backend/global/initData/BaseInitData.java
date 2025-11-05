@@ -20,6 +20,7 @@ import com.backend.domain.qna.repository.QnaRepository;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.entity.QuestionCategoryType;
 import com.backend.domain.question.repository.QuestionRepository;
+import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
@@ -43,7 +44,6 @@ import java.util.stream.IntStream;
 
 @Configuration
 @RequiredArgsConstructor
-//@Profile("!test")
 public class BaseInitData {
 
     @Autowired
