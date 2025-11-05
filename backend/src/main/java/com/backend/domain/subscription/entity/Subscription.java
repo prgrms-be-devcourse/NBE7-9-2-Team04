@@ -60,11 +60,10 @@ public class Subscription extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-
 //    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
 //    private List<Payment> payments = new ArrayList<>();
 
-  
+
     public void activatePremium(String billingKey) {
         this.billingKey = billingKey;
         this.isActive = true;
