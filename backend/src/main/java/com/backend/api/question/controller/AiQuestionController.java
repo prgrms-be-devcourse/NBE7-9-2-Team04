@@ -50,6 +50,6 @@ public class AiQuestionController {
     ) {
         Long userId = rq.getUser().getId();
         PortfolioListReadResponse responses = aiQuestionService.readAiQuestion(userId,groupId);
-        return ApiResponse.ok("AI 면접 질문 목록이 조회되었습니다.",responses);
+        return ApiResponse.ok("그룹별 AI 면접 질문 목록이 조회되었습니다.",responses);
     }
 }
