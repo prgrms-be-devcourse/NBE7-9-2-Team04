@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,7 @@ import java.util.stream.IntStream;
 
 @Configuration
 @RequiredArgsConstructor
+@Profile("!test") // "test" 프로필이 아닐 때만 이 Bean을 활성화합니다.
 public class BaseInitData {
 
     @Autowired
