@@ -2,7 +2,6 @@ package com.backend.api.user.controller;
 
 import com.backend.api.answer.dto.response.AnswerMypageResponse;
 import com.backend.api.answer.dto.response.AnswerPageResponse;
-import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.service.AnswerService;
 import com.backend.api.comment.dto.response.CommentMypageResponse;
 import com.backend.api.comment.dto.response.CommentPageResponse;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -146,9 +144,5 @@ public class UserMyPageController {
 
         return ApiResponse.ok("비밀번호가 확인되었습니다.", true);
     }
-
-
-
-
 
 }
