@@ -61,6 +61,7 @@ public class Subscription extends BaseEntity {
     private User user;
 
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Payment> payments = new ArrayList<>();
   
     public void activatePremium(String billingKey) {
@@ -110,6 +111,11 @@ public class Subscription extends BaseEntity {
             return false;
         }
         return this.isActive && this.endDate != null && this.endDate.isAfter(LocalDateTime.now());
+    }
+
+    // 양방향 관계 설정을 위한 편의 메서드
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }

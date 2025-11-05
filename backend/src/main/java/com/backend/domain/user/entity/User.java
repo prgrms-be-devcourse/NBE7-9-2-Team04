@@ -113,4 +113,9 @@ public class User extends BaseEntity {
     public void incrementAiQuestionUsedCount() {
         this.aiQuestionUsedCount++;
     }
+
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
+        subscription.setUser(this);
+    }
 }
