@@ -10,7 +10,6 @@ import com.backend.api.subscription.dto.response.SubscriptionResponse;
 import com.backend.api.subscription.service.SubscriptionService;
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.payment.entity.PaymentStatus;
-import com.backend.domain.payment.repository.PaymentRepository;
 import com.backend.domain.subscription.entity.Subscription;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -32,7 +31,6 @@ public class BillingService {
 
     private final SubscriptionService subscriptionService;
     private final PaymentService paymentService;
-    private final PaymentRepository paymentRepository;
     private final WebClient webClient;
 
     //빌링키 발급
