@@ -25,6 +25,7 @@ export type AnswerResponseBase = {
 export type AnswerCreateResponse = AnswerResponseBase;
 export type AnswerReadResponse = AnswerResponseBase;
 export type MyAnswerReadResponse = AnswerResponseBase | null;
+export type AnswerMypageResponse = AnswerResponseBase & { title: string; }
 export type AnswerUpdateResponse = AnswerResponseBase;
 export type AnswerReadWithScoreResponse = AnswerResponseBase & { score: number; }
 
@@ -35,3 +36,11 @@ export type AnswerPageResponse<T = AnswerResponseBase> = {
   totalCount: number;
   pageSize: number;
 };
+
+export type AnswerPage2Response<T = AnswerMypageResponse> = {
+  answers: T[];
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+}

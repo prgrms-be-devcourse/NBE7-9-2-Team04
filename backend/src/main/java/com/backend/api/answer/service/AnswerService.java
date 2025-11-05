@@ -2,6 +2,7 @@ package com.backend.api.answer.service;
 
 import com.backend.api.answer.dto.request.AnswerCreateRequest;
 import com.backend.api.answer.dto.request.AnswerUpdateRequest;
+import com.backend.api.answer.dto.response.AnswerMypageResponse;
 import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.dto.response.AnswerReadWithScoreResponse;
@@ -116,7 +117,7 @@ public class AnswerService {
                 .orElse(null); // 없으면 null 반환
     }
 
-    public AnswerPageResponse<AnswerReadResponse> findAnswersByUserId(int page, Long userId) {
+    public AnswerPageResponse<AnswerMypageResponse> findAnswersByUserId(int page, Long userId) {
         userService.getUser(userId);
         User currentUser = rq.getUser();
         if(!currentUser.getId().equals(userId) && !currentUser.getRole().equals(Role.ADMIN)) {
@@ -127,10 +128,10 @@ public class AnswerService {
         Pageable pageable = PageRequest.of(page - 1, 15, Sort.by("createDate").descending());
         Page<Answer> answersPage = answerRepository.findByAuthorId(userId, pageable);
 
-        List<AnswerReadResponse> answers = answersPage
+        List<AnswerMypageResponse> answers = answersPage
                 .getContent()
                 .stream()
-                .map(AnswerReadResponse::new)
+                .map(AnswerMypageResponse::new)
                 .toList();
 
         return new AnswerPageResponse<>(answersPage, answers);

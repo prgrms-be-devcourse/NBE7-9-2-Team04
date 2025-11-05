@@ -1,5 +1,6 @@
 package com.backend.api.user.controller;
 
+import com.backend.api.answer.dto.response.AnswerMypageResponse;
 import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.service.AnswerService;
@@ -119,11 +120,11 @@ public class UserMyPageController {
 
     @GetMapping("/{userId}/answers")
     @Operation(summary = "사용자가 작성한 면접 답변 목록 조회")
-    public ApiResponse<AnswerPageResponse<AnswerReadResponse>> getUserAnswers(
+    public ApiResponse<AnswerPageResponse<AnswerMypageResponse>> getUserAnswers(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int page
     ) {
-        AnswerPageResponse<AnswerReadResponse> userAnswersPage = answerService.findAnswersByUserId(page, userId);
+        AnswerPageResponse<AnswerMypageResponse> userAnswersPage = answerService.findAnswersByUserId(page, userId);
         return ApiResponse.ok(
                 "사용자가 작성한 면접 답변 목록 조회를 완료했습니다.",
                 userAnswersPage
