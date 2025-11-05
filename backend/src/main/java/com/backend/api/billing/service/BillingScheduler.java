@@ -1,7 +1,7 @@
 package com.backend.api.billing.service;
 
+import com.backend.api.subscription.service.SubscriptionService;
 import com.backend.domain.subscription.entity.Subscription;
-import com.backend.domain.subscription.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +16,7 @@ import java.util.List;
 public class BillingScheduler {
 
     private final BillingService billingService;
-    private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionService subscriptionService;
 
     //00시에 자동으로 결제 진행
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
@@ -26,7 +26,7 @@ public class BillingScheduler {
 
         //오늘 결제일인 구독 목록 조회
         List<Subscription> subscriptions =
-                subscriptionRepository.findByNextBillingDateAndIsActive(LocalDate.now(), true);
+                subscriptionService.getActiveSubscriptionsByBillingDate(LocalDate.now());
 
         if(subscriptions.isEmpty()){
             log.info("오늘 결제 대상 구독 없음");
@@ -35,7 +35,7 @@ public class BillingScheduler {
         for(Subscription subscription:subscriptions){
             if(subscription.getBillingKey() == null) {
                 subscription.deActivatePremium(); //구독 종료
-                subscriptionRepository.save(subscription);
+                subscriptionService.saveSubscription(subscription);
                 continue;
             }
             billingService.autoPayment(subscription);

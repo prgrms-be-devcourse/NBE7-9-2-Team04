@@ -10,6 +10,7 @@ import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ public class AdminPaymentService {
 
     private final PaymentRepository paymentRepository;
 
+    @Transactional(readOnly = true)
     public List<AdminPaymentResponse> getAllByOrderByApprovedAtDesc() {
         List<Payment> payments = paymentRepository.findAllByOrderByApprovedAtDesc();
 
@@ -32,6 +34,7 @@ public class AdminPaymentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public AdminPaymentSummaryResponse getPaymentSummary(){
         long total = paymentRepository.count();
 

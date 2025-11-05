@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +85,16 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
 
         return SubscriptionResponse.from(subscription);
+    }
+
+    @Transactional
+    public void saveSubscription(Subscription subscription) {
+        subscriptionRepository.save(subscription);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Subscription> getActiveSubscriptionsByBillingDate(LocalDate billingDate) {
+        return subscriptionRepository.findByNextBillingDateAndIsActive(billingDate, true);
     }
 
 }

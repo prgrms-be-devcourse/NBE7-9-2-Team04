@@ -64,6 +64,7 @@ public class PaymentService {
 
     }
 
+    @Transactional(readOnly = true)
     public PaymentResponse geyPaymentByKey(String paymentKey) {
         Payment payment = paymentRepository.findByPaymentKey(paymentKey)
                 .orElseThrow(() -> new ErrorException(ErrorCode.PAYMENT_NOT_FOUND));
@@ -71,6 +72,7 @@ public class PaymentService {
         return PaymentResponse.from(payment);
     }
 
+    @Transactional(readOnly = true)
     public PaymentResponse getPaymentByOrderId(String orderId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.PAYMENT_NOT_FOUND));
@@ -79,8 +81,8 @@ public class PaymentService {
     }
 
     @Transactional
-    public Payment savePayment(Payment payment) {
-        return paymentRepository.save(payment);
+    public void savePayment(Payment payment) {
+        paymentRepository.save(payment);
     }
 
 }

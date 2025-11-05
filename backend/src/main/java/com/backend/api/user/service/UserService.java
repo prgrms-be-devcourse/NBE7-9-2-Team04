@@ -22,6 +22,7 @@ import com.backend.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -38,6 +39,7 @@ public class UserService {
     private final VerificationCodeRepository verificationCodeRepository;
     private final RankingRepository rankingRepository;
 
+    @Transactional
     public UserSignupResponse signUp(UserSignupRequest request) {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
@@ -99,6 +101,7 @@ public class UserService {
         return UserSignupResponse.from(user,ranking);
     }
 
+    @Transactional
     public UserLoginResponse login(UserLoginRequest request){
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_EMAIL));
@@ -123,11 +126,13 @@ public class UserService {
         return UserLoginResponse.from(user,accessToken,refreshToken);
     }
 
+    @Transactional(readOnly = true)
     public User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
     }
 
+    @Transactional
     public TokenResponse createAccessTokenFromRefresh(String refreshToken) {
 
         //refreshToken 유효성 검사

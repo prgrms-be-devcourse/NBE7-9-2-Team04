@@ -43,8 +43,6 @@ public class QSubscription extends EntityPathBase<Subscription> {
 
     public final DatePath<java.time.LocalDate> nextBillingDate = createDate("nextBillingDate", java.time.LocalDate.class);
 
-    public final ListPath<com.backend.domain.payment.entity.Payment, com.backend.domain.payment.entity.QPayment> payments = this.<com.backend.domain.payment.entity.Payment, com.backend.domain.payment.entity.QPayment>createList("payments", com.backend.domain.payment.entity.Payment.class, com.backend.domain.payment.entity.QPayment.class, PathInits.DIRECT2);
-
     public final NumberPath<Long> price = createNumber("price", Long.class);
 
     public final NumberPath<Integer> questionLimit = createNumber("questionLimit", Integer.class);
