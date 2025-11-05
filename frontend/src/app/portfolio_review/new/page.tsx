@@ -15,6 +15,7 @@ export default function NewFeedbackPage() {
   const [createDate, setCreateDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [requested, setRequested] = useState(false); // Strict Mode 대응
+  const [isPremium, setIsPremium] = useState(false); // 프리미엄 여부 상태 추가
 
   // 진행 상태 애니메이션
   useEffect(() => {
@@ -33,6 +34,12 @@ export default function NewFeedbackPage() {
 
   // 피드백 생성 함수
   const createFeedback = async () => {
+    if (!isPremium) {
+      alert("포트폴리오 첨삭은 PREMIUM 등급 사용자만 이용 가능합니다.");
+      router.push("/mypage/premium");
+      return;
+    }
+
     if (isLoading) return; // 중복 방지
     setIsLoading(true);
 
