@@ -47,6 +47,7 @@ dependencies {
 
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 
 	// querydsl 설정
 	implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
