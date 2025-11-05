@@ -6,6 +6,7 @@ import { fetchApi } from "@/lib/client";
 import { useParams } from "next/navigation";
 import { PostResponse } from "@/types/post";
 import { CommentResponse, CommentRequest, CommentPageResponse } from "@/types/comment";
+import { marked } from "marked"; // Markdown 변환 라이브러리 추가
 
 type CommentWithEdit = CommentResponse & {
   isEditing: boolean;
@@ -39,6 +40,7 @@ export default function RecruitmentDetailPage() {
           createDate: res.data.createDate.split("T")[0],
           modifyDate: res.data.modifyDate.split("T")[0],
           deadline: res.data.deadline.split("T")[0],
+          content: await marked.parse(res.data.content), // Markdown을 HTML로 변환
         };
         setPost(formatted);
       } else {
@@ -271,9 +273,10 @@ export default function RecruitmentDetailPage() {
 
           <hr className="my-5 border-gray-300" />
 
-          <div className="prose prose-sm max-w-none whitespace-pre-wrap text-gray-800 mb-10">
-            {post.content}
-          </div>
+          <div
+            className="prose prose-sm max-w-none whitespace-pre-wrap text-gray-800 mb-10"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
 
           <hr className="my-8 border-gray-300" />
 

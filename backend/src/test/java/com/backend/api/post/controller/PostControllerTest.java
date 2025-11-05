@@ -4,12 +4,14 @@ import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.post.entity.PinStatus;
+import com.backend.domain.qna.repository.QnaRepository;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
+import com.backend.global.exception.ErrorCode;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,6 +63,9 @@ class PostControllerTest {
     @Autowired
     private AnswerRepository answerRepository;
 
+    @Autowired
+    private QnaRepository qnaRepository;
+
     private User testUser;
     private User otherUser;
     private Post savedPost;
@@ -72,6 +77,7 @@ class PostControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
 
         answerRepository.deleteAll();
+        qnaRepository.deleteAll();
         postRepository.deleteAll();
         questionRepository.deleteAll();
         userRepository.deleteAll();
@@ -234,6 +240,38 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.message").exists()) // content 관련 에러 메시지 중 하나가 나옴
                     .andDo(print());
         }
+
+        @Test
+        @DisplayName("실패 - 마감일이 과거 날짜")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        void fail_deadline_in_past() throws Exception {
+            // given
+            PostAddRequest request = new PostAddRequest(
+                    "마감일이 과거인 게시물",
+                    "내용은 충분히 깁니다. 10자 이상입니다.",
+                    "한 줄 소개도 충분히 깁니다. 10자 이상입니다.",
+                    LocalDateTime.now().minusDays(1), // 과거 날짜로 설정
+                    PostStatus.ING,
+                    PinStatus.NOT_PINNED,
+                    4,
+                    PostCategoryType.PROJECT
+            );
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/posts")
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_DEADLINE.getMessage()))
+                    .andDo(print());
+        }
     }
 
     @Nested
@@ -371,6 +409,38 @@ class PostControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").exists()) // 제목 관련 에러 메시지 중 하나가 나옴
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("실패 - 마감일을 과거로 수정")
+        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        void fail_update_deadline_to_past() throws Exception {
+            // given
+            PostUpdateRequest request = new PostUpdateRequest(
+                    "수정된 제목",
+                    "수정된 한 줄 소개입니다. 10자 이상입니다.",
+                    "수정된 내용입니다. 10자 이상입니다.",
+                    LocalDateTime.now().minusDays(1), // 과거 날짜로 설정
+                    PostStatus.ING,
+                    PinStatus.NOT_PINNED,
+                    10,
+                    PostCategoryType.PROJECT
+            );
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    put("/api/v1/posts/{postId}", savedPost.getId())
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_DEADLINE.getMessage()))
                     .andDo(print());
         }
     }
@@ -526,9 +596,10 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공"))
-                    .andExpect(jsonPath("$.data.length()").value(2))
-                    .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
+                    .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공")) // 1. 응답 메시지 확인
+                    .andExpect(jsonPath("$.data.posts.length()").value(2)) // 2. 응답 데이터 구조 변경 확인 (posts 배열)
+                    .andExpect(jsonPath("$.data.posts[0].title").value("두 번째 게시글")) // 3. 최신순 정렬 확인
+                    .andExpect(jsonPath("$.data.posts[1].title").value("기존 제목"))
                     .andDo(print());
         }
 
@@ -577,7 +648,8 @@ class PostControllerTest {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.status").value("OK"))
                         .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
-                        .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
+                        .andExpect(jsonPath("$.data.posts.length()").value(3)) // 4. 생성된 데이터 개수 확인
+                        .andExpect(jsonPath("$.data.posts[0].categoryType").value("PROJECT"))
                         .andDo(print());
             }
 
@@ -608,8 +680,8 @@ class PostControllerTest {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.status").value("OK"))
                         .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
-                        .andExpect(jsonPath("$.data[0].categoryType").value("STUDY"))
-                        .andExpect(jsonPath("$.data[0].title").value("스터디 게시글 1"))
+                        .andExpect(jsonPath("$.data.posts[0].categoryType").value("STUDY"))
+                        .andExpect(jsonPath("$.data.posts[0].title").value("스터디 게시글 1"))
                         .andDo(print());
             }
 
