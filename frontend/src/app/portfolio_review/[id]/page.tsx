@@ -15,10 +15,14 @@ export default function FeedbackDetailPage() {
       setIsLoading(true);
       try {
         const response = await fetchApi(`/api/v1/portfolio-review/${id}`);
-        console.log("Feedback data:", response.data); // 디버깅용 로그 추가
+        console.log("✅ Feedback data:", response.data);
+
+        // createdAt을 그대로 사용하여 상태에 설정
         setFeedback(response.data);
+
+        console.log("✅ Feedback createdAt:", response.data.createdAt);
       } catch (error) {
-        console.error("Failed to fetch feedback:", error);
+        console.error("❌ Failed to fetch feedback:", error);
         alert("피드백을 불러오는 데 실패했습니다.");
         router.push("/portfolio_review");
       } finally {
@@ -30,7 +34,7 @@ export default function FeedbackDetailPage() {
   }, [id, router]);
 
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return "***";
+    if (!dateStr) return "날짜 정보 없음";
 
     // 소수점 이하의 초 제거
     const cleanedDateStr = dateStr.split(".")[0];
@@ -38,13 +42,16 @@ export default function FeedbackDetailPage() {
     const date = new Date(cleanedDateStr);
     if (isNaN(date.getTime())) return "유효하지 않은 날짜";
 
-    return date.toLocaleString("ko-KR", {
+    const formattedDate = date.toLocaleString("ko-KR", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
     });
+
+    console.log("✅ Formatted date:", formattedDate);
+    return formattedDate;
   };
 
   if (isLoading) {
