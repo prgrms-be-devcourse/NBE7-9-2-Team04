@@ -124,6 +124,7 @@ public class FeedbackService {
         return new Prompt(List.of(systemMessage, userMessage, assistantMessage), options);
     }
 
+    @Transactional(readOnly = true)
     public FeedbackReadResponse readFeedback(Long questionId,User user) {
         AnswerReadResponse response = answerService.findMyAnswer(questionId);
         Feedback feedback = getFeedbackByAnswerId(response.id());

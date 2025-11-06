@@ -48,6 +48,10 @@ public class RankingService {
 
         int totalScore = userQuestionService.getTotalUserQuestionScore(user);
 
+        if(totalScore < 0){
+            throw new ErrorException(ErrorCode.INVALID_SCORE);
+        }
+
         Ranking ranking = rankingRepository.findByUser(user)
                 .orElseGet(() -> createRanking(user)); // 존재하지 않으면 생성
 
@@ -69,7 +73,7 @@ public class RankingService {
     @Transactional(readOnly = true)
     public RankingResponse getMyRanking(User user) {
         Ranking ranking = rankingRepository.findByUser(user)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new ErrorException(ErrorCode.RANKING_NOT_FOUND));
 
         int solvedCount = userQuestionService.countSolvedQuestion(user);
         int questionCount = questionService.countByUser(user);
@@ -83,6 +87,10 @@ public class RankingService {
     public List<RankingResponse> getTopRankings() {
 
         List<Ranking> top10 = rankingRepository.findTop10ByOrderByTotalScoreDescUser_NicknameAsc();
+
+        if(top10.isEmpty()){
+            throw new ErrorException(ErrorCode.RANKING_NOT_AVAILABLE);
+        }
 
         return top10.stream()
                 .map(r -> {
@@ -108,9 +116,20 @@ public class RankingService {
     @Transactional
     public void recalculateAllRankings() {
         List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
+
+        if(rankings.isEmpty()){
+            return;
+        }
+
         int ranks = 1;
 
         for (Ranking r : rankings) {
+
+            int score = r.getTotalScore();
+            if(score<0){
+                throw new ErrorException(ErrorCode.INVALID_SCORE);
+            }
+
             r.updateRank(ranks++);
             r.updateTier(Tier.fromScore(r.getTotalScore()));
         }
@@ -118,15 +137,4 @@ public class RankingService {
         rankingRepository.saveAll(rankings);
     }
 
-
-//
-//    private int calculateUserRank(Ranking myRanking) {
-//        List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
-//        for (int i = 0; i < rankings.size(); i++) {
-//            if (rankings.get(i).getUser().getId().equals(myRanking.getUser().getId())) {
-//                return i + 1;
-//            }
-//        }
-//        return rankings.size();
-//    }
 }

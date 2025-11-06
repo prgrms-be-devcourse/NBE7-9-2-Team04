@@ -5,11 +5,11 @@ import com.backend.api.billing.dto.request.BillingRequest;
 import com.backend.api.billing.dto.response.BillingPaymentResponse;
 import com.backend.api.billing.dto.response.BillingResponse;
 import com.backend.api.payment.dto.response.PaymentResponse;
+import com.backend.api.payment.service.PaymentService;
 import com.backend.api.subscription.dto.response.SubscriptionResponse;
 import com.backend.api.subscription.service.SubscriptionService;
 import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.payment.entity.PaymentStatus;
-import com.backend.domain.payment.repository.PaymentRepository;
 import com.backend.domain.subscription.entity.Subscription;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
@@ -30,12 +30,20 @@ import java.util.UUID;
 public class BillingService {
 
     private final SubscriptionService subscriptionService;
-    private final PaymentRepository paymentRepository;
+    private final PaymentService paymentService;
     private final WebClient webClient;
 
     //빌링키 발급
     @Transactional
     public BillingResponse issueBillingKey(BillingRequest request) {
+
+        if(request.authKey() == null){
+            throw new ErrorException(ErrorCode.INVALID_AUTH_KEY);
+        }
+
+        if(request.customerKey() == null){
+            throw new ErrorException(ErrorCode.INVALID_CUSTOMER_KEY);
+        }
 
         Map<String, Object> billingResponse = webClient.post()
                 .uri("v1/billing/authorizations/issue")
@@ -48,6 +56,10 @@ public class BillingService {
                 .block();
 
         String billingKey = (String) billingResponse.get("billingKey");
+
+        if(billingKey == null){
+            throw new ErrorException(ErrorCode.BILLING_KEY_NOT_FOUND);
+        }
 
         // 구독 PREMIUM 전환
         SubscriptionResponse updated = subscriptionService.activatePremium(request.customerKey(), billingKey);
@@ -101,7 +113,7 @@ public class BillingService {
                 .subscription(subscription)
                 .build();
 
-        paymentRepository.save(payment);
+        paymentService.savePayment(payment);
 
         subscriptionService.updateNextBillingDate(managedSub, LocalDate.now().plusMonths(1));
         PaymentResponse.from(payment);

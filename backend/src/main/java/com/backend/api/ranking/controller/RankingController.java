@@ -27,7 +27,7 @@ public class RankingController {
     public ApiResponse<RankingSummaryResponse> getRankings() {
         User user = rq.getUser();
         RankingSummaryResponse response = rankingService.getRankingSummary(user);
-        return ApiResponse.ok(response);
+        return ApiResponse.ok("전체 랭킹 조회를 성공했습니다.", response);
     }
 
     @GetMapping("/me")
@@ -35,9 +35,7 @@ public class RankingController {
     public ApiResponse<RankingResponse> getMyRankingOnly() {
         User currentUser = rq.getUser();
         RankingResponse myRanking = rankingService.getMyRanking(currentUser);
-        return ApiResponse.ok(myRanking);
+        return ApiResponse.ok("내 랭킹 조회를 성공했습니다." ,myRanking);
     }
-
-
 
 }
