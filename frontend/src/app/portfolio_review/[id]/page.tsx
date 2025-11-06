@@ -1,5 +1,6 @@
 "use client";
 
+import { marked } from "marked"; // 마크다운 파싱 라이브러리 추가
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client";
@@ -16,12 +17,14 @@ export default function FeedbackDetailPage() {
       try {
         const response = await fetchApi(`/api/v1/portfolio-review/${id}`);
         console.log("✅ Feedback data:", response.data);
-        // 상태 설정 시 createdAt 필드 확인
+
+        // 마크다운을 HTML로 변환하여 상태에 설정
+        const parsedContent = marked.parse(response.data.feedbackContent);
         setFeedback({
           ...response.data,
+          feedbackContent: parsedContent,
           createdAt: response.data.createDate || "날짜 정보 없음",
         });
-
       } catch (error) {
         console.error("❌ Failed to fetch feedback:", error);
         alert("피드백을 불러오는 데 실패했습니다.");
