@@ -3,6 +3,8 @@ package com.backend.api.user.service;
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
+import com.backend.api.user.dto.response.UserLoginResponse;
+import com.backend.api.user.dto.response.UserSignupResponse;
 import com.backend.domain.ranking.entity.Ranking;
 import com.backend.domain.ranking.entity.Tier;
 import com.backend.domain.ranking.repository.RankingRepository;
@@ -20,6 +22,7 @@ import com.backend.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -36,7 +39,8 @@ public class UserService {
     private final VerificationCodeRepository verificationCodeRepository;
     private final RankingRepository rankingRepository;
 
-    public User signUp(UserSignupRequest request) {
+    @Transactional
+    public UserSignupResponse signUp(UserSignupRequest request) {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ErrorException(ErrorCode.DUPLICATE_EMAIL);
@@ -69,7 +73,7 @@ public class UserService {
                 .user(user)
                 .subscriptionType(SubscriptionType.BASIC)
                 .subscriptionName("BASIC")
-                .isActive(false)                     // 기본 회원은 활성화된 상태로 시작
+                .isActive(false)
                 .price(0L)
                 .questionLimit(5)                   // 무료 사용자는 질문 제한 5회
                 .startDate(LocalDateTime.now())
@@ -81,6 +85,7 @@ public class UserService {
 
         subscriptionRepository.save(basicSubscription);
 
+
         Ranking ranking = Ranking.builder()
                 .user(user)
                 .totalScore(0)
@@ -88,12 +93,16 @@ public class UserService {
                 .rankValue(0)
                 .build();
 
+        user.assignSubscription(basicSubscription);
+        user.assignRanking(ranking);
+
         rankingRepository.save(ranking);
 
-        return user;
+        return UserSignupResponse.from(user,ranking);
     }
 
-    public User login(UserLoginRequest request){
+    @Transactional
+    public UserLoginResponse login(UserLoginRequest request){
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_EMAIL));
 
@@ -110,14 +119,20 @@ public class UserService {
             throw new ErrorException(ErrorCode.WRONG_PASSWORD);
         }
 
-        return user;
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
+
+
+        return UserLoginResponse.from(user,accessToken,refreshToken);
     }
 
+    @Transactional(readOnly = true)
     public User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
     }
 
+    @Transactional
     public TokenResponse createAccessTokenFromRefresh(String refreshToken) {
 
         //refreshToken 유효성 검사

@@ -83,11 +83,13 @@ class AdminQnaControllerTest {
         @DisplayName("전체 Qna 조회 성공")
         void success() throws Exception {
             mockMvc.perform(get("/api/v1/admin/qna")
+                            .param("page", "1")
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("Qna 전체 조회 성공"))
-                    .andExpect(jsonPath("$.data[*].title", hasItem("Qna 제목")))
+                    .andExpect(jsonPath("$.data.qna[0].title").value("Qna 제목"))
+                    .andExpect(jsonPath("$.data.qna[0].categoryType").value("SYSTEM"))
                     .andDo(print());
         }
     }
@@ -129,11 +131,12 @@ class AdminQnaControllerTest {
         @DisplayName("카테고리별 Qna 조회 성공")
         void success_category() throws Exception {
             mockMvc.perform(get("/api/v1/admin/qna/category/{categoryType}", QnaCategoryType.SYSTEM)
+                            .param("page", "1")
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("SYSTEM 카테고리 Qna 조회 성공"))
-                    .andExpect(jsonPath("$.data[0].categoryType").value("SYSTEM"))
+                    .andExpect(jsonPath("$.data.qna[?(@.categoryType == 'SYSTEM')].title").isNotEmpty())
                     .andDo(print());
         }
 

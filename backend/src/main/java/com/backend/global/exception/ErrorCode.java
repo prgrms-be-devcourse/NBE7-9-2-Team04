@@ -95,11 +95,22 @@ public enum ErrorCode {
     SUBSCRIPTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 구독 중입니다."),
     SUBSCRIPTION_INACTIVE(HttpStatus.BAD_REQUEST, "비활성화된 구독입니다."),
     BILLING_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "빌링키를 찾을 수 없습니다."),
+    INVALID_AUTH_KEY(HttpStatus.BAD_REQUEST, "AUTH_KEY가 누락되었거나 유효하지 않습니다."),
+    INVALID_CUSTOMER_KEY(HttpStatus.BAD_REQUEST, "CUSTOMER_KEY가 누락되었거나 유효하지 않습니다."),
+
 
     // feedback
     FEEDBACK_NOT_FOUND(HttpStatus.NOT_FOUND,"피드백을 찾을 수 없습니다."),
-    FETCH_FEEDBACK_FAILED(HttpStatus.BAD_REQUEST,"AI 피드백 조회에 실패했습니다.");
+    FETCH_FEEDBACK_FAILED(HttpStatus.BAD_REQUEST,"AI 피드백 조회에 실패했습니다."),
 
+    //ranking
+    RANKING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 랭킹입니다."),
+    RANKING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자의 랭킹 정보를 찾을 수 없습니다."),
+    INVALID_SCORE(HttpStatus.BAD_REQUEST, "유효하지 않은 점수 값입니다."),
+    RANKING_NOT_AVAILABLE(HttpStatus.NO_CONTENT, "현재 랭킹 데이터가 없습니다."),
+
+
+    ;
     private final HttpStatus httpStatus;
     private final String message;
 }

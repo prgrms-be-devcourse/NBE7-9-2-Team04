@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -88,7 +87,7 @@ public class AdminUserControllerTest {
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("전체 사용자 조회 성공"))
                     .andExpect(jsonPath("$.data.users").isArray())
-                    .andExpect(jsonPath("$.data.users[*].name", hasItem("관리자")))
+                    .andExpect(jsonPath("$.data.users[*].name", hasItem("일반유저")))
                     .andDo(print());
         }
 
