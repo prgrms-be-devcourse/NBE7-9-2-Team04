@@ -68,7 +68,9 @@ tasks.withType<Test> {
 val querydslDir = "src/main/generated"
 
 sourceSets {
-	getByName("main").java.srcDirs(querydslDir)
+	main {
+		java.srcDir(querydslDir)
+	}
 }
 
 tasks.withType<JavaCompile> {
