@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,14 @@ public class SubscriptionService {
     public SubscriptionResponse activatePremium(String customerKey, String billingKey) {
         Subscription subscription = subscriptionRepository.findByCustomerKey(customerKey)
                 .orElseThrow(() -> new ErrorException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
+
+        if(subscription.isActive()){
+            throw new ErrorException(ErrorCode.SUBSCRIPTION_ALREADY_EXISTS);
+        }
+
+        if(billingKey == null || billingKey.isBlank()){
+            throw new ErrorException(ErrorCode.BILLING_KEY_NOT_FOUND);
+        }
 
         subscription.activatePremium(billingKey);
         subscriptionRepository.save(subscription);
@@ -78,5 +87,14 @@ public class SubscriptionService {
         return SubscriptionResponse.from(subscription);
     }
 
+    @Transactional
+    public void saveSubscription(Subscription subscription) {
+        subscriptionRepository.save(subscription);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Subscription> getActiveSubscriptionsByBillingDate(LocalDate billingDate) {
+        return subscriptionRepository.findByNextBillingDateAndIsActive(billingDate, true);
+    }
 
 }

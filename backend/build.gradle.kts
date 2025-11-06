@@ -48,12 +48,9 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-	// querydsl 설정
-	implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
-	annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
-	annotationProcessor("jakarta.annotation:jakarta.annotation-api")
-	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
-
+	//querydsl
+	annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.1:jpa")
+	implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
 }
 extra["springAiVersion"] = "1.1.0-M1"
 
@@ -68,19 +65,21 @@ tasks.withType<Test> {
 }
 
 //-----------querydsl-----------//
-val querydslDir = "src/main/generated"
+val querydslDir = file("src/main/generated")
 
 sourceSets {
-	getByName("main").java.srcDirs(querydslDir)
+	main {
+		java.srcDir(querydslDir)
+	}
 }
 
 tasks.withType<JavaCompile> {
-	options.generatedSourceOutputDirectory = file(querydslDir)
+	options.generatedSourceOutputDirectory.set(querydslDir)
 }
 
 tasks.named("clean") {
 	doLast {
-		file(querydslDir).deleteRecursively()
+		querydslDir.deleteRecursively()
 	}
 }
 //--------------------------------//

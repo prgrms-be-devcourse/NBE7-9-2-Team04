@@ -6,7 +6,9 @@ import com.backend.api.answer.dto.response.AnswerMypageResponse;
 import com.backend.api.answer.dto.response.AnswerPageResponse;
 import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.dto.response.AnswerReadWithScoreResponse;
-import com.backend.api.feedback.service.FeedbackService;
+import com.backend.api.feedback.event.publisher.FeedbackCreateEvent;
+import com.backend.api.feedback.event.publisher.FeedbackPublisher;
+import com.backend.api.feedback.event.publisher.FeedbackUpdateEvent;
 import com.backend.api.question.service.QuestionService;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.answer.entity.Answer;
@@ -18,6 +20,7 @@ import com.backend.global.Rq.Rq;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +40,7 @@ public class AnswerService {
     private final Rq rq;
     private final UserService userService;
 
-    private final FeedbackService feedbackService;
+    private final FeedbackPublisher feedbackPublisher;
 
     public Answer findByIdOrThrow(Long id) {
         return answerRepository.findById(id)
@@ -58,7 +61,7 @@ public class AnswerService {
                 .question(question)
                 .build();
         Answer savedAnswer = answerRepository.save(answer);
-        feedbackService.createFeedback(savedAnswer);
+        feedbackPublisher.publishFeedbackCreate(answer);
 
         return savedAnswer;
     }
@@ -72,7 +75,7 @@ public class AnswerService {
         }
 
         answer.update(reqBody.content(), reqBody.isPublic());
-        feedbackService.updateFeedback(answer);
+        feedbackPublisher.publishFeedbackUpdate(answer);
         return answer;
     }
 

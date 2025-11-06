@@ -3,13 +3,13 @@ package com.backend.api.billing.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record BillingPaymentResponse(
-        @Schema(description = "상점 아이디", example = "tvivarepublica2")
+        @Schema(description = "상점 아이디", example = "tosspayments")
         String mId,
 
-        @Schema(description = "결제 키", example = "xMljweGQBN5OWRapdA8dPbZN9zYl7X8o1zEqZKLPbmD70vk4")
+        @Schema(description = "결제 키", example = "y05n91dEvLex6BJGQOVDpgDQ0gDv0QVW4w2zNbgaYRMPoqmD")
         String paymentKey,
 
-        @Schema(description = "주문 ID", example = "b05c8d5b-7414-44af-9bcd-053e5eeec1e1")
+        @Schema(description = "주문 ID", example = "a4CWyWY5m89PNh7xJwhk1")
         String orderId,
 
         @Schema(description = "주문명", example = "프리미엄 구독 결제")

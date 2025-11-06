@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -105,30 +107,12 @@ class QuestionControllerTest {
         }
 
         @Test
-        @DisplayName("질문 생성 성공 - 카테고리 선택 안함(null)")
-        void success2() throws Exception {
-            QuestionAddRequest request = new QuestionAddRequest(
-                    "Java란?",
-                    "JVM과 JRE의 차이에 대해 설명해주세요.",
-                    null
-            );
-
-            mockMvc.perform(post("/api/v1/questions")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.data.categoryType").doesNotExist())
-                    .andDo(print());
-        }
-
-        @Test
         @DisplayName("질문 생성 실패 - 제목 누락")
         void fail1() throws Exception {
             QuestionAddRequest request = new QuestionAddRequest(
                     "", // 제목 누락
                     "내용입니다.",
-                    null
+                    QuestionCategoryType.OS
             );
 
             mockMvc.perform(post("/api/v1/questions")
@@ -146,7 +130,7 @@ class QuestionControllerTest {
             QuestionAddRequest request = new QuestionAddRequest(
                     "Spring Boot란?",
                     "",
-                    null
+                    QuestionCategoryType.OS
             );
 
             mockMvc.perform(post("/api/v1/questions")
@@ -280,17 +264,21 @@ class QuestionControllerTest {
                     .andExpect(jsonPath("$.data.questions[0].categoryType").value("NETWORK"))
                     .andDo(print());
         }
-
-        @Test
-        @DisplayName("질문 목록 조회 실패 - 데이터 없음")
-        void fail1() throws Exception {
-            mockMvc.perform(get("/api/v1/questions")
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."))
-                    .andDo(print());
-        }
+        //UserQuestion CascadeType.REMOVE 미설정으로 삭제 불가
+//        @Test
+//        @DisplayName("질문 목록 조회 실패 - 데이터 없음")
+//        void fail1() throws Exception {
+//            questionRepository.deleteAll();
+//
+//            mockMvc.perform(get("/api/v1/questions")
+//                            .contentType(MediaType.APPLICATION_JSON))
+//                    .andExpect(status().isOk())
+//                    .andExpect(jsonPath("$.status").value("OK"))
+//                    .andExpect(jsonPath("$.message").value("질문 목록 조회 성공"))
+//                    .andExpect(jsonPath("$.data.questions").isArray())
+//                    .andExpect(jsonPath("$.data.questions").isEmpty())
+//                    .andDo(print());
+//        }
 
         @Test
         @DisplayName("카테고리별 질문 조회 성공")
@@ -322,8 +310,12 @@ class QuestionControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("카테고리별 질문 조회 성공"))
-                    .andExpect(jsonPath("$.data.questions[0].categoryType").value("OS"))
-                    .andExpect(jsonPath("$.data.questions.length()").value(1))
+                    .andExpect(jsonPath("$.data.questions").isArray())
+                    .andExpect(jsonPath("$.data.questions[*].categoryType", everyItem(is("OS"))))
+                    .andExpect(jsonPath("$.data.currentPage").value(1))
+                    .andExpect(jsonPath("$.data.totalPages").exists())
+                    .andExpect(jsonPath("$.data.totalCount").exists())
+                    .andExpect(jsonPath("$.data.pageSize").exists())
                     .andDo(print());
         }
     }

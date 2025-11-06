@@ -36,6 +36,4 @@ public class SubscriptionController {
         return ApiResponse.ok("구독이 성공적으로 취소되었습니다.", response);
     }
 
-
-
 }

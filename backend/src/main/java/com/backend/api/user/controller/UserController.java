@@ -3,7 +3,8 @@ package com.backend.api.user.controller;
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
-import com.backend.api.user.dto.response.UserResponse;
+import com.backend.api.user.dto.response.UserLoginResponse;
+import com.backend.api.user.dto.response.UserSignupResponse;
 import com.backend.api.user.service.EmailService;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.user.entity.User;
@@ -30,19 +31,16 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "사용자 로그인")
-    public ApiResponse<UserResponse> login(@RequestBody UserLoginRequest request) {
+    public ApiResponse<UserLoginResponse> login(@RequestBody UserLoginRequest request) {
 
-        User user = userService.login(request);
+        UserLoginResponse response = userService.login(request);
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
-
-        rq.setCookie("accessToken", accessToken, (int) (jwtTokenProvider.getAccessTokenExpireTime()));
-        rq.setCookie("refreshToken", refreshToken, (int) (jwtTokenProvider.getRefreshTokenExpireTime()));
+        rq.setCookie("accessToken", response.accessToken(), (int) (jwtTokenProvider.getAccessTokenExpireTime()));
+        rq.setCookie("refreshToken", response.refreshToken(), (int) (jwtTokenProvider.getRefreshTokenExpireTime()));
 
         return ApiResponse.ok(
                 "로그인을 성공했습니다.",
-                UserResponse.from(user));
+                response);
     }
 
     @DeleteMapping("/logout")
@@ -56,11 +54,12 @@ public class UserController {
 
     @PostMapping("/signup")
     @Operation(summary = "사용자 회원가입")
-    public ApiResponse<UserResponse> signup(@RequestBody UserSignupRequest request) {
-        User user = userService.signUp(request);
+    public ApiResponse<UserSignupResponse> signup(@RequestBody UserSignupRequest request) {
+        UserSignupResponse response = userService.signUp(request);
+
         return ApiResponse.ok(
                 "회원가입이 완료되었습니다.",
-                UserResponse.from(user)
+                response
         );
     }
 
@@ -98,8 +97,8 @@ public class UserController {
 
     @GetMapping("/check")
     @Operation(summary = "현재 로그인된 사용자 정보")
-    public ApiResponse<UserResponse> getCurrentUser() {
+    public ApiResponse<UserLoginResponse> getCurrentUser() {
         User user = rq.getUser();
-        return ApiResponse.ok("현재 로그인된 사용자 정보입니다.", UserResponse.from(user));
+        return ApiResponse.ok("현재 로그인된 사용자 정보입니다.", UserLoginResponse.from(user));
     }
 }

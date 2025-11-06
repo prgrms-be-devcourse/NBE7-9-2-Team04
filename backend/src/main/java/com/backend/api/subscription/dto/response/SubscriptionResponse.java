@@ -32,10 +32,10 @@ public record SubscriptionResponse(
         @Schema(description = "다음 결제 예정일", example = "2025-11-22")
         LocalDate nextBillingDate,
 
-        @Schema(description = "고객 키 (Toss customerKey)", example = "user_a5f2b59e-d8e3-4ac7-bf32-3f80ad9fef62")
+        @Schema(description = "구매자 ID", example = "aENcQAtPdYbTjGhtQnNVj")
         String customerKey,
 
-        @Schema(description = "빌링 키 (자동결제용 키)", example = "Z_t5vOvQxrj4499PeiJcjen28-V2RyqgYTwN44Rdzk0=")
+        @Schema(description = "빌링키 (자동결제용 키)", example = "Z_t5vOvQxrj4499PeiJcjen28-V2RyqgYTwN44Rdzk0=")
         String billingKey,
 
         @Schema(description = "사용자 ID", example = "3")

@@ -6,8 +6,6 @@ import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
-import com.backend.domain.user.entity.Role;
-import com.backend.domain.user.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +13,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,8 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)  // security filter disable
 @Transactional
-@ActiveProfiles("test")
-@WithMockUser(username = "test@naver.com")
 class ResumeControllerTest extends JwtTest {
 
     @Autowired
@@ -42,7 +35,7 @@ class ResumeControllerTest extends JwtTest {
     @Autowired
     private ResumeRepository resumeRepository;
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
         Resume resume = Resume.builder()
                 .content("이력서 내용입니다.")
@@ -54,30 +47,6 @@ class ResumeControllerTest extends JwtTest {
                 .user(mockUser)
                 .build();
         resumeRepository.save(resume);
-
-        User user = User.builder()
-                .email("test2@naver.com")
-                .age(27)
-                .github("https://github.com/test")
-                .name("test")
-                .password("test1234")
-                .image(null)
-                .role(Role.USER)
-                .nickname("testnick")
-                .build();
-
-
-        mockUser = userRepository.save(user);
-        Resume resume2 = Resume.builder()
-                .content("이력서 내용입니다.")
-                .skill("Java, Spring Boot")
-                .activity("대외 활동 내용입니다.")
-                .certification("없음")
-                .career("경력 사항 내용입니다.")
-                .portfolioUrl("http://portfolio.example.com")
-                .user(user)
-                .build();
-        resumeRepository.save(resume2);
     }
 
     @Nested
@@ -206,10 +175,9 @@ class ResumeControllerTest extends JwtTest {
                     "http://portfolio.example2.com"
             );
 
-            Long resumeId = 2L;
             // when
             ResultActions resultActions = mockMvc.perform(
-                    put("/api/v1/users/resumes/%d" .formatted(resumeId))
+                    put("/api/v1/users/resumes" )
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -234,6 +202,7 @@ class ResumeControllerTest extends JwtTest {
         @Test
         @DisplayName("이력서가 존재하지 않을 때")
         void fail1() throws Exception {
+            resumeRepository.deleteAll();
             //given
             ResumeUpdateRequest request = new ResumeUpdateRequest(
                     "수정된 이력서 내용입니다.",
@@ -243,10 +212,9 @@ class ResumeControllerTest extends JwtTest {
                     "수정된 경력 사항 내용입니다.",
                     "http://portfolio.example2.com"
             );
-            Long resumeId = 999L;
             // when
             ResultActions resultActions = mockMvc.perform(
-                    put("/api/v1/users/resumes/%d" .formatted(resumeId))
+                    put("/api/v1/users/resumes")
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
@@ -260,40 +228,6 @@ class ResumeControllerTest extends JwtTest {
                     .andExpect(jsonPath("$.message").value("이력서를 찾을 수 없습니다."))
                     .andDo(print());
         }
-
-        @Test
-        @DisplayName("작성자 불일치")
-        @Transactional
-        void fail2() throws Exception {
-            //given
-            ResumeUpdateRequest request = new ResumeUpdateRequest(
-                    "수정된 이력서 내용입니다.",
-                    "Java, Spring Boot, mysql",
-                    "수정된 대외 활동 내용입니다.",
-                    "없음",
-                    "수정된 경력 사항 내용입니다.",
-                    "http://portfolio.example2.com"
-            );
-
-            Long resumeId = 1L;
-
-            // when
-            ResultActions resultActions = mockMvc.perform(
-                    put("/api/v1/users/resumes/%d" .formatted(resumeId))
-                            .accept(MediaType.APPLICATION_JSON)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request))
-            );
-
-            // then
-            resultActions
-                    .andExpect(handler().handlerType(ResumeController.class))
-                    .andExpect(handler().methodName("updateResume"))
-                    .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.status").value("FORBIDDEN"))
-                    .andExpect(jsonPath("$.message").value("이력서 수정 권한이 없습니다."))
-                    .andDo(print());
-        }
     }
 
     @Nested
@@ -302,11 +236,16 @@ class ResumeControllerTest extends JwtTest {
         @Test
         @DisplayName("정상 작동")
         void success() throws Exception {
-            // given
-            Long resumeId = 2L;
+
+            //given
+            Resume resume = resumeRepository.findByUser(mockUser)
+                    .orElseGet(null);
+
+            System.out.println("resume id = " + resume.getId());
+
             // when
             ResultActions resultActions = mockMvc.perform(
-                    delete("/api/v1/users/resumes/%d" .formatted( resumeId))
+                    delete("/api/v1/users/resumes/%d" .formatted( resume.getId()))
                             .accept(MediaType.APPLICATION_JSON)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -416,10 +355,10 @@ class ResumeControllerTest extends JwtTest {
         }
 
         @Test
-        @DisplayName("이력서가 존재하지 않을 때")
+        @DisplayName("유저가 존재하지 않을 때")
         void fail1() throws Exception {
             // given
-            resumeRepository.deleteAll();
+            userRepository.deleteAll();
             // when
             ResultActions resultActions = mockMvc.perform(
                     get("/api/v1/users/resumes")
@@ -432,7 +371,7 @@ class ResumeControllerTest extends JwtTest {
                     .andExpect(handler().methodName("getResume"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("이력서를 찾을 수 없습니다."))
+                    .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
                     .andDo(print());
         }
 
