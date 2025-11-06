@@ -85,8 +85,8 @@ class PostControllerTest {
         answerRepository.deleteAll();
         qnaRepository.deleteAll();
         postRepository.deleteAll();
-        questionRepository.deleteAll();
         userRepository.deleteAll();
+        questionRepository.deleteAll();
 
         testUser = User.builder()
                 .email("test1@test.com").password("pw").name("작성자1").nickname("user1").age(20).role(Role.USER)
