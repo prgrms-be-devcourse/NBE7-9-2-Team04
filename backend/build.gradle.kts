@@ -65,7 +65,7 @@ tasks.withType<Test> {
 }
 
 //-----------querydsl-----------//
-val querydslDir = "src/main/generated"
+val querydslDir = file("src/main/generated")
 
 sourceSets {
 	main {
@@ -74,12 +74,12 @@ sourceSets {
 }
 
 tasks.withType<JavaCompile> {
-	options.generatedSourceOutputDirectory = file(querydslDir)
+	options.generatedSourceOutputDirectory.set(querydslDir)
 }
 
 tasks.named("clean") {
 	doLast {
-		file(querydslDir).deleteRecursively()
+		querydslDir.deleteRecursively()
 	}
 }
 //--------------------------------//
