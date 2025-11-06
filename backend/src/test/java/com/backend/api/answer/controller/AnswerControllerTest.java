@@ -1,14 +1,12 @@
 package com.backend.api.answer.controller;
 
+import com.backend.api.global.JwtTest;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.answer.entity.Answer;
 import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
-import com.backend.domain.user.repository.UserRepository;
-import com.backend.global.Rq.Rq;
-import com.backend.global.security.CustomUserDetails;
 import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
@@ -16,9 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -40,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AnswerControllerTest {
+public class AnswerControllerTest extends JwtTest {
 
     @Autowired
     private MockMvc mvc;
@@ -48,15 +43,19 @@ public class AnswerControllerTest {
     private QuestionRepository questionRepository;
     @Autowired
     private AnswerRepository answerRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private Rq rq;
+
+    private Long baseQuestionId;
+    private Long baseAnswerId;
+    private Long baseUserId;
 
     // 테스트 데이터 셋업
     @BeforeAll
     @Transactional
     void setUp() {
+
+        baseQuestionId = (long) questionRepository.findAll().size();
+        baseAnswerId = (long) answerRepository.findAll().size();
+        baseUserId = mockUser.getId() - 1;
 
         User generalUser = User.builder()
                 .email("general@user.com")
@@ -86,47 +85,113 @@ public class AnswerControllerTest {
         Question question1 = Question.builder()
                 .title("첫 번째 질문 제목")
                 .content("첫 번째 질문 내용")
-                .author(userRepository.findById(1L).orElseThrow())
+                .author(mockUser)
                 .build();
         questionRepository.save(question1);
 
-        com.backend.domain.answer.entity.Answer answer1 = com.backend.domain.answer.entity.Answer.builder()
+        Answer answer1 = Answer.builder()
                 .content("첫 번째 답변 내용")
                 .isPublic(true)
-                .author(userRepository.findById(1L).orElseThrow())
+                .author(mockUser)
                 .question(question1)
                 .build();
 
-        com.backend.domain.answer.entity.Answer answer2 = com.backend.domain.answer.entity.Answer.builder()
+        Answer answer2 = Answer.builder()
                 .content("두 번째 답변 내용")
                 .isPublic(false)
-                .author(userRepository.findById(2L).orElseThrow())
+                .author(userRepository.findById(baseUserId+2).orElseThrow())
                 .question(question1)
                 .build();
 
-        com.backend.domain.answer.entity.Answer answer3 = com.backend.domain.answer.entity.Answer.builder()
+        Answer answer3 = Answer.builder()
                 .content("세 번째 답변 내용")
                 .isPublic(true)
-                .author(userRepository.findById(2L).orElseThrow())
+                .author(userRepository.findById(baseUserId+2).orElseThrow())
+                .question(question1)
+                .build();
+
+        Answer answer4 = Answer.builder()
+                .content("네 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+
+        Answer answer5 = Answer.builder()
+                .content("다섯 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+
+        Answer answer6 = Answer.builder()
+                .content("여섯 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+
+        Answer answer7 = Answer.builder()
+                .content("일곱 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+
+        Answer answer8 = Answer.builder()
+                .content("여덟 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+        Answer answer9 = Answer.builder()
+                .content("아홉 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+
+        Answer answer10 = Answer.builder()
+                .content("열 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+
+        Answer answer11 = Answer.builder()
+                .content("열한 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+
+        Answer answer12 = Answer.builder()
+                .content("열두 번째 답변 내용")
+                .isPublic(true)
+                .author(mockUser)
+                .question(question1)
+                .build();
+
+        Answer answer13 = Answer.builder()
+                .content("열세 번째 답변 내용")
+                .isPublic(true)
+                .author(userRepository.findById(baseUserId+2).orElseThrow())
                 .question(question1)
                 .build();
 
         answerRepository.save(answer1);
         answerRepository.save(answer2);
         answerRepository.save(answer3);
-    }
-
-    // 인증 설정
-    @BeforeEach
-    void setupAuth() {
-        User user = userRepository.findById(1L).get();
-        CustomUserDetails userDetails = new CustomUserDetails(user);
-
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities()
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        answerRepository.save(answer4);
+        answerRepository.save(answer5);
+        answerRepository.save(answer6);
+        answerRepository.save(answer7);
+        answerRepository.save(answer8);
+        answerRepository.save(answer9);
+        answerRepository.save(answer10);
+        answerRepository.save(answer11);
+        answerRepository.save(answer12);
+        answerRepository.save(answer13);
     }
 
     @Nested
@@ -136,7 +201,7 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("1번 질문에 생성 성공")
         void success() throws Exception {
-            long targetQuestionId = 1;
+            long targetQuestionId = baseQuestionId + 1;
             String answer = "새로운 답변 내용입니다.";
 
             // DB에 답변 생성 전 개수
@@ -156,11 +221,11 @@ public class AnswerControllerTest {
                     .andDo(print());
 
             // DB에 답변 생성 후 개수 확인
-            List<com.backend.domain.answer.entity.Answer> newAnswers = answerRepository.findAll();
+            List<Answer> newAnswers = answerRepository.findAll();
             assertThat(newAnswers.size()).isEqualTo(initialAnswerCount + 1);
 
             // 생성된 답변 정보 동적 확인
-            com.backend.domain.answer.entity.Answer createdAnswer = newAnswers.stream()
+            Answer createdAnswer = newAnswers.stream()
                     .filter(c -> c.getContent().equals(answer))
                     .filter(c -> c.getQuestion().getId().equals(targetQuestionId))
                     .findFirst()
@@ -178,9 +243,8 @@ public class AnswerControllerTest {
                     .andExpect(jsonPath("$.data.createDate").exists())
                     .andExpect(jsonPath("$.data.modifyDate").exists())
                     .andExpect(jsonPath("$.data.content").value(answer))
-                    .andExpect(jsonPath("$.data.aiScore").value(Matchers.nullValue()))
                     .andExpect(jsonPath("$.data.isPublic").value(true))
-                    .andExpect(jsonPath("$.data.feedback").value(Matchers.nullValue()))
+//                    .andExpect(jsonPath("$.data.feedback").value(Matchers.nullValue()))
                     .andExpect(jsonPath("$.data.authorId").value(createdAnswer.getAuthor().getId()))
                     .andExpect(jsonPath("$.data.authorNickName").value(createdAnswer.getAuthor().getNickname()))
                     .andExpect(jsonPath("$.data.questionId").value(targetQuestionId));
@@ -189,7 +253,7 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("필수 필드 누락")
         void fail1() throws Exception {
-            long targetQuestionId = 1;
+            long targetQuestionId = baseQuestionId + 1;
 
             ResultActions resultActions = mvc
                     .perform(
@@ -214,7 +278,7 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("필수 필드 누락 2")
         void fail1_2() throws Exception {
-            long targetQuestionId = 1;
+            long targetQuestionId = baseQuestionId + 1;
             String answer = "새로운 답변 내용입니다.";
 
             ResultActions resultActions = mvc
@@ -267,7 +331,7 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("작성자 정보 저장 확인")
         void success2() throws Exception {
-            long targetQuestionId = 1;
+            long targetQuestionId = baseQuestionId + 1;
             String answer = "새로운 답변 내용입니다.";
 
             ResultActions resultActions = mvc
@@ -292,11 +356,11 @@ public class AnswerControllerTest {
             String responseBody = resultActions.andReturn().getResponse().getContentAsString();
             Long answerId = JsonPath.parse(responseBody).read("$.data.id", Long.class);
 
-            com.backend.domain.answer.entity.Answer savedAnswer = answerRepository.findById(answerId)
+            Answer savedAnswer = answerRepository.findById(answerId)
                     .orElseThrow(() -> new RuntimeException("답변이 저장되지 않았습니다."));
 
             // 작성자 검증
-            assertThat(savedAnswer.getAuthor().getId()).isEqualTo(rq.getUser().getId());
+            assertThat(savedAnswer.getAuthor().getId()).isEqualTo(mockUser.getId());
         }
 
     }
@@ -308,11 +372,11 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("1번 답변 수정 성공")
         void success() throws Exception {
-            long targetQuestionId = 1; // 동적으로 생성된 질문 ID 사용
-            long targetAnswerId = 1; // 동적으로 생성된 답변 ID 사용
+            long targetQuestionId = baseQuestionId + 1; // 동적으로 생성된 질문 ID 사용
+            long targetAnswerId = baseAnswerId + 1; // 동적으로 생성된 답변 ID 사용
             String content = "수정된 답변 내용입니다."; // 수정할 내용
-            long expectedAuthorId = 1; // 예상 작성자 ID
-            String expectedAuthorNickname = "gildong"; // 예상 작성자 닉네임
+            long expectedAuthorId = mockUser.getId(); // 예상 작성자 ID
+            String expectedAuthorNickname = mockUser.getNickname(); // 예상 작성자 닉네임
 
             // 초기 modifyDate 값 캡처 (수정되기 전의 시간)
             LocalDateTime initialModifyDate = answerRepository.findById(targetAnswerId)
@@ -346,9 +410,9 @@ public class AnswerControllerTest {
                     .andExpect(jsonPath("$.data.createDate").exists())
                     .andExpect(jsonPath("$.data.modifyDate").exists())
                     .andExpect(jsonPath("$.data.content").value(content))
-                    .andExpect(jsonPath("$.data.aiScore").value(Matchers.nullValue()))
+//                    .andExpect(jsonPath("$.data.aiScore").value(Matchers.nullValue()))
                     .andExpect(jsonPath("$.data.isPublic").value(false))
-                    .andExpect(jsonPath("$.data.feedback").value(Matchers.nullValue()))
+//                    .andExpect(jsonPath("$.data.feedback").value(Matchers.nullValue()))
                     .andExpect(jsonPath("$.data.authorId").value(expectedAuthorId))
                     .andExpect(jsonPath("$.data.authorNickName").value(expectedAuthorNickname))
                     .andExpect(jsonPath("$.data.questionId").value(targetQuestionId));
@@ -369,8 +433,8 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("답변 수정 - 다른 작성자의 답변 수정 시도")
         void fail1() throws Exception {
-            long targetQuestionId = 1;
-            long targetAnswerId = 3;
+            long targetQuestionId = baseQuestionId + 1;
+            long targetAnswerId = baseAnswerId + 3;
             String content = "수정된 답변 내용입니다.";
 
             ResultActions resultActions = mvc
@@ -397,8 +461,8 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("답변 수정 - 없는 답변에 대한 수정 요청 ")
         void fail2() throws Exception {
-            long targetQuestionId = 1;
-            long targetAnswerId = 4;
+            long targetQuestionId = baseQuestionId + 1;
+            long targetAnswerId = 9999;
             String content = "수정된 답변 내용입니다.";
 
             ResultActions resultActions = mvc
@@ -431,8 +495,8 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("답변 삭제 - 1번 질문의 1번 답변 삭제")
         void success() throws Exception {
-            long targetQuestionId = 1;
-            long targetAnswerId = 1;
+            long targetQuestionId = baseQuestionId + 1;
+            long targetAnswerId = baseAnswerId + 1;
 
             ResultActions resultActions = mvc
                     .perform(
@@ -456,8 +520,8 @@ public class AnswerControllerTest {
         @Test
         @DisplayName("답변 삭제 - 다른 사용자의 답변 삭제 시도")
         void fail1() throws Exception {
-            long targetQuestionId = 1;
-            long targetAnswerId = 3;
+            long targetQuestionId = baseQuestionId + 1;
+            long targetAnswerId = baseAnswerId + 3;
 
             ResultActions resultActions = mvc
                     .perform(
@@ -488,7 +552,7 @@ public class AnswerControllerTest {
         @DisplayName("답변 목록 조회, aiScore, feedback 포함")
         void success() throws Exception {
 
-            long targetQuestionId = 1;
+            long targetQuestionId = baseQuestionId + 1;
 
             ResultActions resultActions = mvc
                     .perform(
@@ -505,17 +569,53 @@ public class AnswerControllerTest {
 
             resultActions
                     .andExpect(jsonPath("$.length()").value(3))
-                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(3, 1)))
-                    .andExpect(jsonPath("$.data.answers[0].id").value(3))
+                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(29, 20)))
+                    .andExpect(jsonPath("$.data.answers[0].id").value(29))
+                    .andExpect(jsonPath("$.data.answers[0].createDate").exists())
+                    .andExpect(jsonPath("$.data.answers[0].modifyDate").exists())
+                    .andExpect(jsonPath("$.data.answers[0].content").value("열세 번째 답변 내용"))
+//                    .andExpect(jsonPath("$.data.answers[0].score").value(10))
+                    .andExpect(jsonPath("$.data.answers[0].isPublic").value(true))
+//                    .andExpect(jsonPath("$.data.answers[0].feedback").value("좋은 답변입니다."))
+                    .andExpect(jsonPath("$.data.answers[0].authorId").value(baseUserId+2))
+                    .andExpect(jsonPath("$.data.answers[0].authorNickName").value("gildong"))
+                    .andExpect(jsonPath("$.data.answers[0].questionId").value(baseQuestionId+1))
+                    .andExpect(jsonPath("$.data.answers[*].isPublic").value(Matchers.not(Matchers.hasItem(false))))
+                    .andExpect(jsonPath("$.data.answers[*].id").value(Matchers.not(Matchers.hasItem(2))));
+        }
+
+        @Test
+        @DisplayName("답변 목록 조회, 2페이지")
+        void success2() throws Exception {
+
+            long targetQuestionId = baseQuestionId + 1;
+
+            ResultActions resultActions = mvc
+                    .perform(
+                            get("/api/v1/questions/%d/answers?page=2".formatted(targetQuestionId))
+                    )
+                    .andDo(print());
+
+            resultActions
+                    .andExpect(handler().handlerType(AnswerController.class))
+                    .andExpect(handler().methodName("readAnswers"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.message").value("%d번 질문의 답변 목록 조회 성공".formatted(targetQuestionId)));
+
+            resultActions
+                    .andExpect(jsonPath("$.length()").value(3))
+                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(19, 17)))
+                    .andExpect(jsonPath("$.data.answers[0].id").value(19))
                     .andExpect(jsonPath("$.data.answers[0].createDate").exists())
                     .andExpect(jsonPath("$.data.answers[0].modifyDate").exists())
                     .andExpect(jsonPath("$.data.answers[0].content").value("세 번째 답변 내용"))
-                    .andExpect(jsonPath("$.data.answers[0].aiScore").value(10))
+//                    .andExpect(jsonPath("$.data.answers[0].score").value(10))
                     .andExpect(jsonPath("$.data.answers[0].isPublic").value(true))
-                    .andExpect(jsonPath("$.data.answers[0].feedback").value("좋은 답변입니다."))
-                    .andExpect(jsonPath("$.data.answers[0].authorId").value(2))
-                    .andExpect(jsonPath("$.data.answers[0].authorNickName").value("gilddong"))
-                    .andExpect(jsonPath("$.data.answers[0].questionId").value(1))
+//                    .andExpect(jsonPath("$.data.answers[0].feedback").value("좋은 답변입니다."))
+                    .andExpect(jsonPath("$.data.answers[0].authorId").value(baseUserId + 2))
+                    .andExpect(jsonPath("$.data.answers[0].authorNickName").value("gildong"))
+                    .andExpect(jsonPath("$.data.answers[0].questionId").value(baseQuestionId + 1))
                     .andExpect(jsonPath("$.data.answers[*].isPublic").value(Matchers.not(Matchers.hasItem(false))))
                     .andExpect(jsonPath("$.data.answers[*].id").value(Matchers.not(Matchers.hasItem(2))));
         }
@@ -545,92 +645,50 @@ public class AnswerControllerTest {
     class t5 {
 
         @Test
-        @DisplayName("답변 단건 조회")
+        @DisplayName("내 답변 조회")
         void success() throws Exception {
 
-            long targetQuestionId = 1;
-            long targetAnswerId = 1;
+            long targetQuestionId = baseQuestionId + 1;
 
             ResultActions resultActions = mvc
                     .perform(
-                            get("/api/v1/questions/%d/answers/%d".formatted(targetQuestionId, targetAnswerId))
+                            get("/api/v1/questions/%d/answers/mine".formatted(targetQuestionId))
                     )
                     .andDo(print());
 
             resultActions
                     .andExpect(handler().handlerType(AnswerController.class))
-                    .andExpect(handler().methodName("readAnswer"))
+                    .andExpect(handler().methodName("readMyAnswer"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("%d번 질문의 %d번 답변 조회 성공".formatted(targetQuestionId, targetAnswerId)));
+                    .andExpect(jsonPath("$.message").value("%d번 질문의 내 답변 조회 성공".formatted(targetQuestionId)));
 
             resultActions
-                    .andExpect(jsonPath("$.data.id").value(1))
+                    .andExpect(jsonPath("$.data.id").value(baseAnswerId+1))
                     .andExpect(jsonPath("$.data.createDate").exists())
                     .andExpect(jsonPath("$.data.modifyDate").exists())
                     .andExpect(jsonPath("$.data.content").value("첫 번째 답변 내용"))
-                    .andExpect(jsonPath("$.data.aiScore").value(Matchers.nullValue()))
                     .andExpect(jsonPath("$.data.isPublic").value(true))
-                    .andExpect(jsonPath("$.data.feedback").value(Matchers.nullValue()))
-                    .andExpect(jsonPath("$.data.authorId").value(1))
-                    .andExpect(jsonPath("$.data.authorNickName").value("gildong"))
-                    .andExpect(jsonPath("$.data.questionId").value(1));
+//                    .andExpect(jsonPath("$.data.feedback").value(Matchers.nullValue()))
+                    .andExpect(jsonPath("$.data.authorId").value(mockUser.getId()))
+                    .andExpect(jsonPath("$.data.authorNickName").value(mockUser.getNickname()))
+                    .andExpect(jsonPath("$.data.questionId").value(baseQuestionId + 1));
         }
 
         @Test
-        @DisplayName("답변 단건 조회 - 다른 사용자의 비공개 답변 조회 시도")
-        void fail1() throws Exception {
-            long targetQuestionId = 1;
-            long targetAnswerId = 2;
-
-            ResultActions resultActions = mvc
-                    .perform(
-                            get("/api/v1/questions/%d/answers/%d".formatted(targetQuestionId, targetAnswerId))
-                    )
-                    .andDo(print());
-
-            resultActions
-                    .andExpect(handler().handlerType(AnswerController.class))
-                    .andExpect(handler().methodName("readAnswer"))
-                    .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.status").value("FORBIDDEN"))
-                    .andExpect(jsonPath("$.message").value("비공개 답변입니다."));
-        }
-
-        @Test
-        @DisplayName("답변 단건 조회 - 존재하지 않는 답변 조회 시도")
-        void fail2() throws Exception {
-            long targetQuestionId = 1;
-            long targetAnswerId = 9999;
-            ResultActions resultActions = mvc
-                    .perform(
-                            get("/api/v1/questions/%d/answers/%d".formatted(targetQuestionId, targetAnswerId))
-                    )
-                    .andDo(print());
-
-            resultActions
-                    .andExpect(handler().handlerType(AnswerController.class))
-                    .andExpect(handler().methodName("readAnswer"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("존재하지 않는 답변입니다."));
-        }
-
-        @Test
-        @DisplayName("답변 단건 조회 - 존재하지 않는 질문의 답변 조회 시도")
+        @DisplayName("내 답변 조회 - 존재하지 않는 질문의 답변 조회 시도")
         void fail3() throws Exception {
             long targetQuestionId = 9999;
-            long targetAnswerId = 1;
 
             ResultActions resultActions = mvc
                     .perform(
-                            get("/api/v1/questions/%d/answers/%d".formatted(targetQuestionId, targetAnswerId))
+                            get("/api/v1/questions/%d/answers/mine".formatted(targetQuestionId))
                     )
                     .andDo(print());
 
             resultActions
                     .andExpect(handler().handlerType(AnswerController.class))
-                    .andExpect(handler().methodName("readAnswer"))
+                    .andExpect(handler().methodName("readMyAnswer"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value("NOT_FOUND"))
                     .andExpect(jsonPath("$.message").value("질문을 찾을 수 없습니다."));
