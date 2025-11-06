@@ -51,70 +51,70 @@ public class CommentControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    @BeforeAll
-    @Transactional
-    void setUp() {
-
-        User generalUser = User.builder()
-                .email("general@user.com")
-                .password("asdf1234!")
-                .name("홍길동")
-                .nickname("gildong")
-                .age(20)
-                .github("abc123")
-                .image(null)
-                .role(Role.USER)
-                .build();
-
-        User generalUser2 = User.builder()
-                .email("general2@user.com")
-                .password("asdf1234!")
-                .name("홍길똥")
-                .nickname("gilddong")
-                .age(25)
-                .github("abc1233")
-                .image(null)
-                .role(Role.USER)
-                .build();
-
-        userRepository.save(generalUser);
-        userRepository.save(generalUser2);
-
-        Post post1 = Post.builder()
-                .title("제목")
-                .introduction("소개")
-                .content("내용12321321321321")
-                .deadline(LocalDateTime.now().plusDays(7))
-                .status(PostStatus.ING)
-                .pinStatus(PinStatus.NOT_PINNED)
-                .recruitCount(5)
-                .users(userRepository.findById(1L).orElseThrow())
-                .postCategoryType(PostCategoryType.PROJECT)
-                .build();
-        postRepository.save(post1);
-
-        Comment comment1 = Comment.builder()
-                .content("1번 댓글")
-                .author(userRepository.findById(1L).orElseThrow())
-                .post(post1)
-                .build();
-
-        Comment comment2 = Comment.builder()
-                .content("2번 댓글")
-                .author(userRepository.findById(2L).orElseThrow())
-                .post(post1)
-                .build();
-
-        Comment comment3 = Comment.builder()
-                .content("3번 댓글")
-                .author(userRepository.findById(1L).orElseThrow())
-                .post(post1)
-                .build();
-
-        commentRepository.save(comment1);
-        commentRepository.save(comment2);
-        commentRepository.save(comment3);
-    }
+//    @BeforeAll
+//    @Transactional
+//    void setUp() {
+//
+//        User generalUser = User.builder()
+//                .email("general@user.com")
+//                .password("asdf1234!")
+//                .name("홍길동")
+//                .nickname("gildong")
+//                .age(20)
+//                .github("abc123")
+//                .image(null)
+//                .role(Role.USER)
+//                .build();
+//
+//        User generalUser2 = User.builder()
+//                .email("general2@user.com")
+//                .password("asdf1234!")
+//                .name("홍길똥")
+//                .nickname("gilddong")
+//                .age(25)
+//                .github("abc1233")
+//                .image(null)
+//                .role(Role.USER)
+//                .build();
+//
+//        userRepository.save(generalUser);
+//        userRepository.save(generalUser2);
+//
+//        Post post1 = Post.builder()
+//                .title("제목")
+//                .introduction("소개")
+//                .content("내용12321321321321")
+//                .deadline(LocalDateTime.now().plusDays(7))
+//                .status(PostStatus.ING)
+//                .pinStatus(PinStatus.NOT_PINNED)
+//                .recruitCount(5)
+//                .users(userRepository.findById(1L).orElseThrow())
+//                .postCategoryType(PostCategoryType.PROJECT)
+//                .build();
+//        postRepository.save(post1);
+//
+//        Comment comment1 = Comment.builder()
+//                .content("1번 댓글")
+//                .author(userRepository.findById(1L).orElseThrow())
+//                .post(post1)
+//                .build();
+//
+//        Comment comment2 = Comment.builder()
+//                .content("2번 댓글")
+//                .author(userRepository.findById(2L).orElseThrow())
+//                .post(post1)
+//                .build();
+//
+//        Comment comment3 = Comment.builder()
+//                .content("3번 댓글")
+//                .author(userRepository.findById(1L).orElseThrow())
+//                .post(post1)
+//                .build();
+//
+//        commentRepository.save(comment1);
+//        commentRepository.save(comment2);
+//        commentRepository.save(comment3);
+//    }
 
     @BeforeEach
     void setupAuth() {
@@ -205,11 +205,11 @@ public class CommentControllerTest {
     @Test
     @DisplayName("댓글 수정 - 자신의 댓글 수정")
     void t2() throws Exception {
-        long targetPostId = 1; // 동적으로 생성된 게시글 ID 사용
+        long targetPostId = 7; // 동적으로 생성된 게시글 ID 사용
         long targetCommentId = 1; // 동적으로 생성된 댓글 ID 사용
         String content = "수정한 댓글"; // 수정할 내용
         long expectedAuthorId = 1; // 예상 작성자 ID
-        String expectedAuthorNickname = "gildong"; // 예상 작성자 닉네임
+        String expectedAuthorNickname = "user1"; // 예상 작성자 닉네임
 
         // 초기 modifyDate 값 캡처 (수정되기 전의 시간)
         LocalDateTime initialModifyDate = commentRepository.findById(targetCommentId)
@@ -262,8 +262,8 @@ public class CommentControllerTest {
     @Test
     @DisplayName("댓글 수정 - 다른 작성자의 댓글 수정 시도")
     void t3() throws Exception {
-        long targetPostId = 1;
-        long targetCommentId = 2;
+        long targetPostId = 14;
+        long targetCommentId = 3;
         String content = "수정한 댓글";
 
         ResultActions resultActions = mvc
@@ -314,8 +314,8 @@ public class CommentControllerTest {
     @Test
     @DisplayName("댓글 삭제 - 다른 사용자의 댓글 삭제 시도")
     void t5() throws Exception {
-        long targetPostId = 1;
-        long targetCommentId = 2;
+        long targetPostId = 14;
+        long targetCommentId = 3;
 
         ResultActions resultActions = mvc
                 .perform(
@@ -336,7 +336,7 @@ public class CommentControllerTest {
     @DisplayName("댓글 조회")
     void t6() throws Exception {
 
-        long targetPostId = 1;
+        long targetPostId = 16;
 
         ResultActions resultActions = mvc
                 .perform(
@@ -353,14 +353,14 @@ public class CommentControllerTest {
 
         resultActions
                 .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$.data.comments[*].id", containsInRelativeOrder(1, 3)))
-                .andExpect(jsonPath("$.data.comments[2].id").value(3))
-                .andExpect(jsonPath("$.data.comments[2].createDate").exists())
-                .andExpect(jsonPath("$.data.comments[2].modifyDate").exists())
-                .andExpect(jsonPath("$.data.comments[2].content").value("3번 댓글"))
-                .andExpect(jsonPath("$.data.comments[2].authorId").value(1))
-                .andExpect(jsonPath("$.data.comments[2].authorNickName").value("gildong"))
-                .andExpect(jsonPath("$.data.comments[2].postId").value(1));
+                .andExpect(jsonPath("$.data.comments[*].id", containsInRelativeOrder(5, 6)))
+                .andExpect(jsonPath("$.data.comments[1].id").value(6))
+                .andExpect(jsonPath("$.data.comments[1].createDate").exists())
+                .andExpect(jsonPath("$.data.comments[1].modifyDate").exists())
+                .andExpect(jsonPath("$.data.comments[1].content").value("혹시 백엔드 포지션도 모집하시나요?"))
+                .andExpect(jsonPath("$.data.comments[1].authorId").value(4))
+                .andExpect(jsonPath("$.data.comments[1].authorNickName").value("user4"))
+                .andExpect(jsonPath("$.data.comments[1].postId").value(targetPostId));
 
     }
 
