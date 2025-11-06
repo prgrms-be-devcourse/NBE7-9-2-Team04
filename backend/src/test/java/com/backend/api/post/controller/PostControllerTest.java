@@ -577,13 +577,19 @@ class PostControllerTest {
         @WithAnonymousUser
         void success() throws Exception {
             // given
-            // @BeforeEach에서 이미 1개의 게시글(savedPost)이 생성됨
-            // 테스트를 위해 1개 더 추가
+            // 테스트의 독립성을 위해 필요한 데이터를 이 테스트 내에서 직접 생성합니다.
+            User postAuthor = User.builder()
+                    .email("post_author@test.com").password("pw").name("게시글작성자").nickname("post_author").age(25).role(Role.USER)
+                    .github("").build();
+            userRepository.save(postAuthor);
+
+            // @BeforeEach에서 생성된 게시글 외에 새로운 게시글을 추가합니다.
             Post anotherPost = Post.builder()
                     .title("두 번째 게시글")
                     .introduction("두 번째 한줄 소개입니다. 10자 이상.")
                     .content("두 번째 내용입니다. 10자 이상.")
-                    .users(otherUser)
+                    // @BeforeEach의 otherUser 대신 이 테스트에서 생성한 postAuthor를 사용합니다.
+                    .users(postAuthor)
                     .deadline(FIXED_DEADLINE)
                     .status(PostStatus.ING)
                     .pinStatus(PinStatus.NOT_PINNED)
