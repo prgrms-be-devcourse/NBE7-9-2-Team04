@@ -89,7 +89,8 @@ class QnaControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("Qna 목록 조회 성공"))
-                    .andExpect(jsonPath("$.data[*].title", hasItem("기존 제목")))
+                    .andExpect(jsonPath("$.data.qna[0].title").value("기존 제목"))
+                    .andExpect(jsonPath("$.data.qna[0].categoryType").value("ACCOUNT"))
                     .andDo(print());
         }
 
@@ -125,7 +126,7 @@ class QnaControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.message").value("ACCOUNT 카테고리 Qna 조회 성공"))
-                    .andExpect(jsonPath("$.data[0].categoryType").value("ACCOUNT"))
+                    .andExpect(jsonPath("$.data.qna[?(@.categoryType == 'ACCOUNT')].title").isNotEmpty())
                     .andDo(print());
         }
 

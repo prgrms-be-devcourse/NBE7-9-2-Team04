@@ -109,8 +109,6 @@ public class AnswerControllerTest {
                 .isPublic(true)
                 .author(userRepository.findById(2L).orElseThrow())
                 .question(question1)
-//                .aiScore(10)
-//                .feedback("좋은 답변입니다.")
                 .build();
 
         answerRepository.save(answer1);
