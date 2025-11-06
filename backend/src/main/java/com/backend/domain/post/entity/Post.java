@@ -82,7 +82,7 @@ public class Post extends BaseEntity {
         }
     }
 
-    public void updatePost(String title, String introduction, @NotBlank(message = "내용은 필수입니다.") @Size(min = 10, message = "내용은 최소 10자 이상 입력해주세요.") String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount, PostCategoryType postCategoryType) {
+    public void updatePost(String title, String introduction, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount, PostCategoryType postCategoryType) {
         this.title = title;
         this.introduction = introduction;
         this.content = content;
