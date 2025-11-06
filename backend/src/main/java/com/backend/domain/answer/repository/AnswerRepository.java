@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     @EntityGraph(attributePaths = {"author", "question"})
-    @Query("SELECT a FROM Answer a WHERE a.question.id = :questionId AND a.isPublic = true ORDER BY a.feedback.aiScore DESC")
+    @Query("SELECT a FROM Answer a LEFT JOIN a.feedback f WHERE a.question.id = :questionId AND a.isPublic = true ORDER BY COALESCE(f.aiScore, 0) DESC, a.modifyDate DESC")
     Page<Answer> findByQuestionIdAndIsPublicTrueOrderByFeedbackScoreDesc(Long questionId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"author", "question"})
