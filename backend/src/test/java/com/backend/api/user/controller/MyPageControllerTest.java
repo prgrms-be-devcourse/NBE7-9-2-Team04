@@ -14,13 +14,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
 
-
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -54,7 +56,7 @@ public class MyPageControllerTest {
     @BeforeEach
     void setUp() {
 
-        user = userRepository.save(User.builder()
+        user = User.builder()
                 .email("user@test.com")
                 .password("user1234!")
                 .name("일반유저")
@@ -63,8 +65,9 @@ public class MyPageControllerTest {
                 .github("github.com/user")
                 .image(null)
                 .role(Role.USER)
-                .build());
+                .build();
 
+        ReflectionTestUtils.setField(user, "id", 1L);
         when(rq.getUser()).thenReturn(user);
     }
 
@@ -90,13 +93,14 @@ public class MyPageControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
                     .andExpect(jsonPath("$.data.email").value("user@test.com"))
-                    .andExpect(jsonPath("$.data.name").value("홍길동"))
+                    .andExpect(jsonPath("$.data.name").value("일반유저"))
                     .andDo(print());
         }
 
         @Test
         @DisplayName("비로그인 상태")
         void fail1() throws Exception {
+
             when(rq.getUser()).thenReturn(null);
 
             mockMvc.perform(get("/api/v1/users/me"))
@@ -138,7 +142,7 @@ public class MyPageControllerTest {
                             .content(objectMapper.writeValueAsString(requestBody)))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
-                    .andExpect(jsonPath("$.message").value("비밀번호가 틀렸습니다."))
+                    .andExpect(jsonPath("$.message").value("비밀번호가 일치하지 않습니다."))
                     .andDo(print());
         }
     }
@@ -170,7 +174,7 @@ public class MyPageControllerTest {
                     .image("newImage")
                     .build();
 
-            when(userMyPageService.modifyUser(user.getId(), org.mockito.ArgumentMatchers.any()))
+            when(userMyPageService.modifyUser(eq(user.getId()), any(UserMyPageResponse.UserModify.class)))
                     .thenReturn(response);
 
             mockMvc.perform(put("/api/v1/users/me")

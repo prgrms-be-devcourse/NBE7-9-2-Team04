@@ -42,6 +42,10 @@ public class UserMyPageController {
     @GetMapping("/me")
     @Operation(summary = "개인 정보 조회")
     public ApiResponse<UserMyPageResponse> detailInformation() {
+        if (rq.getUser() == null) {
+            throw new ErrorException(ErrorCode.UNAUTHORIZED);
+        }
+
         Long userId = rq.getUser().getId();
         return ApiResponse.ok(userMyPageService.getInformation(userId));
     }
