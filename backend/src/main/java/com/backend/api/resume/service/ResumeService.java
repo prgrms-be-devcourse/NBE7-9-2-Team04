@@ -9,6 +9,7 @@ import com.backend.api.user.service.UserService;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import jakarta.validation.Valid;
@@ -73,13 +74,13 @@ public class ResumeService {
     }
 
     private void validateResumeAuthor(Resume resume, User user) {
-        if (!resume.getUser().equals(user)) {
+        if (!resume.getUser().getId().equals(user.getId())) {
             throw new ErrorException(ErrorCode.INVALID_USER);
         }
     }
 
     @Transactional
-    public void deleteResume(@Valid Long userId, @Valid Long resumeId) {
+    public void deleteResume(Long userId, Long resumeId) {
         User user = userService.getUser(userId);
 
         Resume resume = getResume(resumeId);

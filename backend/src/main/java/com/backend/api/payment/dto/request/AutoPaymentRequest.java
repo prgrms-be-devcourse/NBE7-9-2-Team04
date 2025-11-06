@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record AutoPaymentRequest(
 
-        @Schema(description = "구매자 식별용 키", example = "8e92b22a-4a11-4b4a-bf1b-28b0ff812a6c")
+        @Schema(description = "구매자 ID", example = "aENcQAtPdYbTjGhtQnNVj")
         String customerKey,
 
-        @Schema(description = "빌링키", example = "Z_t5vOvQxrj4499PeiJcjen28-V2RyqgYTwN44Rdzk0=")
+        @Schema(description = "빌링키 (자동결제용 키)", example = "Z_t5vOvQxrj4499PeiJcjen28-V2RyqgYTwN44Rdzk0=")
         String billingKey,
 
         @Schema(description = "결제 금액", example = "9900")

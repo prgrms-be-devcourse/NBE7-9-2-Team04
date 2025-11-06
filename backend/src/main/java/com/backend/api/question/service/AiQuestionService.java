@@ -10,13 +10,11 @@ import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.entity.QuestionCategoryType;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.user.entity.User;
-import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.CascadeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,11 +26,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AiQuestionService {
 
-    private final UserService userService;
     @Value("${openai.url}")
     private String apiUrl;
 
@@ -41,15 +37,14 @@ public class AiQuestionService {
 
     private final RestClient restClient;
     private final QuestionService questionService;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ResumeService resumeService;
     private final ObjectMapper objectMapper;
 
-    @Transactional
+
     public AIQuestionCreateResponse createAiQuestion(Long userId) throws JsonProcessingException {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+        User user = userService.getUser(userId);
         // AI 질문 생성 횟수 제한 검증
         validateQuestionLimit(user);
 
@@ -67,6 +62,7 @@ public class AiQuestionService {
         return AIQuestionCreateResponse.from(questions.getFirst().getGroupId(),questionDto);
     }
 
+    @Transactional(readOnly = true)
     public String getAiReviewContent(AiReviewbackRequest request) throws JsonProcessingException {
         String rawApiResponse = connectionAi(request);
         return parseSingleContentFromResponse(rawApiResponse);
@@ -86,7 +82,7 @@ public class AiQuestionService {
     private List<AiQuestionResponse> parseChatGptResponse(String connectionAi) throws JsonProcessingException {
         ChatGptResponse responseDto = objectMapper.readValue(connectionAi, ChatGptResponse.class);
 
-        String content = responseDto.choiceResponses().get(0).message().content();
+        String content = responseDto.choiceResponses().getFirst().message().content();
 
         String cleanJson = content
                 .replaceAll("```json", "")
@@ -99,7 +95,7 @@ public class AiQuestionService {
 
     private String parseSingleContentFromResponse(String rawApiResponse) throws JsonProcessingException {
         ChatGptResponse responseDto = objectMapper.readValue(rawApiResponse, ChatGptResponse.class);
-        return responseDto.choiceResponses().get(0).message().content();
+        return responseDto.choiceResponses().getFirst().message().content();
     }
 
     private <T> String connectionAi(T request){
@@ -130,11 +126,13 @@ public class AiQuestionService {
     }
 
 
+    @Transactional(readOnly = true)
     public AiQuestionReadAllResponse readAllAiQuestion(Long userId) {
         User user = userService.getUser(userId);
         return questionService.getByCategoryType( QuestionCategoryType.PORTFOLIO, user);
     }
 
+    @Transactional(readOnly = true)
     public PortfolioListReadResponse readAiQuestion(Long userId, UUID groupId) {
         User user = userService.getUser(userId);
         return questionService.getByUserAndGroupId(user, groupId);

@@ -1,6 +1,5 @@
 package com.backend.api.user.dto.request;
 
-import com.backend.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,10 +20,4 @@ public record UserLoginRequest(
         @Schema(description = "사용자 비밀번호", example = "abc12345")
         String password
 ) {
-    public UserLoginRequest(User users){
-        this(
-                users.getEmail(),
-                users.getPassword()
-        );
-    }
 }

@@ -25,7 +25,7 @@ public class FeedbackController {
 
     @GetMapping("{questionId}")
     @Operation(summary = "피드백 단건 조회", description = "답변 피드백 단건 조회합니다.")
-    public ApiResponse<FeedbackReadResponse> getAdminPayment(
+    public ApiResponse<FeedbackReadResponse> getFeedback(
             @PathVariable Long questionId
     ) {
         User user = rq.getUser();

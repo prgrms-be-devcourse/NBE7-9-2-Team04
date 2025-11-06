@@ -1,15 +1,15 @@
 package com.backend.domain.subscription.entity;
 
-import com.backend.domain.payment.entity.Payment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -60,9 +60,10 @@ public class Subscription extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Payment> payments = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
+//    private List<Payment> payments = new ArrayList<>();
+
   
     public void activatePremium(String billingKey) {
         this.billingKey = billingKey;

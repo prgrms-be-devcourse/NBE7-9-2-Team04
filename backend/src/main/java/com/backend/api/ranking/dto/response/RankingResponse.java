@@ -50,8 +50,8 @@ public record RankingResponse (
 
         return new RankingResponse(
                 ranking.getUser().getId(),
-                ranking.getUser().getEmail(),
                 ranking.getUser().getNickname(),
+                ranking.getUser().getEmail(),
                 totalScore,
                 currentTier,
                 ranking.getRankValue(),
