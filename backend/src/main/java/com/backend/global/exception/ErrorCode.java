@@ -27,7 +27,6 @@ public enum ErrorCode {
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다."),
     EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다."),
     USER_QUESTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 유저-문제 관계입니다."),
-    RANKING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 랭킹입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인된 사용자가 없습니다."),
 
     //token
