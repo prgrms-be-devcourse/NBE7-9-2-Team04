@@ -44,7 +44,6 @@ import java.util.stream.IntStream;
 
 @Configuration
 @RequiredArgsConstructor
-@Profile("!test") // "test" 프로필이 아닐 때만 이 Bean을 활성화합니다.
 public class BaseInitData {
 
     @Autowired
