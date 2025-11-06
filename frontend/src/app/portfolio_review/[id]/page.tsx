@@ -16,11 +16,12 @@ export default function FeedbackDetailPage() {
       try {
         const response = await fetchApi(`/api/v1/portfolio-review/${id}`);
         console.log("✅ Feedback data:", response.data);
+        // 상태 설정 시 createdAt 필드 확인
+        setFeedback({
+          ...response.data,
+          createdAt: response.data.createDate || "날짜 정보 없음",
+        });
 
-        // createdAt을 그대로 사용하여 상태에 설정
-        setFeedback(response.data);
-
-        console.log("✅ Feedback createdAt:", response.data.createdAt);
       } catch (error) {
         console.error("❌ Failed to fetch feedback:", error);
         alert("피드백을 불러오는 데 실패했습니다.");
@@ -38,6 +39,7 @@ export default function FeedbackDetailPage() {
 
     // 소수점 이하의 초 제거
     const cleanedDateStr = dateStr.split(".")[0];
+    console.log("✅ cleanedDateStr:", cleanedDateStr); // cleanedDateStr 디버깅 로그 추가
 
     const date = new Date(cleanedDateStr);
     if (isNaN(date.getTime())) return "유효하지 않은 날짜";
