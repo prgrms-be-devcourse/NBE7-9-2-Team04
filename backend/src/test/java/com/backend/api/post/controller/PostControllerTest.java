@@ -14,6 +14,7 @@ import com.backend.domain.user.entity.Role;
 import com.backend.global.exception.ErrorCode;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.initData.BaseInitData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
@@ -22,8 +23,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.TestExecutionEvent;
@@ -47,6 +50,9 @@ class PostControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean(name = "initDataRunner")
+    private ApplicationRunner mockInitdataRunner;
 
     @Autowired
     private ObjectMapper objectMapper;
