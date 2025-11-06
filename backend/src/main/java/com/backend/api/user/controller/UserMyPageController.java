@@ -43,7 +43,7 @@ public class UserMyPageController {
     @Operation(summary = "개인 정보 조회")
     public ApiResponse<UserMyPageResponse> detailInformation() {
         if (rq.getUser() == null) {
-            throw new ErrorException(ErrorCode.UNAUTHORIZED);
+            throw new ErrorException(ErrorCode.UNAUTHORIZED_USER);
         }
 
         Long userId = rq.getUser().getId();
