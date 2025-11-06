@@ -48,12 +48,9 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-	// querydsl 설정
-	implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
-	annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
-	annotationProcessor("jakarta.annotation:jakarta.annotation-api")
-	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
-
+	//querydsl
+	annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.1:jpa")
+	implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
 }
 extra["springAiVersion"] = "1.1.0-M1"
 
