@@ -2,7 +2,6 @@ package com.backend.api.user.controller;
 
 import com.backend.api.answer.dto.response.AnswerMypageResponse;
 import com.backend.api.answer.dto.response.AnswerPageResponse;
-import com.backend.api.answer.dto.response.AnswerReadResponse;
 import com.backend.api.answer.service.AnswerService;
 import com.backend.api.comment.dto.response.CommentMypageResponse;
 import com.backend.api.comment.dto.response.CommentPageResponse;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/users")
@@ -44,6 +42,10 @@ public class UserMyPageController {
     @GetMapping("/me")
     @Operation(summary = "개인 정보 조회")
     public ApiResponse<UserMyPageResponse> detailInformation() {
+        if (rq.getUser() == null) {
+            throw new ErrorException(ErrorCode.UNAUTHORIZED_USER);
+        }
+
         Long userId = rq.getUser().getId();
         return ApiResponse.ok(userMyPageService.getInformation(userId));
     }
@@ -146,9 +148,5 @@ public class UserMyPageController {
 
         return ApiResponse.ok("비밀번호가 확인되었습니다.", true);
     }
-
-
-
-
 
 }
