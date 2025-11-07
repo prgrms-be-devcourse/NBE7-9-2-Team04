@@ -9,6 +9,7 @@ import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
+import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
 import com.backend.global.exception.ErrorCode;
@@ -80,11 +81,12 @@ class PostControllerTest {
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
 
+        // 자식 테이블부터 순서대로 정리
         answerRepository.deleteAll();
         qnaRepository.deleteAll();
         postRepository.deleteAll();
-        userRepository.deleteAll();
         questionRepository.deleteAll();
+        userRepository.deleteAll();
 
         testUser = User.builder()
                 .email("test1@test.com").password("pw").name("작성자1").nickname("user1").age(20).role(Role.USER)
@@ -108,6 +110,13 @@ class PostControllerTest {
                 .postCategoryType(PostCategoryType.PROJECT)
                 .build();
         savedPost = postRepository.save(post);
+
+        Question question = Question.builder()
+                .title("테스트 질문 제목")
+                .content("테스트 질문 내용입니다.")
+                .author(testUser)  // 여기 반드시 필요
+                .build();
+        questionRepository.save(question);
     }
 
     @Nested
