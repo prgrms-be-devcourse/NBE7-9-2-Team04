@@ -40,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
-@Rollback
 @ActiveProfiles("test")
 class AiReviewControllerTest extends JwtTest {
 
@@ -64,9 +63,10 @@ class AiReviewControllerTest extends JwtTest {
 
     @BeforeEach
     void setUp() {
-        resumeRepository.deleteAll();
         reviewRepository.deleteAll();
+        resumeRepository.deleteAll();
         subscriptionRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     private Review createAndSaveReview(String content) {
