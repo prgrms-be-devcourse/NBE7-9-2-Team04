@@ -14,7 +14,7 @@ import com.backend.domain.user.entity.Role;
 import com.backend.global.exception.ErrorCode;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
-import com.backend.global.initData.BaseInitData;
+import com.backend.global.Rq.Rq;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
@@ -28,9 +28,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.security.test.context.support.TestExecutionEvent;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -38,6 +35,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,8 +49,8 @@ class PostControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean(name = "initDataRunner")
-    private ApplicationRunner mockInitdataRunner;
+    @MockBean
+    private Rq rq;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -118,10 +116,10 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 작성 성공")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
-            // PostAddRequest의 파라미터 순서: title, content, introduction (content와 introduction이 바뀜)
+            when(rq.getUser()).thenReturn(testUser);
+
             PostAddRequest request = new PostAddRequest(
                     "새로운 게시물",
                     "새로운 프로젝트 모집글 내용입니다. 10자 이상.",
@@ -153,9 +151,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 인증되지 않은 사용자(로그인 X)")
-        @WithAnonymousUser
         void fail1() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(null);
             PostAddRequest request = new PostAddRequest(
                     "첫번째 게시물",
                     "함께 팀 프로젝트를 진행할 백엔드 개발자 구합니다. 10자 이상.",
@@ -185,9 +183,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 제목 누락")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail2() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostAddRequest request = new PostAddRequest(
                     null, // 제목 누락
                     "내용은 10자 이상으로 충분합니다.",
@@ -217,9 +215,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 내용 누락")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail3() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostAddRequest request = new PostAddRequest(
                     "제목은 있습니다.",
                     "", // 내용 누락
@@ -249,9 +247,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 마감일이 과거 날짜")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_deadline_in_past() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostAddRequest request = new PostAddRequest(
                     "마감일이 과거인 게시물",
                     "내용은 충분히 깁니다. 10자 이상입니다.",
@@ -286,9 +284,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 수정 성공")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "수정된 제목",
                     "수정된 한 줄 소개입니다. 10자 이상.",
@@ -324,9 +322,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 존재하지 않는 게시글")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_post_not_found() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "수정된 제목",
                     "수정된 한 줄 소개입니다. 10자 이상.",
@@ -356,9 +354,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 작성자가 아님")
-        @WithUserDetails(value = "other@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_not_owner() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(otherUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "수정된 제목",
                     "수정된 한 줄 소개입니다. 10자 이상.",
@@ -388,9 +386,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 제목 누락")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_title_blank() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "", // 제목 누락
                     "수정된 한 줄 소개입니다. 10자 이상.",
@@ -420,9 +418,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 마감일을 과거로 수정")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_update_deadline_to_past() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "수정된 제목",
                     "수정된 한 줄 소개입니다. 10자 이상입니다.",
@@ -457,10 +455,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 삭제 성공")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
-
+            when(rq.getUser()).thenReturn(testUser);
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", savedPost.getId())
@@ -477,10 +474,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 존재하지 않는 게시글")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_post_not_found() throws Exception {
             // given
-
+            when(rq.getUser()).thenReturn(testUser);
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", 999L)
@@ -497,10 +493,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 작성자가 아님")
-        @WithUserDetails(value = "other@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_not_owner() throws Exception {
             // given
-
+            when(rq.getUser()).thenReturn(otherUser);
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", savedPost.getId())
@@ -522,7 +517,6 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 조회 성공")
-        @WithAnonymousUser
         void success() throws Exception {
             // given
             Long postId = savedPost.getId();
@@ -548,7 +542,6 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 존재하지 않는 게시글")
-        @WithAnonymousUser
         void fail_post_not_found() throws Exception {
             // given
             Long nonExistentPostId = 999L;
@@ -574,7 +567,6 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 다건 조회 성공")
-        @WithAnonymousUser
         void success() throws Exception {
             // given
             // 테스트의 독립성을 위해 필요한 데이터를 이 테스트 내에서 직접 생성합니다.
@@ -621,7 +613,6 @@ class PostControllerTest {
 
             @Test
             @DisplayName("카테고리별 게시글 조회 성공 - PROJECT")
-            @WithAnonymousUser
             void success_project() throws Exception {
                 // given
                 Post post1 = Post.builder()
@@ -667,7 +658,6 @@ class PostControllerTest {
 
             @Test
             @DisplayName("카테고리별 게시글 조회 성공 - STUDY")
-            @WithAnonymousUser
             void success_study() throws Exception {
                 // given
                 Post studyPost = Post.builder()
@@ -699,7 +689,6 @@ class PostControllerTest {
 
             @Test
             @DisplayName("실패 - 해당 카테고리에 게시글이 없음")
-            @WithAnonymousUser
             void fail_empty_category() throws Exception {
 
                 ResultActions resultActions = mockMvc.perform(

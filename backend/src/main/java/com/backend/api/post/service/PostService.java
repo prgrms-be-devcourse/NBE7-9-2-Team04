@@ -37,6 +37,12 @@ public class PostService {
 
     @Transactional
     public PostResponse createPost(PostAddRequest request, User user) {
+        // 로그인 안한 경우 처리
+        if (user == null) {
+            throw new ErrorException(ErrorCode.UNAUTHORIZED_USER); // 401
+        }
+
+        // 정지된 계정일 경우 처리
         if (!user.validateActiveStatus()) {
             throw new ErrorException(ErrorCode.ACCOUNT_SUSPENDED);
         }
