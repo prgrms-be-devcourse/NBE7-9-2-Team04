@@ -9,6 +9,10 @@ spring:
     properties:
       hibernate:
         ddl-auto: create-drop
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 custom:
   jwt:

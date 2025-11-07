@@ -14,7 +14,7 @@ public class RefreshRedisService {
 
     public void saveRefreshToken(Long userId, String token, Long ttlSeconds) {
         RefreshToken refreshToken = RefreshToken.builder()
-                .userId(String.valueOf(userId))
+                .userId(userId)
                 .refreshToken(token)
                 .expiration(ttlSeconds)
                 .build();
