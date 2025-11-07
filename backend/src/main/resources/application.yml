@@ -52,7 +52,6 @@ spring:
     redis:
       host: localhost
       port: 6379
-#      timeout: 필요시 설정
 
 logging:
   level:

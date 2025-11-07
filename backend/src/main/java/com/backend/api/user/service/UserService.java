@@ -38,6 +38,7 @@ public class UserService {
     private final EmailService emailService;
     private final VerificationCodeRepository verificationCodeRepository;
     private final RankingRepository rankingRepository;
+    private final RefreshRedisService refreshRedisService;
 
     @Transactional
     public UserSignupResponse signUp(UserSignupRequest request) {
@@ -122,8 +123,18 @@ public class UserService {
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
 
+        refreshRedisService.saveRefreshToken(
+                user.getId(),
+                refreshToken,
+                jwtTokenProvider.getRefreshTokenExpireTime()
+        );
 
         return UserLoginResponse.from(user,accessToken,refreshToken);
+    }
+
+    @Transactional
+    public void logout(Long userId){
+        refreshRedisService.deleteRefreshToken(userId);
     }
 
     @Transactional(readOnly = true)
@@ -133,17 +144,29 @@ public class UserService {
     }
 
     @Transactional
-    public TokenResponse createAccessTokenFromRefresh(String refreshToken) {
+    public TokenResponse createAccessTokenFromRefresh(String requestRefreshToken) {
 
-        //refreshToken 유효성 검사
-        if (!jwtTokenProvider.validateToken(refreshToken)) {
+        //클라이언트 요청으로부터 refreshToken 유효성 검사
+        if (!jwtTokenProvider.validateToken(requestRefreshToken)) {
             throw new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        //refreshToken으로부터 id 추출
-        Long userId = jwtTokenProvider.getIdFromToken(refreshToken);
+
+        //요청된 refreshToken으로부터 id 추출
+        Long userId = jwtTokenProvider.getIdFromToken(requestRefreshToken);
         if (userId == null) {
             throw new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        //redis에 저장된 refreshToken 조회
+        String savedRefreshToken = refreshRedisService.getRefreshToken(userId);
+        if(savedRefreshToken == null) {
+            throw new ErrorException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+
+        //요청과 redis 동일한지 비교
+        if(!savedRefreshToken.equals(requestRefreshToken)) {
+            throw  new ErrorException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         User user = userRepository.findById(userId)
@@ -153,6 +176,12 @@ public class UserService {
         //새로운 토큰 발급
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
+
+        refreshRedisService.saveRefreshToken(
+                user.getId(),
+                newRefreshToken,
+                jwtTokenProvider.getRefreshTokenExpireTime()
+        );
 
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
