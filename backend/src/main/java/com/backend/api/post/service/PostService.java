@@ -37,6 +37,12 @@ public class PostService {
 
     @Transactional
     public PostResponse createPost(PostAddRequest request, User user) {
+        // 로그인 안한 경우 처리
+        if (user == null) {
+            throw new ErrorException(ErrorCode.UNAUTHORIZED_USER); // 401
+        }
+
+        // 정지된 계정일 경우 처리
         if (!user.validateActiveStatus()) {
             throw new ErrorException(ErrorCode.ACCOUNT_SUSPENDED);
         }
@@ -44,6 +50,8 @@ public class PostService {
         if(request.pinStatus() == PinStatus.PINNED && !subscriptionRepository.existsByUserAndIsActiveTrue(user)) {
             throw new ErrorException(ErrorCode.PIN_POST_FORBIDDEN);
         }
+
+        validateDeadline(request.deadline());
 
         Post post = Post.builder()
                 .title(request.title())
@@ -106,6 +114,8 @@ public class PostService {
     public PostResponse updatePost(Long postId, PostUpdateRequest request, User user) {
         Post post = findPostByIdOrThrow(postId);
         validatePostOwner(post, user);
+
+        validateDeadline(request.deadline());
 
         post.updatePost(request.title(), request.introduction(),request.content(), request.deadline(), request.status(), request.pinStatus(), request.recruitCount(), request.categoryType());
 
@@ -179,5 +189,11 @@ public class PostService {
         return postRepository.findByStatusAndDeadlineLessThan(PostStatus.ING,now)
                 .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
+    }
+
+    private void validateDeadline(LocalDateTime deadline) {
+        if (deadline != null && deadline.isBefore(LocalDateTime.now())) {
+            throw new ErrorException(ErrorCode.INVALID_DEADLINE);
+        }
     }
 }
