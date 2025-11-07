@@ -51,6 +51,8 @@ public class PostService {
             throw new ErrorException(ErrorCode.PIN_POST_FORBIDDEN);
         }
 
+        validateDeadline(request.deadline());
+
         Post post = Post.builder()
                 .title(request.title())
                 .introduction(request.introduction())
@@ -112,6 +114,8 @@ public class PostService {
     public PostResponse updatePost(Long postId, PostUpdateRequest request, User user) {
         Post post = findPostByIdOrThrow(postId);
         validatePostOwner(post, user);
+
+        validateDeadline(request.deadline());
 
         post.updatePost(request.title(), request.introduction(),request.content(), request.deadline(), request.status(), request.pinStatus(), request.recruitCount(), request.categoryType());
 
@@ -185,5 +189,11 @@ public class PostService {
         return postRepository.findByStatusAndDeadlineLessThan(PostStatus.ING,now)
                 .orElseThrow(() -> new ErrorException(ErrorCode.POST_NOT_FOUND));
 
+    }
+
+    private void validateDeadline(LocalDateTime deadline) {
+        if (deadline != null && deadline.isBefore(LocalDateTime.now())) {
+            throw new ErrorException(ErrorCode.INVALID_DEADLINE);
+        }
     }
 }
