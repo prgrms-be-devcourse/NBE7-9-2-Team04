@@ -20,7 +20,7 @@ jobs:
         
     env: # ✅ GitHub Secrets 전달
       SPRING_PROFILES_ACTIVE: test
-      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_HOST: localhost
       SPRING_DATA_REDIS_PORT: 6379
       SECRET_PATTERN: ${{ secrets.SECRET_PATTERN }}
       PAYMENT_SECRET_KEY: ${{ secrets.PAYMENT_SECRET_KEY }}
