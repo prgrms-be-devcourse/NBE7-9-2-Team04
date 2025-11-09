@@ -4,6 +4,8 @@ package com.backend.config;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import redis.embedded.RedisServer;
 
 import java.io.IOException;
@@ -12,12 +14,12 @@ import java.net.ServerSocket;
 @TestConfiguration
 public class TestRedisConfig {
 
-    private RedisServer redisServer;
-    private int port;
+    private static RedisServer redisServer;
+    private static int port;
 
     public TestRedisConfig() throws IOException {
-        this.port = findAvailablePort();
-        this.redisServer = new RedisServer(port);
+        port = findAvailablePort();
+        redisServer = new RedisServer(port);
     }
 
     private int findAvailablePort() throws IOException {
@@ -38,5 +40,11 @@ public class TestRedisConfig {
         if (redisServer != null) {
             redisServer.stop();
         }
+    }
+
+    @DynamicPropertySource
+    static void overrideRedisProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", () -> "localhost");
+        registry.add("spring.data.redis.port", () -> port);
     }
 }
