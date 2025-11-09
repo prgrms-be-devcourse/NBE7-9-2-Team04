@@ -25,9 +25,9 @@ public class UserPenaltyScheduler {
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    //매일 자정(00:00)에 실행 만료된 정지 사용자 ACTIVE로 복구
+    //매일 (00:05)에 실행 만료된 정지 사용자 ACTIVE로 복구
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
     public void releaseExpiredPenalties() {
         List<UserPenalty> expiredPenalties = userPenaltyRepository.findExpiredPenalties(LocalDateTime.now());
 
