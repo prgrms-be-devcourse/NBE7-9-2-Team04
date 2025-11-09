@@ -1,24 +1,25 @@
 package com.backend.config;
 
 
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import redis.embedded.RedisServer;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 
 @TestConfiguration
 public class TestRedisConfig {
 
     private RedisServer redisServer;
 
-    @Value("${spring.data.redis.port}")
-    private int port;
-
     @PostConstruct
     public void startRedis() throws IOException {
+
+        int port = findAvailablePort();
 
         redisServer = new RedisServer(port);
         redisServer.start();
@@ -30,8 +31,17 @@ public class TestRedisConfig {
 
     @PreDestroy
     public void stopRedis() {
-        if (redisServer != null) {
+        if (redisServer != null && redisServer.isActive()) {
             redisServer.stop();
+        }
+    }
+
+    private int findAvailablePort() {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            socket.setReuseAddress(true);
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            throw new ErrorException(ErrorCode.REDIS_ERROR);
         }
     }
 }

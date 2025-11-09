@@ -4,6 +4,7 @@ import com.backend.domain.ranking.entity.Ranking;
 import com.backend.domain.ranking.entity.Tier;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+
 public record RankingResponse (
         @Schema(description = "사용자 ID", example = "12")
         Long userId,

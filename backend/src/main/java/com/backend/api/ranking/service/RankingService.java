@@ -150,6 +150,4 @@ public class RankingService {
 
         return RankingSummaryResponse.from(myRanking, topRankings);
     }
-
-
 }
