@@ -3,6 +3,7 @@ package com.backend.api.user.controller;
 import com.backend.api.global.JwtTest;
 import com.backend.api.user.dto.request.UserLoginRequest;
 import com.backend.api.user.dto.request.UserSignupRequest;
+import com.backend.config.TestRedisConfig;
 import com.backend.domain.user.entity.RefreshToken;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
 @ActiveProfiles("test")
+@Import(TestRedisConfig.class)
 public class UserControllerTest extends JwtTest {
 
     @Autowired
