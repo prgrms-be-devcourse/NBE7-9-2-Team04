@@ -14,7 +14,7 @@ import org.springframework.data.redis.core.TimeToLive;
 @Getter
 @Entity
 @Builder
-@RedisHash(value = "refreshToken") //RedisTemplate에서는 필수는 아니지만 일단 사용
+@RedisHash(value = "refreshToken")
 public class RefreshToken {
 
     @Id
