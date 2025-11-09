@@ -57,6 +57,7 @@ public class UserControllerTest extends JwtTest {
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;
 
+
     @Autowired
     private RefreshRedisRepository refreshRedisRepository;
 
