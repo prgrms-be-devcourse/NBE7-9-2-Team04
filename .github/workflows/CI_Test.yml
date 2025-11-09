@@ -17,20 +17,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    container:
-      image: eclipse-temurin:21-jdk
-
-    services:
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
         
     env: # ✅ GitHub Secrets 전달
       SPRING_PROFILES_ACTIVE: test
@@ -49,6 +35,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.1.0
+        with:
+          redis-version: 8.2.3
 
       - name: JDK 21을 설치합니다
         uses: actions/setup-java@v3
