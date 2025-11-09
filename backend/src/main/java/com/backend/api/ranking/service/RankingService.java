@@ -11,10 +11,14 @@ import com.backend.domain.user.entity.User;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +27,9 @@ public class RankingService {
     private final RankingRepository rankingRepository;
     private final UserQuestionService userQuestionService;
     private final QuestionService questionService;
+
+    private final StringRedisTemplate stringRedisTemplate;
+    private static final String REDIS_PREFIX = "ranking_";
 
     @Transactional
     public Ranking createRanking(User user) {
@@ -59,14 +66,15 @@ public class RankingService {
         ranking.updateTotalScore(totalScore);
         ranking.updateTier(Tier.fromScore(totalScore));
 
-        // 현재 유저보다 점수 높은 사람 수 계산
-        int higherRankCount = rankingRepository.countByTotalScoreGreaterThan(totalScore);
-
-        // 현재 유저의 순위 = 점수 높은 사람 수 + 1
-        ranking.updateRank(higherRankCount + 1);
-
         rankingRepository.save(ranking);
-        recalculateAllRankings();
+
+        stringRedisTemplate.opsForZSet().add(
+                REDIS_PREFIX,
+                String.valueOf(user.getId()),
+                totalScore
+        );
+
+
     }
 
     //마이페이지용
@@ -75,10 +83,20 @@ public class RankingService {
         Ranking ranking = rankingRepository.findByUser(user)
                 .orElseThrow(() -> new ErrorException(ErrorCode.RANKING_NOT_FOUND));
 
+        Long rankIndex = stringRedisTemplate.opsForZSet()
+                .reverseRank(REDIS_PREFIX, String.valueOf(user.getId()));
+
+        if (rankIndex == null) {
+            // Redis에 랭킹 정보가 없는 경우
+            throw new ErrorException(ErrorCode.RANKING_NOT_AVAILABLE);
+        }
+
+        int rankValue = rankIndex.intValue() + 1;
+
         int solvedCount = userQuestionService.countSolvedQuestion(user);
         int questionCount = questionService.countByUser(user);
 
-        return RankingResponse.from(ranking, solvedCount, questionCount);
+        return RankingResponse.from(ranking, rankValue, solvedCount, questionCount);
     }
 
 
@@ -86,19 +104,41 @@ public class RankingService {
     @Transactional(readOnly = true)
     public List<RankingResponse> getTopRankings() {
 
-        List<Ranking> top10 = rankingRepository.findTop10ByOrderByTotalScoreDescUser_NicknameAsc();
+        Set<ZSetOperations.TypedTuple<String>> topRanks = stringRedisTemplate.opsForZSet()
+                .reverseRangeWithScores(REDIS_PREFIX, 0, 9);
 
-        if(top10.isEmpty()){
+        if (topRanks == null || topRanks.isEmpty()) {
             throw new ErrorException(ErrorCode.RANKING_NOT_AVAILABLE);
         }
 
-        return top10.stream()
-                .map(r -> {
-                    int solved = userQuestionService.countSolvedQuestion(r.getUser());
-                    int submitted = questionService.countByUser(r.getUser());
-                    return RankingResponse.from(r, solved, submitted);
-                })
+        //Redis 결과에서 사용자 ID, 점수 추출
+        List<Long> userIds = topRanks.stream()
+                .map(tuple -> Long.valueOf(tuple.getValue()))
                 .toList();
+
+        List<Ranking> dbRankings = rankingRepository.findByUser_IdIn(userIds);
+
+        // Redis 순위와 DB 정보를 결합
+        List<RankingResponse> responses = new ArrayList<>();
+        int rank = 1;
+        for (ZSetOperations.TypedTuple<String> tuple : topRanks) {
+            Long userId = Long.valueOf(tuple.getValue());
+
+            Ranking ranking = dbRankings.stream()
+                    .filter(r -> r.getUser().getId().equals(userId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (ranking != null) {
+                int solved = userQuestionService.countSolvedQuestion(ranking.getUser());
+                int submitted = questionService.countByUser(ranking.getUser());
+
+                // Redis에서 가져온 rank 사용
+                responses.add(RankingResponse.from(ranking, rank, solved, submitted));
+            }
+            rank++;
+        }
+        return responses;
     }
 
     //상위 10명 + 내 랭킹
@@ -111,30 +151,5 @@ public class RankingService {
         return RankingSummaryResponse.from(myRanking, topRankings);
     }
 
-
-    //스케줄러 랭킹 재계산
-    @Transactional
-    public void recalculateAllRankings() {
-        List<Ranking> rankings = rankingRepository.findAllByOrderByTotalScoreDesc();
-
-        if(rankings.isEmpty()){
-            return;
-        }
-
-        int ranks = 1;
-
-        for (Ranking r : rankings) {
-
-            int score = r.getTotalScore();
-            if(score<0){
-                throw new ErrorException(ErrorCode.INVALID_SCORE);
-            }
-
-            r.updateRank(ranks++);
-            r.updateTier(Tier.fromScore(r.getTotalScore()));
-        }
-
-        rankingRepository.saveAll(rankings);
-    }
 
 }

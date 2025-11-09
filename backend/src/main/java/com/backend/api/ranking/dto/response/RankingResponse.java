@@ -36,7 +36,7 @@ public record RankingResponse (
         int questionCount
 )
 {
-    public static RankingResponse from(Ranking ranking, int solvedCount, int questionCount) {
+    public static RankingResponse from(Ranking ranking, int rankValue, int solvedCount, int questionCount) {
         int totalScore = ranking.getTotalScore();
         Tier currentTier = ranking.getTier();
         Tier nextTier = currentTier.nextTier();
@@ -54,7 +54,7 @@ public record RankingResponse (
                 ranking.getUser().getEmail(),
                 totalScore,
                 currentTier,
-                ranking.getRankValue(),
+                rankValue,
                 nextTier,
                 scoreToNextTier,
                 solvedCount,

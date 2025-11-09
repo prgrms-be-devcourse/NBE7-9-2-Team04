@@ -1,5 +1,6 @@
 package com.backend.api.ranking.controller;
 
+import com.backend.config.TestRedisConfig;
 import com.backend.domain.ranking.entity.Ranking;
 import com.backend.domain.ranking.entity.Tier;
 import com.backend.domain.ranking.repository.RankingRepository;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
 @ActiveProfiles("test")
+@Import(TestRedisConfig.class)
 public class RankingControllerTest {
     @Autowired
     private MockMvc mockMvc;
