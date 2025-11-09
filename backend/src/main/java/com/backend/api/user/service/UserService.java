@@ -5,6 +5,7 @@ import com.backend.api.user.dto.request.UserSignupRequest;
 import com.backend.api.user.dto.response.TokenResponse;
 import com.backend.api.user.dto.response.UserLoginResponse;
 import com.backend.api.user.dto.response.UserSignupResponse;
+import com.backend.api.user.event.publisher.UserSignupEvent;
 import com.backend.domain.ranking.entity.Ranking;
 import com.backend.domain.ranking.entity.Tier;
 import com.backend.domain.ranking.repository.RankingRepository;
@@ -20,6 +21,7 @@ import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import com.backend.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,18 +40,22 @@ public class UserService {
     private final EmailService emailService;
     private final VerificationCodeRepository verificationCodeRepository;
     private final RankingRepository rankingRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public UserSignupResponse signUp(UserSignupRequest request) {
 
+        //이메일 중복 검사
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ErrorException(ErrorCode.DUPLICATE_EMAIL);
         }
 
+        // 이메일 인증 여부 확인
         if (!emailService.isVerified(request.email())) {
             throw new ErrorException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
+        // 사용자 생성
         String encodedPassword = passwordEncoder.encode(request.password());
         User user = User.builder()
                 .email(request.email())
@@ -63,7 +69,6 @@ public class UserService {
                 .build();
 
 
-              
       verificationCodeRepository.findByEmail(request.email())
         .ifPresent(verificationCodeRepository::delete);
       
@@ -95,6 +100,8 @@ public class UserService {
 
         user.assignSubscription(basicSubscription);
         user.assignRanking(ranking);
+
+        eventPublisher.publishEvent(new UserSignupEvent(user));
 
         rankingRepository.save(ranking);
 
@@ -157,4 +164,14 @@ public class UserService {
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
 
+    @Transactional
+    public void sendEmailVerification(String email) {
+        emailService.sendVerificationCode(email);
+    }
+
+    // 🟩 이메일 인증 코드 검증
+    @Transactional
+    public void verifyEmailCode(String email, String code) {
+        emailService.verifyCode(email, code);
+    }
 }

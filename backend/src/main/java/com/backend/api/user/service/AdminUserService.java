@@ -3,12 +3,16 @@ package com.backend.api.user.service;
 import com.backend.api.user.dto.request.AdminUserStatusUpdateRequest;
 import com.backend.api.user.dto.response.AdminUserResponse;
 import com.backend.api.user.dto.response.UserPageResponse;
+import com.backend.api.user.event.publisher.UserStatusChangeEvent;
 import com.backend.domain.user.entity.AccountStatus;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.userPenalty.entity.UserPenalty;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.domain.userPenalty.repository.UserPenaltyRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +34,8 @@ public class AdminUserService {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final UserPenaltyRepository userPenaltyRepository;
+    private final Executor mailExecutor;
 
     // 관리자 권한 검증
     public void validateAdminAuthority(User user) {
@@ -75,16 +85,72 @@ public class AdminUserService {
         return AdminUserResponse.from(user);
     }
 
-    // 사용자 상태 변경
     @Transactional
     public AdminUserResponse changeUserStatus(Long userId, AdminUserStatusUpdateRequest request, User admin) {
         validateAdminAuthority(admin);
         User user = findByIdOrThrow(userId);
 
         validateNotDuplicateStatus(user, request.status());
-        user.changeStatus(request.status());
 
-        sendStatusChangeMailIfNeeded(user, request.status());
+        // 상태별 검증 로직
+        if (request.status() == AccountStatus.SUSPENDED) {
+            if (request.reason() == null || request.reason().isBlank()) {
+                throw new ErrorException(ErrorCode.INVALID_SUSPEND_REASON);
+            }
+            if (request.suspendEndDate() == null) {
+                throw new ErrorException(ErrorCode.INVALID_SUSPEND_PERIOD);
+            }
+            if (request.suspendEndDate() != null &&
+                    request.suspendEndDate().isBefore(LocalDate.now())) {
+                throw new ErrorException(ErrorCode.INVALID_SUSPEND_PERIOD);
+            }
+        }
+        else if (request.status() == AccountStatus.BANNED) {
+            if (request.reason() == null || request.reason().isBlank()) {
+                throw new ErrorException(ErrorCode.INVALID_SUSPEND_REASON);
+            }
+            if (request.suspendEndDate() != null) {
+                throw new ErrorException(ErrorCode.INVALID_BAN_PERIOD);
+            }
+        }
+        else if (request.status() == AccountStatus.ACTIVE) {
+            //복구 요청 시에는 사유나 날짜가 있더라도 무시
+            request.clearReasonAndDate(); // DTO에 이런 헬퍼 메서드 있으면 깔끔
+        }
+
+        // 상태 변경
+        user.changeStatus(request.status());
+        userRepository.saveAndFlush(user);
+
+        UserPenalty penalty = null;
+
+        // 🔹 정지/정책 위반 등 이력 기록 (UserPenalty)
+        if (request.status() == AccountStatus.SUSPENDED ||
+                request.status() == AccountStatus.BANNED) {
+
+            penalty = UserPenalty.builder()
+                    .user(user)
+                    .reason(request.reason())
+                    .startAt(LocalDateTime.now())
+                    .endAt(request.suspendEndDate() != null
+                            ? request.suspendEndDate().atStartOfDay()
+                            : null)
+                    .released(false)
+                    .appliedStatus(request.status())
+                    .build();
+
+            userPenaltyRepository.saveAndFlush(penalty);
+        }
+
+        UserPenalty finalPenalty = penalty;
+        CompletableFuture.runAsync(() -> {
+            try {
+                emailService.sendStatusChangeMail(user, finalPenalty);
+            } catch (Exception e) {
+                System.err.println("[메일 전송 실패] " + user.getEmail() + " - " + e.getMessage());
+            }
+        }, mailExecutor);
+
         return AdminUserResponse.from(user);
     }
 
@@ -92,13 +158,6 @@ public class AdminUserService {
     private void validateNotDuplicateStatus(User user, AccountStatus newStatus) {
         if (user.getAccountStatus().equals(newStatus)) {
             throw new ErrorException(ErrorCode.DUPLICATE_STATUS);
-        }
-    }
-
-    // 상태 변경에 따른 이메일 발송
-    private void sendStatusChangeMailIfNeeded(User user, AccountStatus status) {
-        if (status == AccountStatus.SUSPENDED || status == AccountStatus.BANNED || status == AccountStatus.DEACTIVATED || status == AccountStatus.ACTIVE) {
-            emailService.sendStatusChangeMail(user);
         }
     }
 }
