@@ -4,8 +4,6 @@ package com.backend.config;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import redis.embedded.RedisServer;
 
 import java.io.IOException;
@@ -14,37 +12,47 @@ import java.net.ServerSocket;
 @TestConfiguration
 public class TestRedisConfig {
 
-    private static RedisServer redisServer;
-    private static int port;
+    private RedisServer redisServer;
+    private int port;
 
-    public TestRedisConfig() throws IOException {
-        port = findAvailablePort();
+    @PostConstruct
+    public void startRedis() throws IOException {
+        // 1️⃣ 먼저 포트 확인
+        port = 6379;
+        if (isPortInUse(port)) {
+            port = findAvailablePort();
+        }
+
+        // 2️⃣ Redis 실행
         redisServer = new RedisServer(port);
+        redisServer.start();
+
+        // 3️⃣ Spring에 동적으로 port 반영
+        System.setProperty("spring.data.redis.port", String.valueOf(port));
+        System.setProperty("spring.data.redis.host", "localhost");
+
+        System.out.println("✅ Embedded Redis started on port " + port);
+    }
+
+    @PreDestroy
+    public void stopRedis() {
+        if (redisServer != null) {
+            redisServer.stop();
+            System.out.println("🛑 Embedded Redis stopped");
+        }
+    }
+
+    private boolean isPortInUse(int port) {
+        try (ServerSocket socket = new ServerSocket(port)) {
+            return false;
+        } catch (IOException e) {
+            return true;
+        }
     }
 
     private int findAvailablePort() throws IOException {
         try (ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();
         }
-    }
-
-    @PostConstruct
-    public void start() {
-        redisServer.start();
-        System.setProperty("spring.data.redis.port", String.valueOf(port));
-        System.setProperty("spring.data.redis.host", "localhost");
-    }
-
-    @PreDestroy
-    public void stop() {
-        if (redisServer != null) {
-            redisServer.stop();
-        }
-    }
-
-    @DynamicPropertySource
-    static void overrideRedisProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", () -> "localhost");
-        registry.add("spring.data.redis.port", () -> port);
     }
 }
