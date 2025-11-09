@@ -57,7 +57,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Gradle build를 수행합니다
-        run: ./gradlew clean test -Dspring.profiles.active=test
+        run: ./gradlew clean test -Dspring.profiles.active=test -Dspring.data.redis.host=redis 
           
 
       - name: 테스트 결과를 PR에 코멘트로 등록합니다
