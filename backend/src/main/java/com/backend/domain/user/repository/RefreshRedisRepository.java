@@ -14,7 +14,7 @@ public class RefreshRedisRepository {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String REFRESH_TOKEN_PREFIX = "refreshToken: ";
+    private static final String REFRESH_TOKEN_PREFIX = "refreshToken_";
 
     public void save(RefreshToken refreshToken) {
         redisTemplate.opsForValue().set(
