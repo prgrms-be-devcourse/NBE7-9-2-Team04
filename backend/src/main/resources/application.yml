@@ -6,6 +6,7 @@ spring:
     password: ${DB_PASSWORD}
     hikari:
       auto-commit: false
+
   output:
     ansi:
       enabled: always
@@ -20,15 +21,14 @@ spring:
       ddl-auto: update
     show-sql: true
 
-
   mvc:
     hiddenmethod:
       filter:
         enabled: true
+
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
-
 
   mail:
     host: smtp.gmail.com
@@ -48,13 +48,22 @@ spring:
           ssl:
             trust: smtp.gmail.com
 
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true   # ElasticsearchRepository 사용 허용
+
+  elasticsearch:
+    uris: http://localhost:9200  # Elastic 노드 주소
+    # username: elastic           # 보안 해제 시 불필요
+    # password: changeme          # 보안 해제 시 불필요
+
 logging:
   level:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
     com.backend: DEBUG
-
 
 springdoc:
   swagger-ui:
@@ -68,9 +77,8 @@ custom:
     access-token:
       expire-time: "#{24 * 60 * 60 * 1000}"  # 24시간 (1일)
     refresh-token:
-      expire-time: "#{72 * 60 * 60 * 1000}"       # 72시간 (3일)
+      expire-time: "#{72 * 60 * 60 * 1000}"  # 72시간 (3일)
     secretPattern: ${SECRET_PATTERN}
-
 
 openai:
   url: ${OPENAI_API_URL}
@@ -79,4 +87,3 @@ toss:
   payments:
     base-url: "https://api.tosspayments.com"
     secret-key: ${PAYMENT_SECRET_KEY}
-
