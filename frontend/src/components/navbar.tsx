@@ -161,7 +161,11 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
-              <span className="text-gray-700 font-medium">{userName}님</span>
+              <span className="text-gray-700 font-medium">
+                {userName.length > 4
+                  ? `${userName.substring(0, 4)}님`
+                  : `${userName}님`}
+              </span>
               <Link
                 href="/mypage"
                 className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 p-2"
