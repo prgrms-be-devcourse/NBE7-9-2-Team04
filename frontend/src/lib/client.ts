@@ -30,6 +30,11 @@ export async function fetchApi(url: string, options?: RequestInit) {
   // -------------------------------
   if (res.status === 401) {
     // 로그인 체크용 요청이라면 바로 종료
+    if (url.includes("/api/v1/users/verifyPassword")) {
+      console.warn("비밀번호 검증 실패 : 로그인 리다이렉트 안 함");
+      throw new Error(apiResponse.message || "비밀번호가 일치하지 않습니다.");
+    }
+
     if (isLoginCheckRequest) {
       console.warn("로그인되지 않은 상태입니다. (refresh 시도 안 함)");
       return apiResponse;
