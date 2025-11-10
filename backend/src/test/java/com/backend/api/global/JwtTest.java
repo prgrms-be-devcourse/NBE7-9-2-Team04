@@ -32,6 +32,7 @@ public abstract class JwtTest{
     @BeforeEach
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     void setUp() {
+
         User user = User.builder()
                 .email("test@naver.com")
                 .age(27)
@@ -45,10 +46,7 @@ public abstract class JwtTest{
 
 
         mockUser = userRepository.save(user);
-    }
 
-    @BeforeEach
-    void setupEach() {
         CustomUserDetails userDetails = new CustomUserDetails(mockUser);
 
         Authentication auth = new UsernamePasswordAuthenticationToken(

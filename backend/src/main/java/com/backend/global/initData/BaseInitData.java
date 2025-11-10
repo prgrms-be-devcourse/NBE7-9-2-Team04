@@ -42,7 +42,6 @@ import java.util.stream.IntStream;
 
 @Configuration
 @RequiredArgsConstructor
-//@Profile("!test")
 public class BaseInitData {
 
     @Autowired
