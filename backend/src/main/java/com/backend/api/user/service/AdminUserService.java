@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import static org.apache.logging.log4j.util.Strings.isBlank;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -89,69 +91,60 @@ public class AdminUserService {
     public AdminUserResponse changeUserStatus(Long userId, AdminUserStatusUpdateRequest request, User admin) {
         validateAdminAuthority(admin);
         User user = findByIdOrThrow(userId);
-
         validateNotDuplicateStatus(user, request.status());
 
-        // 상태별 검증 로직
-        if (request.status() == AccountStatus.SUSPENDED) {
-            if (request.reason() == null || request.reason().isBlank()) {
-                throw new ErrorException(ErrorCode.INVALID_SUSPEND_REASON);
-            }
-            if (request.suspendEndDate() == null) {
-                throw new ErrorException(ErrorCode.INVALID_SUSPEND_PERIOD);
-            }
-            if (request.suspendEndDate() != null &&
-                    request.suspendEndDate().isBefore(LocalDate.now())) {
-                throw new ErrorException(ErrorCode.INVALID_SUSPEND_PERIOD);
-            }
-        }
-        else if (request.status() == AccountStatus.BANNED) {
-            if (request.reason() == null || request.reason().isBlank()) {
-                throw new ErrorException(ErrorCode.INVALID_SUSPEND_REASON);
-            }
-            if (request.suspendEndDate() != null) {
-                throw new ErrorException(ErrorCode.INVALID_BAN_PERIOD);
-            }
-        }
-        else if (request.status() == AccountStatus.ACTIVE) {
-            //복구 요청 시에는 사유나 날짜가 있더라도 무시
-            request.clearReasonAndDate(); // DTO에 이런 헬퍼 메서드 있으면 깔끔
-        }
+        validateStatusChangeRequest(request); // 상태별 검증 메서드로 분리
 
-        // 상태 변경
         user.changeStatus(request.status());
         userRepository.saveAndFlush(user);
 
-        UserPenalty penalty = null;
+        UserPenalty penalty = handleUserPenalty(user, request); // 패널티 로직 분리
+        sendStatusChangeMailAsync(user, penalty); // 비동기 메일 전송 분리
 
-        // 🔹 정지/정책 위반 등 이력 기록 (UserPenalty)
-        if (request.status() == AccountStatus.SUSPENDED ||
-                request.status() == AccountStatus.BANNED) {
+        return AdminUserResponse.from(user);
+    }
 
-            penalty = UserPenalty.builder()
+    private void validateStatusChangeRequest(AdminUserStatusUpdateRequest request) {
+        switch (request.status()) {
+            case SUSPENDED -> validateSuspendRequest(request);
+            case BANNED -> validateBanRequest(request);
+            case ACTIVE -> request.clearReasonAndDate();
+            default -> throw new ErrorException(ErrorCode.INVALID_STATUS);
+        }
+    }
+
+    private void validateSuspendRequest(AdminUserStatusUpdateRequest request) {
+        if (isBlank(request.reason())) {
+            throw new ErrorException(ErrorCode.INVALID_SUSPEND_REASON);
+        }
+        if (request.suspendEndDate() == null || request.suspendEndDate().isBefore(LocalDate.now())) {
+            throw new ErrorException(ErrorCode.INVALID_SUSPEND_PERIOD);
+        }
+    }
+
+    private void validateBanRequest(AdminUserStatusUpdateRequest request) {
+        if (isBlank(request.reason())) {
+            throw new ErrorException(ErrorCode.INVALID_SUSPEND_REASON);
+        }
+        if (request.suspendEndDate() != null) {
+            throw new ErrorException(ErrorCode.INVALID_BAN_PERIOD);
+        }
+    }
+
+    // Penalty 기록 처리
+    private UserPenalty handleUserPenalty(User user, AdminUserStatusUpdateRequest request) {
+        if (request.status() == AccountStatus.SUSPENDED || request.status() == AccountStatus.BANNED) {
+            UserPenalty penalty = UserPenalty.builder()
                     .user(user)
                     .reason(request.reason())
                     .startAt(LocalDateTime.now())
-                    .endAt(request.suspendEndDate() != null
-                            ? request.suspendEndDate().atStartOfDay()
-                            : null)
+                    .endAt(request.suspendEndDate() != null ? request.suspendEndDate().atStartOfDay() : null)
                     .released(false)
                     .appliedStatus(request.status())
                     .build();
-
-            userPenaltyRepository.saveAndFlush(penalty);
+            return userPenaltyRepository.saveAndFlush(penalty);
         }
-
-        UserPenalty finalPenalty = penalty;
-        CompletableFuture.runAsync(() -> {
-            try {
-                emailService.sendStatusChangeMail(user, finalPenalty);
-            } catch (Exception e) {
-                System.err.println("[메일 전송 실패] " + user.getEmail() + " - " + e.getMessage());
-            }
-        }, mailExecutor);
-
-        return AdminUserResponse.from(user);
+        return null;
     }
 
     // 중복 상태 변경 방지
@@ -159,5 +152,16 @@ public class AdminUserService {
         if (user.getAccountStatus().equals(newStatus)) {
             throw new ErrorException(ErrorCode.DUPLICATE_STATUS);
         }
+    }
+
+    // 메일 전송 비동기 처리
+    private void sendStatusChangeMailAsync(User user, UserPenalty penalty) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                emailService.sendStatusChangeMail(user, penalty);
+            } catch (Exception e) {
+                System.err.println("[메일 전송 실패] " + user.getEmail() + " - " + e.getMessage());
+            }
+        }, mailExecutor);
     }
 }

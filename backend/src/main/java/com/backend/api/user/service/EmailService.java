@@ -13,6 +13,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -29,42 +30,42 @@ public class EmailService {
     private static final int CODE_LENGTH = 6;
 
 
-    // 회원가입 시 이메일 인증 코드 전송
+    @Transactional
+    public void createAndSendVerificationCode(String email) {
+        verificationCodeRepository.findByEmail(email)
+                .ifPresent(verificationCodeRepository::delete);
+
+        String code = generateVerificationCode();
+
+        VerificationCode verification = VerificationCode.builder()
+                .email(email)
+                .code(code)
+                .expiresAt(LocalDateTime.now().plusMinutes(5))
+                .verified(false)
+                .build();
+
+        verificationCodeRepository.save(verification);
+
+        // 비동기 메일 전송
+        sendVerificationMailAsync(email, code);
+    }
+
     @Async("mailExecutor")
-    public void sendVerificationCode(String email) {
+    void sendVerificationMailAsync(String email, String code) {
         try {
-            // 기존 코드 삭제 후 재발급
-            verificationCodeRepository.findByEmail(email)
-                    .ifPresent(verificationCodeRepository::delete);
-
-            String code = generateVerificationCode();
-
-            VerificationCode verification = VerificationCode.builder()
-                    .email(email)
-                    .code(code)
-                    .expiresAt(LocalDateTime.now().plusMinutes(5))
-                    .verified(false)
-                    .build();
-
-            verificationCodeRepository.save(verification);
-
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email);
             message.setSubject("[Dev-Station] 이메일 인증 코드");
             message.setText("""
-                    안녕하세요. Dev-Station 입니다.
-                    
-                    회원가입을 위해 아래 인증 코드를 입력해주세요.
-                    인증코드: %s
-                    
-                    해당 코드는 5분간 유효합니다.
-                    """.formatted(code));
-
+                안녕하세요. Dev-Station 입니다.
+                
+                회원가입을 위해 아래 인증 코드를 입력해주세요.
+                인증코드: %s
+                
+                해당 코드는 5분간 유효합니다.
+                """.formatted(code));
             mailSender.send(message);
             log.info("[이메일 인증] 인증코드 전송 완료: {}", email);
-
-        } catch (ErrorException e) {
-            throw e;
         } catch (Exception e) {
             log.error("이메일 인증코드 전송 실패: {}", e.getMessage(), e);
             throw new ErrorException(ErrorCode.EMAIL_SEND_FAILED);

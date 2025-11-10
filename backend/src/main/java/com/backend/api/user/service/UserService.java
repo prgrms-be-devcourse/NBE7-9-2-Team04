@@ -166,7 +166,7 @@ public class UserService {
 
     @Transactional
     public void sendEmailVerification(String email) {
-        emailService.sendVerificationCode(email);
+        emailService.createAndSendVerificationCode(email);
     }
 
     // 🟩 이메일 인증 코드 검증
