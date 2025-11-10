@@ -256,7 +256,7 @@ export default function AdminUsersPage() {
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50"
         >
           이전
         </button>
@@ -268,7 +268,7 @@ export default function AdminUsersPage() {
         <button
           onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           disabled={page === totalPages}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50"
         >
           다음
         </button>

@@ -22,14 +22,14 @@ export default function QnAPage() {
   // ✅ 카테고리별 색상 매핑
   const getCategoryColor = (category: string) => {
     const colorMap: Record<string, string> = {
-      계정: "bg-indigo-50 text-indigo-700 border-indigo-200",
-      결제: "bg-blue-50 text-blue-700 border-blue-200",
-      시스템: "bg-slate-50 text-slate-700 border-slate-200",
-      모집: "bg-purple-50 text-purple-700 border-purple-200",
-      제안: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      기타: "bg-amber-50 text-amber-700 border-amber-200",
+      계정: "bg-indigo-50 text-indigo-700 border-indigo-100",
+      결제: "bg-blue-50 text-blue-700 border-blue-100",
+      시스템: "bg-slate-50 text-slate-700 border-slate-100",
+      모집: "bg-purple-50 text-purple-700 border-purple-100",
+      제안: "bg-emerald-50 text-emerald-700 border-emerald-100",
+      기타: "bg-amber-50 text-amber-700 border-amber-100",
     };
-    return colorMap[category] || "bg-gray-100 text-gray-700 border-gray-200";
+    return colorMap[category] || "bg-gray-100 text-gray-700 border-gray-100";
   };
 
   // ✅ QnA 목록 조회 (404 → 빈 리스트 fallback 처리)

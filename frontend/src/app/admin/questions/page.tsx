@@ -237,7 +237,7 @@ export default function AdminQuestionsPage() {
 
             <h2 className="text-2xl font-bold mb-4">{selectedQuestion.title}</h2>
 
-            <div className="text-gray-800 whitespace-pre-wrap border p-4 rounded-lg bg-gray-50 mb-4">
+            <div className="text-gray-800 whitespace-pre-wrap border border-gray-200 p-4 rounded-lg bg-gray-50 mb-4">
               {selectedQuestion.content}
             </div>
 
@@ -266,10 +266,10 @@ export default function AdminQuestionsPage() {
                       score: Number(e.target.value),
                     })
                   }
-                  className="w-20 px-2 py-1 border rounded-md text-center"
+                  className="w-15 px-2 py-1 border border-gray-200 rounded-md text-center"
                 />
                 <button
-                  className="px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700"
+                  className="px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   onClick={async () => {
                     try {
                       const res = await fetchApi(
