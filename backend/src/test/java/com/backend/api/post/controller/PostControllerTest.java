@@ -4,14 +4,18 @@ import com.backend.api.post.dto.request.PostAddRequest;
 import com.backend.api.post.dto.request.PostUpdateRequest;
 import com.backend.domain.answer.repository.AnswerRepository;
 import com.backend.domain.post.entity.PinStatus;
+import com.backend.domain.qna.repository.QnaRepository;
 import com.backend.domain.post.entity.Post;
 import com.backend.domain.post.entity.PostCategoryType;
 import com.backend.domain.post.entity.PostStatus;
 import com.backend.domain.post.repository.PostRepository;
+import com.backend.domain.question.entity.Question;
 import com.backend.domain.question.repository.QuestionRepository;
 import com.backend.domain.user.entity.Role;
+import com.backend.global.exception.ErrorCode;
 import com.backend.domain.user.entity.User;
 import com.backend.domain.user.repository.UserRepository;
+import com.backend.global.Rq.Rq;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
@@ -20,12 +24,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.security.test.context.support.TestExecutionEvent;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -33,6 +36,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,6 +49,9 @@ class PostControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private Rq rq;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -61,6 +68,9 @@ class PostControllerTest {
     @Autowired
     private AnswerRepository answerRepository;
 
+    @Autowired
+    private QnaRepository qnaRepository;
+
     private User testUser;
     private User otherUser;
     private Post savedPost;
@@ -71,7 +81,9 @@ class PostControllerTest {
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
 
+        // 자식 테이블부터 순서대로 정리
         answerRepository.deleteAll();
+        qnaRepository.deleteAll();
         postRepository.deleteAll();
         questionRepository.deleteAll();
         userRepository.deleteAll();
@@ -98,6 +110,13 @@ class PostControllerTest {
                 .postCategoryType(PostCategoryType.PROJECT)
                 .build();
         savedPost = postRepository.save(post);
+
+        Question question = Question.builder()
+                .title("테스트 질문 제목")
+                .content("테스트 질문 내용입니다.")
+                .author(testUser)  // 여기 반드시 필요
+                .build();
+        questionRepository.save(question);
     }
 
     @Nested
@@ -106,10 +125,10 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 작성 성공")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
-            // PostAddRequest의 파라미터 순서: title, content, introduction (content와 introduction이 바뀜)
+            when(rq.getUser()).thenReturn(testUser);
+
             PostAddRequest request = new PostAddRequest(
                     "새로운 게시물",
                     "새로운 프로젝트 모집글 내용입니다. 10자 이상.",
@@ -141,9 +160,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 인증되지 않은 사용자(로그인 X)")
-        @WithAnonymousUser
         void fail1() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(null);
             PostAddRequest request = new PostAddRequest(
                     "첫번째 게시물",
                     "함께 팀 프로젝트를 진행할 백엔드 개발자 구합니다. 10자 이상.",
@@ -173,9 +192,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 제목 누락")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail2() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostAddRequest request = new PostAddRequest(
                     null, // 제목 누락
                     "내용은 10자 이상으로 충분합니다.",
@@ -205,9 +224,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 내용 누락")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail3() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostAddRequest request = new PostAddRequest(
                     "제목은 있습니다.",
                     "", // 내용 누락
@@ -234,6 +253,38 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.message").exists()) // content 관련 에러 메시지 중 하나가 나옴
                     .andDo(print());
         }
+
+        @Test
+        @DisplayName("실패 - 마감일이 과거 날짜")
+        void fail_deadline_in_past() throws Exception {
+            // given
+            when(rq.getUser()).thenReturn(testUser);
+            PostAddRequest request = new PostAddRequest(
+                    "마감일이 과거인 게시물",
+                    "내용은 충분히 깁니다. 10자 이상입니다.",
+                    "한 줄 소개도 충분히 깁니다. 10자 이상입니다.",
+                    LocalDateTime.now().minusDays(1), // 과거 날짜로 설정
+                    PostStatus.ING,
+                    PinStatus.NOT_PINNED,
+                    4,
+                    PostCategoryType.PROJECT
+            );
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    post("/api/v1/posts")
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_DEADLINE.getMessage()))
+                    .andDo(print());
+        }
     }
 
     @Nested
@@ -242,9 +293,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 수정 성공")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "수정된 제목",
                     "수정된 한 줄 소개입니다. 10자 이상.",
@@ -280,9 +331,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 존재하지 않는 게시글")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_post_not_found() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "수정된 제목",
                     "수정된 한 줄 소개입니다. 10자 이상.",
@@ -312,9 +363,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 작성자가 아님")
-        @WithUserDetails(value = "other@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_not_owner() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(otherUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "수정된 제목",
                     "수정된 한 줄 소개입니다. 10자 이상.",
@@ -344,9 +395,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 제목 누락")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_title_blank() throws Exception {
             // given
+            when(rq.getUser()).thenReturn(testUser);
             PostUpdateRequest request = new PostUpdateRequest(
                     "", // 제목 누락
                     "수정된 한 줄 소개입니다. 10자 이상.",
@@ -373,6 +424,38 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.message").exists()) // 제목 관련 에러 메시지 중 하나가 나옴
                     .andDo(print());
         }
+
+        @Test
+        @DisplayName("실패 - 마감일을 과거로 수정")
+        void fail_update_deadline_to_past() throws Exception {
+            // given
+            when(rq.getUser()).thenReturn(testUser);
+            PostUpdateRequest request = new PostUpdateRequest(
+                    "수정된 제목",
+                    "수정된 한 줄 소개입니다. 10자 이상입니다.",
+                    "수정된 내용입니다. 10자 이상입니다.",
+                    LocalDateTime.now().minusDays(1), // 과거 날짜로 설정
+                    PostStatus.ING,
+                    PinStatus.NOT_PINNED,
+                    10,
+                    PostCategoryType.PROJECT
+            );
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    put("/api/v1/posts/{postId}", savedPost.getId())
+                            .accept(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_DEADLINE.getMessage()))
+                    .andDo(print());
+        }
     }
 
     @Nested
@@ -381,10 +464,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 삭제 성공")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void success() throws Exception {
             // given
-
+            when(rq.getUser()).thenReturn(testUser);
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", savedPost.getId())
@@ -401,10 +483,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 존재하지 않는 게시글")
-        @WithUserDetails(value = "test1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_post_not_found() throws Exception {
             // given
-
+            when(rq.getUser()).thenReturn(testUser);
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", 999L)
@@ -421,10 +502,9 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 작성자가 아님")
-        @WithUserDetails(value = "other@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void fail_not_owner() throws Exception {
             // given
-
+            when(rq.getUser()).thenReturn(otherUser);
             // when
             ResultActions resultActions = mockMvc.perform(
                     delete("/api/v1/posts/{postId}", savedPost.getId())
@@ -446,7 +526,6 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 조회 성공")
-        @WithAnonymousUser
         void success() throws Exception {
             // given
             Long postId = savedPost.getId();
@@ -472,7 +551,6 @@ class PostControllerTest {
 
         @Test
         @DisplayName("실패 - 존재하지 않는 게시글")
-        @WithAnonymousUser
         void fail_post_not_found() throws Exception {
             // given
             Long nonExistentPostId = 999L;
@@ -498,16 +576,21 @@ class PostControllerTest {
 
         @Test
         @DisplayName("게시글 다건 조회 성공")
-        @WithAnonymousUser
         void success() throws Exception {
             // given
-            // @BeforeEach에서 이미 1개의 게시글(savedPost)이 생성됨
-            // 테스트를 위해 1개 더 추가
+            // 테스트의 독립성을 위해 필요한 데이터를 이 테스트 내에서 직접 생성합니다.
+            User postAuthor = User.builder()
+                    .email("post_author@test.com").password("pw").name("게시글작성자").nickname("post_author").age(25).role(Role.USER)
+                    .github("").build();
+            userRepository.save(postAuthor);
+
+            // @BeforeEach에서 생성된 게시글 외에 새로운 게시글을 추가합니다.
             Post anotherPost = Post.builder()
                     .title("두 번째 게시글")
                     .introduction("두 번째 한줄 소개입니다. 10자 이상.")
                     .content("두 번째 내용입니다. 10자 이상.")
-                    .users(otherUser)
+                    // @BeforeEach의 otherUser 대신 이 테스트에서 생성한 postAuthor를 사용합니다.
+                    .users(postAuthor)
                     .deadline(FIXED_DEADLINE)
                     .status(PostStatus.ING)
                     .pinStatus(PinStatus.NOT_PINNED)
@@ -526,9 +609,10 @@ class PostControllerTest {
             resultActions
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("OK"))
-                    .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공"))
-                    .andExpect(jsonPath("$.data.length()").value(2))
-                    .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
+                    .andExpect(jsonPath("$.message").value("전체 게시글 조회 성공")) // 1. 응답 메시지 확인
+                    .andExpect(jsonPath("$.data.posts.length()").value(2)) // 2. 응답 데이터 구조 변경 확인 (posts 배열)
+                    .andExpect(jsonPath("$.data.posts[0].title").value("두 번째 게시글")) // 3. 최신순 정렬 확인
+                    .andExpect(jsonPath("$.data.posts[1].title").value("기존 제목"))
                     .andDo(print());
         }
 
@@ -538,7 +622,6 @@ class PostControllerTest {
 
             @Test
             @DisplayName("카테고리별 게시글 조회 성공 - PROJECT")
-            @WithAnonymousUser
             void success_project() throws Exception {
                 // given
                 Post post1 = Post.builder()
@@ -577,13 +660,13 @@ class PostControllerTest {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.status").value("OK"))
                         .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
-                        .andExpect(jsonPath("$.data[0].categoryType").value("PROJECT"))
+                        .andExpect(jsonPath("$.data.posts.length()").value(3)) // 4. 생성된 데이터 개수 확인
+                        .andExpect(jsonPath("$.data.posts[0].categoryType").value("PROJECT"))
                         .andDo(print());
             }
 
             @Test
             @DisplayName("카테고리별 게시글 조회 성공 - STUDY")
-            @WithAnonymousUser
             void success_study() throws Exception {
                 // given
                 Post studyPost = Post.builder()
@@ -608,14 +691,13 @@ class PostControllerTest {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.status").value("OK"))
                         .andExpect(jsonPath("$.message").value("카테고리별 게시글 조회 성공"))
-                        .andExpect(jsonPath("$.data[0].categoryType").value("STUDY"))
-                        .andExpect(jsonPath("$.data[0].title").value("스터디 게시글 1"))
+                        .andExpect(jsonPath("$.data.posts[0].categoryType").value("STUDY"))
+                        .andExpect(jsonPath("$.data.posts[0].title").value("스터디 게시글 1"))
                         .andDo(print());
             }
 
             @Test
             @DisplayName("실패 - 해당 카테고리에 게시글이 없음")
-            @WithAnonymousUser
             void fail_empty_category() throws Exception {
 
                 ResultActions resultActions = mockMvc.perform(

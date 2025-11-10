@@ -43,6 +43,7 @@ public enum ErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     COMMENT_INVALID_USER(HttpStatus.FORBIDDEN, "해당 댓글에 대한 권한이 없는 사용자입니다."),
     PIN_POST_FORBIDDEN(HttpStatus.FORBIDDEN, "게시물 상단 고정 권한이 없습니다."),
+    INVALID_DEADLINE(HttpStatus.BAD_REQUEST, "마감일은 현재 시간 이후로 설정해야 합니다."),
 
     //Qna
     QNA_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 Q&A를 찾을 수 없습니다."),

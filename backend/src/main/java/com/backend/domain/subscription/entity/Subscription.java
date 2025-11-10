@@ -62,7 +62,8 @@ public class Subscription extends BaseEntity {
 
 //    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
 //    private List<Payment> payments = new ArrayList<>();
-  
+
+
     public void activatePremium(String billingKey) {
         this.billingKey = billingKey;
         this.isActive = true;
@@ -110,6 +111,11 @@ public class Subscription extends BaseEntity {
             return false;
         }
         return this.isActive && this.endDate != null && this.endDate.isAfter(LocalDateTime.now());
+    }
+
+    // 양방향 관계 설정을 위한 편의 메서드
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }
