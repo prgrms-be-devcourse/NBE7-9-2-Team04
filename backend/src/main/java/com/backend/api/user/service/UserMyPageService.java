@@ -31,9 +31,17 @@ public class UserMyPageService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
+        String encodedPassword;
+
+        if (modify.getPassword() == null || modify.getPassword().trim().isEmpty()) {
+            encodedPassword = user.getPassword(); // 기존 비밀번호 유지
+        } else {
+            encodedPassword = passwordEncoder.encode(modify.getPassword());
+        }
+
         user.updateUser(
                 modify.getEmail(),
-                passwordEncoder.encode(modify.getPassword()),
+                encodedPassword,
                 modify.getName(),
                 modify.getNickname(),
                 modify.getAge(),
