@@ -54,7 +54,7 @@ dependencies {
 
     //redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    testImplementation("it.ozimov:embedded-redis:0.7.2")
+    testImplementation("com.github.codemonstur:embedded-redis:1.4.3")
 }
 extra["springAiVersion"] = "1.1.0-M1"
 

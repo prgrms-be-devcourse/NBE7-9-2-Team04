@@ -50,7 +50,6 @@ public class RankingControllerTest {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-
     @MockBean
     private Rq rq;
 

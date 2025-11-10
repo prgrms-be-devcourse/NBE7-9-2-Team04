@@ -1,47 +1,47 @@
 package com.backend.config;
 
 
-import com.backend.global.exception.ErrorCode;
-import com.backend.global.exception.ErrorException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import redis.embedded.RedisServer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 
-@TestConfiguration
+@Configuration
+@Profile("test")
 public class TestRedisConfig {
 
     private RedisServer redisServer;
+    private int redisPort;
 
     @PostConstruct
     public void startRedis() throws IOException {
-
-        int port = findAvailablePort();
-
-        redisServer = new RedisServer(port);
+        redisPort = findAvailableTcpPort();
+        redisServer = new RedisServer(redisPort);
         redisServer.start();
 
-        System.setProperty("spring.data.redis.port", String.valueOf(port));
+        // Spring Boot Redis 설정에 반영
         System.setProperty("spring.data.redis.host", "localhost");
+        System.setProperty("spring.data.redis.port", String.valueOf(redisPort));
 
+        System.out.printf("Embedded Redis 서버 시작 (port: %d)%n", redisPort);
     }
 
     @PreDestroy
-    public void stopRedis() {
+    public void stopRedis() throws IOException {
         if (redisServer != null && redisServer.isActive()) {
             redisServer.stop();
+            System.out.println("Embedded Redis 서버 종료");
         }
     }
 
-    private int findAvailablePort() {
+    private int findAvailableTcpPort() throws IOException {
         try (ServerSocket socket = new ServerSocket(0)) {
             socket.setReuseAddress(true);
             return socket.getLocalPort();
-        } catch (IOException e) {
-            throw new ErrorException(ErrorCode.REDIS_ERROR);
         }
     }
 }
