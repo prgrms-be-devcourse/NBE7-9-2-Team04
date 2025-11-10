@@ -288,14 +288,14 @@ export default function RecruitmentDetailPage() {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer disabled:cursor-default disabled:bg-gray-200 disabled:opacity-50"
+                className="px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300 cursor-pointer disabled:cursor-default disabled:bg-gray-200 disabled:opacity-50"
               >
                 &lt;
               </button>
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer disabled:cursor-default disabled:bg-gray-200 disabled:opacity-50"
+                className="px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300 cursor-pointer disabled:cursor-default disabled:bg-gray-200 disabled:opacity-50"
               >
                 &gt;
               </button>
