@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
 	java
 	id("org.springframework.boot") version "3.5.6"
@@ -51,6 +53,9 @@ dependencies {
 	//querydsl
 	annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.1:jpa")
 	implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
+
+    //Elasticsearch
+    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
 }
 extra["springAiVersion"] = "1.1.0-M1"
 
