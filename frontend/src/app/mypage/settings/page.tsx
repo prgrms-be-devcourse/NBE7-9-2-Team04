@@ -75,6 +75,7 @@ export default function MySettingsPage() {
         body: JSON.stringify(formData),
       });
       alert(res.message || "개인정보가 수정되었습니다.");
+      window.dispatchEvent(new Event("profileUpdated"));
     } catch (err: any) {
       console.error(err);
       alert(err.message || "정보 수정 중 오류가 발생했습니다.");

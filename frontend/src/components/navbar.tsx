@@ -36,10 +36,14 @@ export default function Navbar() {
 
     // 로그인 이벤트 리스너. 상단바 바로 바뀌게함함
     const handleLoginSuccess = () => fetchUser();
+    const handleProfileUpdate = () => fetchUser();
+
     window.addEventListener("loginSuccess", handleLoginSuccess);
+    window.addEventListener("profileUpdated", handleProfileUpdate);
 
     return () => {
       window.removeEventListener("loginSuccess", handleLoginSuccess);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
   }, []);
 
