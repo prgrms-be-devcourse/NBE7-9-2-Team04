@@ -14,7 +14,6 @@ export default function AiQuestionPage() {
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [generating, setGenerating] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchQuestions = async () => {
@@ -41,31 +40,32 @@ export default function AiQuestionPage() {
     
   };
 
-  const createQuestions = async () => {
+  const handleStartInterview = async () => {
     setGenerating(true);
-
     try {
-      const res = await fetchApi("/api/v1/ai/questions", {
-        method: "POST",
-      });
+      // 먼저 이력서 존재 여부 확인
+      const resumeCheck = await fetchApi("/api/v1/users/resumes/check", { method: "GET" });
+      if (!resumeCheck?.data?.hasResume) {
+        alert("이력서를 먼저 등록해주세요!");
+        router.replace("/mypage/resume");
+        return;
+      }
 
 
-      alert("질문이 생성되었습니다.");
+      const res = await fetchApi("/api/v1/ai/questions", { method: "POST" });
+      alert("AI가 새 면접 질문을 생성했습니다!");
       await fetchQuestions();
-    } catch (err: any) {
-      // 실패(이력서 없음 등): 애니메이션 끄고 즉시 이동
-      setGenerating(false);
-      alert("이력서를 먼저 등록해주세요!");
-      router.replace("/mypage/resume");
-      return;
+
+    } catch (error) {
+      console.error("❌ 면접 질문 생성 실패:", error);
+      alert("질문 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
-      // 완료 후 애니메이션 제거
       setGenerating(false);
     }
   };
 
   const handleSave = () => {
-    createQuestions();
+    handleStartInterview();
   };
 
   const handleAddAiQuestion = () => {
@@ -88,7 +88,7 @@ export default function AiQuestionPage() {
       <div className="flex items-center justify-between mb-10">
         <h2 className="text-2xl font-semibold">분석된 포트폴리오</h2>
         <button
-          onClick={createQuestions}
+          onClick={handleStartInterview}
           disabled={generating}
           className={`flex items-center gap-2 px-4 py-2 rounded-md transition font-medium text-white ${
             generating
@@ -103,12 +103,12 @@ export default function AiQuestionPage() {
       {/* 카드 목록 or 빈 상태 */}
       {generating ? (
         <div className="flex flex-col items-center justify-center text-center py-20 gap-3 animate-fade-in">
-          <div className="animate-spin text-blue-500 text-5xl">🤖</div>
+          <div className="animate-spin text-blue-500 text-5xl">⏳</div>
           <p className="text-gray-700 font-medium animate-pulse">
             AI가 포트폴리오를 분석 중이에요...
           </p>
           <p className="text-sm text-gray-500">
-            잠시만 기다려주세요. 맞춤 면접 질문을 준비 중입니다.
+            잠시만 기다려주세요. 맞춤 면접 질문을 준비 중입니다. 🤖
           </p>
         </div>
       ) : (

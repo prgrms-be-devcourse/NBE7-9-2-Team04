@@ -122,7 +122,7 @@ export default function PortfolioReviewMainPage() {
           </p>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {feedbacks.map((f) => (
+            {feedbacks.map((f, index) => (
               <li
                 key={f.reviewId}
                 className="py-4 cursor-pointer hover:bg-gray-50 transition px-2 rounded-md"
@@ -130,7 +130,7 @@ export default function PortfolioReviewMainPage() {
               >
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-800">
-                    📍 {f.reviewId}번째 포트폴리오 AI 첨삭
+                    📍 {feedbacks.length - index}번째 포트폴리오 AI 첨삭
                   </span>
                   <span className="text-sm text-gray-500">
                     {formatDate(f.createDate)}
