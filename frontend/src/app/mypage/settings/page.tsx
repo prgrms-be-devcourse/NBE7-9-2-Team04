@@ -250,6 +250,7 @@ export default function MySettingsPage() {
                 onClick={() => {
                   setCanEdit(false);
                   setShowPasswordModal(true);
+                  
                 }}
                 className="flex-1 border border-gray-300 py-2 rounded-md hover:bg-gray-100"
               >

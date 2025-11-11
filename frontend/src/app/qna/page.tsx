@@ -196,7 +196,7 @@ export default function QnAPage() {
                   </div>
                   <span>{qna.authorNickname}</span>
                   <span>•</span>
-                  <span>{new Date(qna.createdDate).toLocaleDateString()}</span>
+                  <span>{new Date(qna.createdDate).toLocaleDateString().replace(/\.$/, "")}</span>
                 </div>
               </div>
             ))}

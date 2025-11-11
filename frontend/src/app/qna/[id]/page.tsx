@@ -92,7 +92,7 @@ export default function QnADetailPage() {
               <span className="font-medium">{qna.authorNickname}</span>
             </div>
             <span>•</span>
-            <span>{new Date(qna.createdDate).toLocaleDateString()}</span>
+            <span>{new Date(qna.createdDate).toLocaleDateString().replace(/\.$/, "")}</span>
           </div>
         </div>
 
