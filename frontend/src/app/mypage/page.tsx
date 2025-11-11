@@ -7,7 +7,6 @@ import { RankingResponse } from "@/types/ranking";
 import { Subscription } from "@/types/subscription";
 import {
   tierStyles,
-  tierBorderStyles,
   tierAvatarStyles,
 } from "@/components/ui/tierStyle";
 
@@ -56,7 +55,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-lg p-6 shadow-md">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-6">
-              {/* 🧩 아바타: 티어별 스타일 반영 */}
+              {/* 아바타 */}
               <div
                 className={`relative w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold transition-all duration-300 ${
                   tierAvatarStyles[myRanking.currentTier] ||
@@ -69,7 +68,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* 👤 닉네임 & 티어 */}
+              {/* 닉네임 & 티어 */}
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">
                   {myRanking.nickName}
@@ -89,7 +88,7 @@ export default function ProfilePage() {
                       : "일반 회원"}
                   </span>
 
-                  {/* 🏅 티어 배지 */}
+                  {/* 티어 배지 */}
                   <div
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-base font-bold shadow-md transition-transform hover:scale-110 ${
                       tierOf(myRanking.currentTier).gradient
@@ -104,7 +103,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* 📈 순위 */}
+            {/* 순위 */}
             <div className="text-right">
               <p className="text-gray-500 text-sm mb-1">랭킹</p>
               <p className="text-3xl font-extrabold text-gray-800">
@@ -113,7 +112,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* 📊 통계 - 내부 강조 스타일만 변경 */}
+          {/* 통계 */}
           <div className="grid md:grid-cols-3 gap-6 mt-8">
             <StatBox
               label="해결한 문제"
@@ -138,9 +137,7 @@ export default function ProfilePage() {
   );
 }
 
-/* --------------------------------------------------- */
-/* 내부 통계 박스만 개선 - 카드 크기나 레이아웃은 동일 */
-/* --------------------------------------------------- */
+
 function StatBox({
   label,
   value,

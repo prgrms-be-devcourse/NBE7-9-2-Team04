@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { fetchApi } from "@/lib/client";
 import { RankingResponse, RankingSummaryResponse } from "@/types/ranking";
-import { tierStyles, tierBorderStyles, tierAvatarStyles } from "@/components/ui/tierStyle";
+import {
+  tierStyles,
+  tierBorderStyles,
+  tierAvatarStyles,
+} from "@/components/ui/tierStyle";
 
 export default function RankingPage() {
   const [sortBy, setSortBy] = useState<"score" | "problems">("score");
@@ -241,8 +245,8 @@ export default function RankingPage() {
       </div>
 
       {/* 전체 랭킹 */}
-     {/* 전체 랭킹 */}
-     <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-gray-200">
+      {/* 전체 랭킹 */}
+      <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-gray-200">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold">전체 랭킹</h3>
 
@@ -276,20 +280,21 @@ export default function RankingPage() {
             <div
               key={user.userId}
               className="flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300"
-
             >
               <div className="w-10 flex justify-center text-2xl font-bold">
                 {getRankEmoji(user.rankValue)}
               </div>
-              
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-md ${
-                index < 3 
-                  ? 'bg-white text-gray-800' 
-                  : 'bg-gray-200 text-gray-700'
-              }`}>
+
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-md ${
+                  index < 3
+                    ? "bg-white text-gray-800"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
                 {user.nickName[0]}
               </div>
-              
+
               <div className="flex-1">
                 <p className="font-bold text-lg text-gray-800">
                   {user.nickName}
@@ -302,7 +307,7 @@ export default function RankingPage() {
                   <span>질문 {user.questionCount}개</span>
                 </div>
               </div>
-              
+
               <div
                 className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold shadow-lg transition-transform hover:scale-110 ${
                   tierOf(user.currentTier).gradient
@@ -319,30 +324,40 @@ export default function RankingPage() {
   );
 }
 
-// StatBox 컴포넌트 개선
-function StatBox({ 
-  label, 
-  value, 
-  tier, 
-  highlight = false 
-}: { 
-  label: string; 
-  value: number; 
+// StatBox 컴포넌트
+function StatBox({
+  label,
+  value,
+  tier,
+  highlight = false,
+}: {
+  label: string;
+  value: number;
   tier?: string;
   highlight?: boolean;
 }) {
   const tierStyle = tier ? tierStyles[tier] : tierStyles.UNRATED;
-  
+
   return (
-    <div className={`rounded-xl p-5 text-center border-2 transition-all duration-300 hover:scale-105 ${
-      highlight 
-        ? `${tierStyle.gradient} border-transparent text-black ${tierStyle.shadow}` 
-        : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 hover:border-gray-300'
-    }`}>
-      <p className={`text-sm font-semibold mb-1 ${highlight ? 'text-black/90' : 'text-gray-600'}`}>
+    <div
+      className={`rounded-xl p-5 text-center border-2 transition-all duration-300 hover:scale-105 ${
+        highlight
+          ? `${tierStyle.gradient} border-transparent text-black ${tierStyle.shadow}`
+          : "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 hover:border-gray-300"
+      }`}
+    >
+      <p
+        className={`text-sm font-semibold mb-1 ${
+          highlight ? "text-black/90" : "text-gray-600"
+        }`}
+      >
         {label}
       </p>
-      <p className={`text-4xl font-bold ${highlight ? 'drop-shadow-md' : 'text-gray-800'}`}>
+      <p
+        className={`text-4xl font-bold ${
+          highlight ? "drop-shadow-md" : "text-gray-800"
+        }`}
+      >
         {value}
       </p>
     </div>

@@ -70,7 +70,6 @@ export const tierStyles: Record<
 
 
 // 티어별 테두리 스타일
-// 티어별 화려한 테두리 스타일 (더 강화된 버전)
 export const tierBorderStyles: Record<string, string> = {
     UNRATED: "border-2 border-gray-300 bg-white",
     BRONZE:
