@@ -46,8 +46,25 @@ export default function PortfolioReviewMainPage() {
     fetchFeedbacks();
   }, []);
 
-  const handleStartAnalyze = () => {
-    router.push("/portfolio_review/new");
+  const handleStartAnalyze = async () => {
+    try {
+      // 1️⃣ 이력서 존재 여부 확인
+      const res = await fetchApi("/api/v1/users/resumes/check", { method: "GET" });
+      const hasResume = res?.data?.hasResume;
+
+      // 2️⃣ 분기 처리
+      if (!hasResume) {
+        alert("이력서를 먼저 등록해주세요!");
+        router.replace("/mypage/resume");
+        return;
+      }
+
+      // 3️⃣ 이력서가 있을 경우 첨삭 페이지 이동
+      router.push("/portfolio_review/new");
+    } catch (error) {
+      console.error("❌ 이력서 존재 여부 확인 실패:", error);
+      alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    }
   };
 
   const formatDate = (dateStr: string) => {
