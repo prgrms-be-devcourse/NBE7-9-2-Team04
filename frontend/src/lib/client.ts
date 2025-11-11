@@ -29,7 +29,12 @@ export async function fetchApi(url: string, options?: RequestInit) {
   // 401 → 토큰 갱신 로직
   // -------------------------------
   if (res.status === 401) {
-    // 로그인 체크용 요청이라면 바로 종료
+
+    if (url.includes("/api/v1/users/login")) {
+      console.warn("로그인 실패 (잘못된 비밀번호)");
+      throw new Error(apiResponse.message || "비밀번호가 잘못되었습니다.");
+    }
+
     if (url.includes("/api/v1/users/verifyPassword")) {
       console.warn("비밀번호 검증 실패 : 로그인 리다이렉트 안 함");
       throw new Error(apiResponse.message || "비밀번호가 일치하지 않습니다.");

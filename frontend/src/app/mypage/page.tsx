@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client";
 import { RankingResponse } from "@/types/ranking";
 import { Subscription } from "@/types/subscription";
-import {
-  tierStyles,
-  tierAvatarStyles,
-} from "@/components/ui/tierStyle";
+import { tierStyles, tierAvatarStyles } from "@/components/ui/tierStyle";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -136,7 +133,6 @@ export default function ProfilePage() {
     </>
   );
 }
-
 
 function StatBox({
   label,
