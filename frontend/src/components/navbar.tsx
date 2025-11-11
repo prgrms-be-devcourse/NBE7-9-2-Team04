@@ -166,8 +166,8 @@ export default function Navbar() {
           {isLoggedIn ? (
             <>
               <span className="text-gray-700 font-medium">
-                {userName.length > 4
-                  ? `${userName.substring(0, 4)}님`
+                {userName.length > 6
+                  ? `${userName.substring(0, 6)}님`
                   : `${userName}님`}
               </span>
               <Link
