@@ -35,7 +35,7 @@ function PostRow({
   const { ref, open, setOpen } = useDropdown();
 
   const getStatusBadge = (status: PostStatus) => {
-    const base = "px-2 py-1 text-sm rounded";
+    const base = "px-2 py-1 text-sm font-semibold rounded";
     return status === "ING" ? (
       <span className={`${base} bg-green-100 text-green-700`}>진행중</span>
     ) : (
@@ -64,7 +64,7 @@ function PostRow({
       <TableCell>{getStatusBadge(post.status)}</TableCell>
 
       {/*작성일 */}
-      <TableCell>{new Date(post.createDate).toLocaleDateString()}</TableCell>
+      <TableCell>{new Date(post.createDate).toLocaleDateString().replace(/\.$/, "")}</TableCell>
 
       {/*Dropdown 메뉴 */}
       <TableCell className="text-right">

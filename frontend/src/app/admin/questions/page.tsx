@@ -101,11 +101,11 @@ export default function AdminQuestionsPage() {
   //상태 뱃지
   const getStatusBadge = (isApproved: boolean) => {
     return isApproved ? (
-      <span className="px-2 py-1 text-sm font-semibold rounded-md bg-green-100 text-green-700 border border-green-200">
+      <span className="px-2 py-1 text-sm font-semibold rounded-md bg-green-100 text-green-700">
         승인됨
       </span>
     ) : (
-      <span className="px-2 py-1 text-sm font-semibold rounded-md bg-yellow-100 text-yellow-700 border border-yellow-200">
+      <span className="px-2 py-1 text-sm font-semibold rounded-md bg-yellow-100 text-yellow-700">
         미승인
       </span>
     );
@@ -170,7 +170,7 @@ export default function AdminQuestionsPage() {
                 <TableCell>{q.score}</TableCell>
                 <TableCell>{getStatusBadge(q.isApproved)}</TableCell>
                 <TableCell>
-                  {new Date(q.createdDate).toLocaleDateString()}
+                  {new Date(q.createdDate).toLocaleDateString().replace(/\.$/, "")}
                 </TableCell>
 
                 <TableCell className="text-right">

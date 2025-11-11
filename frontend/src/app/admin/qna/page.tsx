@@ -119,21 +119,21 @@ export default function AdminQnaPage() {
   const getAnswerBadge = (isAnswered: boolean) => {
     const base = "px-2 py-1 text-sm rounded";
     return isAnswered ? (
-      <span className={`${base} bg-green-100 text-green-700`}>답변 완료</span>
+      <span className={`${base} font-semibold bg-green-100 text-green-700`}>답변 완료</span>
     ) : (
-      <span className={`${base} bg-yellow-100 text-yellow-700`}>대기 중</span>
+      <span className={`${base} font-semibold bg-yellow-100 text-yellow-700`}>대기 중</span>
     );
   };
 
   // 카테고리 뱃지
   const getCategoryBadge = (category: string) => {
     const colorMap: Record<string, string> = {
-      계정: "bg-blue-50 text-blue-600 border-blue-100",
-      결제: "bg-pink-50 text-pink-600 border-pink-100",
-      시스템: "bg-indigo-50 text-indigo-600 border-indigo-100",
-      모집: "bg-emerald-50 text-emerald-600 border-emerald-100",
-      제안: "bg-orange-50 text-orange-600 border-orange-100",
-      기타: "bg-gray-50 text-gray-600 border-gray-100",
+      계정: "bg-blue-50 font-semibold text-blue-600 border-blue-100",
+      결제: "bg-pink-50 font-semibold text-pink-600 border-pink-100",
+      시스템: "bg-indigo-50 font-semibold text-indigo-600 border-indigo-100",
+      모집: "bg-emerald-50 font-semibold text-emerald-600 border-emerald-100",
+      제안: "bg-orange-50 font-semibold text-orange-600 border-orange-100",
+      기타: "bg-gray-50 font-semibold text-gray-600 border-gray-100",
     };
     return (
       <span
@@ -187,7 +187,7 @@ export default function AdminQnaPage() {
                 <TableCell>{qna.authorNickname}</TableCell>
                 <TableCell>{getCategoryBadge(qna.categoryName)}</TableCell>
                 <TableCell>{getAnswerBadge(qna.isAnswered)}</TableCell>
-                <TableCell>{new Date(qna.createdDate).toLocaleDateString()}</TableCell>
+                <TableCell>{new Date(qna.createdDate).toLocaleDateString().replace(/\.$/, "")}</TableCell>
                 <TableCell className="text-right">
                   <div className="relative inline-block">
                     <button
