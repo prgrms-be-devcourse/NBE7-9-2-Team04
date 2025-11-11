@@ -147,6 +147,24 @@ public class QuestionService {
         return QuestionResponse.from(question);
     }
 
+    //승인되지 않은 질문 단건 조회 -> 수정용
+    @Transactional(readOnly = true)
+    public QuestionResponse getNotApprovedQuestionById(Long userId, Long questionId, User user) {
+        validateUserAuthority(user);
+
+        if (!user.getId().equals(userId)) {
+            throw new ErrorException(ErrorCode.QUESTION_INVALID_USER);
+        }
+        Question question = findByIdOrThrow(questionId);
+        validateQuestionAuthor(question, user);
+
+        if (question.getIsApproved()) {
+            throw new ErrorException(ErrorCode.ALREADY_APPROVED_QUESTION);
+        }
+
+        return QuestionResponse.from(question);
+    }
+
     @Transactional
     public void createListQuestion(List<Question> questions){
         questionRepository.saveAll(questions);

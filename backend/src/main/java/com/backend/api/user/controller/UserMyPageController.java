@@ -14,6 +14,7 @@ import com.backend.api.question.dto.response.QuestionResponse;
 import com.backend.api.question.service.QuestionService;
 import com.backend.api.user.dto.response.UserMyPageResponse;
 import com.backend.api.user.service.UserMyPageService;
+import com.backend.domain.user.entity.User;
 import com.backend.global.Rq.Rq;
 import com.backend.global.dto.response.ApiResponse;
 import com.backend.global.exception.ErrorCode;
@@ -147,6 +148,18 @@ public class UserMyPageController {
         }
 
         return ApiResponse.ok("비밀번호가 확인되었습니다.", true);
+    }
+
+    @GetMapping("/{userId}/questions/{questionId}")
+    @Operation(summary = "사용자가 작성한 승인되지 않은 질문 단건 조회 (수정용)")
+    public ApiResponse<QuestionResponse> getUserQuestionForEdit(
+            @PathVariable Long userId,
+            @PathVariable Long questionId
+    ) {
+        User currentUser = rq.getUser();
+        QuestionResponse response = questionService.getNotApprovedQuestionById(userId, questionId, currentUser);
+
+        return ApiResponse.ok("사용자가 작성한 승인되지 않은 질문 단건 조회를 완료했습니다.", response);
     }
 
 }
