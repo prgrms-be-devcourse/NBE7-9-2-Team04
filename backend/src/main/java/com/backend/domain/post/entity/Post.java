@@ -3,6 +3,8 @@ package com.backend.domain.post.entity;
 import com.backend.domain.comment.entity.Comment;
 import com.backend.domain.user.entity.User;
 import com.backend.global.entity.BaseEntity;
+import com.backend.global.exception.ErrorCode;
+import com.backend.global.exception.ErrorException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,14 +17,25 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "post")
 
 
 public class Post extends BaseEntity {
 
+    @Builder
+    public Post(String title, String introduction, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount, User users, PostCategoryType postCategoryType) {
+        this.title = title;
+        this.introduction = introduction;
+        this.content = content;
+        validateDeadline(deadline);
+        this.deadline = deadline;
+        this.status = status;
+        this.pinStatus = pinStatus;
+        this.recruitCount = recruitCount;
+        this.users = users;
+        this.postCategoryType = postCategoryType;
+    }
 
     @NotNull
     @Size(min = 2, max = 255)
@@ -63,10 +76,17 @@ public class Post extends BaseEntity {
     @Column(length = 30, nullable = false)
     private PostCategoryType postCategoryType;
 
-    public void updatePost(String title, String introduction, @NotBlank(message = "내용은 필수입니다.") @Size(min = 10, message = "내용은 최소 10자 이상 입력해주세요.") String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount, PostCategoryType postCategoryType) {
+    public void validateDeadline(LocalDateTime deadline) {
+        if (deadline != null && deadline.isBefore(LocalDateTime.now())) {
+            throw new ErrorException(ErrorCode.INVALID_DEADLINE);
+        }
+    }
+
+    public void updatePost(String title, String introduction, String content, LocalDateTime deadline, PostStatus status, PinStatus pinStatus, Integer recruitCount, PostCategoryType postCategoryType) {
         this.title = title;
         this.introduction = introduction;
         this.content = content;
+        validateDeadline(deadline);
         this.deadline = deadline;
         this.status = status;
         this.pinStatus = pinStatus;

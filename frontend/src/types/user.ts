@@ -22,6 +22,8 @@ export type UserSignupRequest = {
 /** 관리자: 사용자 상태 변경 요청 DTO */
 export type AdminUserStatusUpdateRequest = {
   status: AccountStatus;
+  reason: string;
+  suspendEndDate: string | null;
 };
 
 /** 관리자용 사용자 응답 DTO */

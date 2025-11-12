@@ -4,19 +4,39 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/client"; // API 호출을 위한 헬퍼 함수 임포트
 
+// 타입 정의 추가
+interface Feedback {
+  reviewId: number;
+  createdAt?: string;
+  [key: string]: any; // 기타 필드 허용
+}
+
 export default function PortfolioReviewMainPage() {
   const router = useRouter();
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 디버깅 로그 추가 및 데이터 매핑 개선
   useEffect(() => {
     const fetchFeedbacks = async () => {
       setIsLoading(true);
       try {
+        console.log("🔍 API 호출 시작: /api/v1/portfolio-review/reviews");
         const response = await fetchApi("/api/v1/portfolio-review/reviews");
-        setFeedbacks(response.data);
+        console.log("✅ API 응답 데이터:", response.data);
+
+        if (response.data && Array.isArray(response.data)) {
+          const mappedFeedbacks = response.data.map((feedback: Feedback) => ({
+            ...feedback,
+            createdAt: feedback.createdAt || "날짜 정보 없음", // createdAt이 없을 경우 기본값 설정
+          }));
+          setFeedbacks(mappedFeedbacks);
+        } else {
+          console.error("⚠️ 응답 데이터가 올바르지 않습니다:", response.data);
+          setFeedbacks([]);
+        }
       } catch (error) {
-        console.error("Failed to fetch feedbacks:", error);
+        console.error("❌ 피드백 목록 불러오기 실패:", error);
         alert("피드백 목록을 불러오는 데 실패했습니다.");
       } finally {
         setIsLoading(false);
@@ -31,13 +51,13 @@ export default function PortfolioReviewMainPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return "날짜 정보 없음"; // dateStr이 없을 때 표시할 메시지
+    if (!dateStr) return ""; // dateStr이 없을 때 빈 문자열 반환
 
     // 소수점 이하의 초 제거
     const cleanedDateStr = dateStr.split(".")[0];
 
     const date = new Date(cleanedDateStr);
-    if (isNaN(date.getTime())) return "유효하지 않은 날짜"; // dateStr이 유효하지 않을 때 표시할 메시지
+    if (isNaN(date.getTime())) return ""; // dateStr이 유효하지 않을 때 빈 문자열 반환
 
     return date.toLocaleString("ko-KR", {
       year: "numeric",
@@ -96,7 +116,7 @@ export default function PortfolioReviewMainPage() {
                     📍 {f.reviewId}번째 포트폴리오 AI 첨삭
                   </span>
                   <span className="text-sm text-gray-500">
-                    {formatDate(f.createdAt)}
+                    {formatDate(f.createDate)}
                   </span>
                 </div>
               </li>

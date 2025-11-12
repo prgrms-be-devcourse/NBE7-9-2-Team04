@@ -15,18 +15,18 @@ defaults:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-        
-    env: # ✅ GitHub Secrets 전달
+
+    env:
       SPRING_PROFILES_ACTIVE: test
+      SPRING_DATA_REDIS_HOST: localhost
+      SPRING_DATA_REDIS_PORT: 6379
       SECRET_PATTERN: ${{ secrets.SECRET_PATTERN }}
       PAYMENT_SECRET_KEY: ${{ secrets.PAYMENT_SECRET_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       EMAIL_ID: ${{ secrets.EMAIL_ID }}
       EMAIL_PW: ${{ secrets.EMAIL_PW }}
       OPENAI_API_URL: ${{ secrets.OPENAI_API_URL }}
-      
 
     steps:
       - name: 리포지토리를 가져옵니다
@@ -45,7 +45,6 @@ jobs:
 
       - name: Gradle build를 수행합니다
         run: ./gradlew clean test -Dspring.profiles.active=test
-          
 
       - name: 테스트 결과를 PR에 코멘트로 등록합니다
         uses: EnricoMi/publish-unit-test-result-action@v1
@@ -59,3 +58,4 @@ jobs:
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
           token: ${{ github.token }}
+
