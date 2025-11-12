@@ -108,7 +108,7 @@ public class FeedbackService {
 
     public AiFeedbackResponse fallbackToGemini(Prompt prompt, Throwable e ) {
         ChatClient geminiClient = ChatClient.create(geminiModel);
-        log.warn("[Fallback Triggered] OpenAI unavailable → switching to Claude. Cause={}", e.getMessage());
+        log.warn("[Fallback Triggered] OpenAI unavailable → switching to Gemini. Cause={}", e.getMessage());
         return geminiClient.prompt(prompt)
                 .call()
                 .entity(AiFeedbackResponse.class);
