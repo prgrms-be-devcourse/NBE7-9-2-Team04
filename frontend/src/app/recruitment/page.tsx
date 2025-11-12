@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/client";
 import Link from "next/link";
 import CategoryTab from "@/components/categoryTab";
-import { PostResponse, PostPageResponse } from "@/types/post";
+import { PostResponse, PostPageResponse, PostStatus, PinStatus } from "@/types/post";
 
 export default function RecruitmentPage() {
   const [pinnedPosts, setPinnedPosts] = useState<PostResponse[]>([]);
@@ -86,6 +86,26 @@ export default function RecruitmentPage() {
   useEffect(() => {
     fetchPosts(1);
   }, [selectedCategory]);
+
+  useEffect(() => {
+    const updatePostStatus = async () => {
+      const currentDate = new Date();
+      const updatedPosts = posts.map((post) => {
+        const deadlineDate = new Date(post.deadline);
+        if (deadlineDate < currentDate) {
+          return {
+            ...post,
+            status: "CLOSED" as PostStatus,
+            pinStatus: "NOT_PINNED" as PinStatus,
+          };
+        }
+        return post;
+      });
+      return updatedPosts;
+    };
+
+    updatePostStatus().then((updatedPosts) => setPosts(updatedPosts));
+  }, []);
 
   useEffect(() => {
     if (pinnedPosts.length === 0) return;
