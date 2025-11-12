@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { fetchApi } from "@/lib/client";
 import { RankingResponse, RankingSummaryResponse } from "@/types/ranking";
+import {
+  tierStyles,
+  tierBorderStyles,
+  tierAvatarStyles,
+} from "@/components/ui/tierStyle";
 
 export default function RankingPage() {
   const [sortBy, setSortBy] = useState<"score" | "problems">("score");
@@ -32,21 +37,6 @@ export default function RankingPage() {
       </div>
     );
   }
-
-  // 티어 스타일 & 아이콘
-  const tierStyles: Record<
-    string,
-    { color: string; bgColor: string; icon: string }
-  > = {
-    UNRATED: { color: "text-gray-600", bgColor: "bg-gray-100", icon: "⚪" },
-    BRONZE: { color: "text-amber-700", bgColor: "bg-amber-100", icon: "🥉" },
-    SILVER: { color: "text-gray-500", bgColor: "bg-gray-200", icon: "🥈" },
-    GOLD: { color: "text-yellow-700", bgColor: "bg-yellow-100", icon: "🥇" },
-    PLATINUM: { color: "text-cyan-700", bgColor: "bg-cyan-100", icon: "💠" },
-    DIAMOND: { color: "text-blue-700", bgColor: "bg-blue-100", icon: "💎" },
-    RUBY: { color: "text-red-700", bgColor: "bg-red-100", icon: "🔴" },
-    MASTER: { color: "text-purple-700", bgColor: "bg-purple-100", icon: "👑" },
-  };
 
   const TIER_SCORE_RANGES: Record<string, string> = {
     UNRATED: "0 ~ 299점",
@@ -89,86 +79,141 @@ export default function RankingPage() {
         <p className="text-gray-500">문제를 풀고 티어를 올려보세요!</p>
       </div>
 
-      {/* 내 랭킹 */}
-      <div className="bg-blue-50 rounded-lg p-6 shadow-md border border-blue-200 mb-10">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-3xl font-bold">
-              {myRanking.nickName[0]}
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">{myRanking.nickName}</h2>
-              <p className="text-gray-500">
-                현재 랭킹: {myRanking.rankValue}위
-              </p>
+      {/* 내 랭킹 - 티어별 화려한 스타일 적용 */}
+      <div
+        className={`relative rounded-2xl shadow-2xl mb-10 overflow-hidden transition-all duration-300 hover:scale-[1.02] ${
+          tierBorderStyles[myRanking.currentTier] || tierBorderStyles.UNRATED
+        }`}
+      >
+        {/* 배경 그라데이션 효과 */}
+        <div
+          className={`absolute inset-0 opacity-10 ${
+            tierOf(myRanking.currentTier).gradient
+          } ${tierOf(myRanking.currentTier).animation}`}
+        ></div>
+
+        {/* 내부 내용 */}
+        <div className="bg-white rounded-xl p-6 relative z-10">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-6">
+              {/* 프로필 아바타 - 티어별 테두리 */}
               <div
-                className={`mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${
-                  tierOf(myRanking.currentTier).bgColor
-                } ${tierOf(myRanking.currentTier).color}`}
+                className={`relative w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full flex items-center justify-center text-3xl font-bold transition-all duration-300 ${
+                  tierAvatarStyles[myRanking.currentTier] ||
+                  tierAvatarStyles.UNRATED
+                }`}
               >
-                <span>{tierOf(myRanking.currentTier).icon}</span>
-                <span>{myRanking.currentTier}</span>
+                <span className="relative z-10">{myRanking.nickName[0]}</span>
+                {/* 티어 아이콘 배지 */}
+                <div className="absolute -bottom-1 -right-1 text-3xl">
+                  {tierOf(myRanking.currentTier).icon}
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-bold">{myRanking.nickName}</h2>
+                <p className="text-gray-500">
+                  현재 랭킹: {myRanking.rankValue}위
+                </p>
+
+                {/* 티어 배지 - 더 화려하게 */}
+                <div
+                  className={`mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-full text-base font-bold shadow-lg transition-all duration-300 hover:scale-110 ${
+                    tierOf(myRanking.currentTier).gradient
+                  } text-gray-600" ${tierOf(myRanking.currentTier).shadow}`}
+                >
+                  <span className="text-xl">
+                    {tierOf(myRanking.currentTier).icon}
+                  </span>
+                  <span>{myRanking.currentTier}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* 통계 */}
-        <div className="grid md:grid-cols-3 gap-4 mt-6 mb-6">
-          <StatBox label="해결한 문제" value={myRanking.solvedCount} />
-          <StatBox label="총 점수" value={myRanking.totalScore} />
-          <StatBox label="제출한 질문" value={myRanking.questionCount} />
-        </div>
-
-        {/* 다음 티어 진행률. 300,600 ``해당하면 해당 바 안 보임 */}
-        {myRanking.nextTier && myRanking.scoreToNextTier > 0 ? (
-          <>
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>다음 티어까지</span>
-              <span className="font-semibold">
-                {myRanking.scoreToNextTier}점 남음 ({myRanking.nextTier})
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-blue-500 h-3 transition-all duration-300"
-                style={{
-                  width: `${
-                    100 -
-                    (myRanking.scoreToNextTier /
-                      (myRanking.totalScore + myRanking.scoreToNextTier)) *
-                      100
-                  }%`,
-                }}
-              ></div>
-            </div>
-            <div className="flex justify-between text-sm text-gray-600 mt-1">
-              <span>
-                {tierOf(myRanking.currentTier).icon} {myRanking.currentTier}
-              </span>
-              <span>
-                {tierOf(myRanking.nextTier).icon} {myRanking.nextTier}
-              </span>
-            </div>
-          </>
-        ) : (
-          // ✅ 다음 티어가 없거나 이미 달성한 경우
-          <div className="flex flex-col items-center justify-center py-3">
-            <span className="text-lg">🎉</span>
-            <p className="text-blue-600 font-semibold mt-1">
-              다음 티어 달성 완료!
-            </p>
+          {/* 통계 - 카드 스타일 개선 */}
+          <div className="grid md:grid-cols-3 gap-4 mt-6 mb-6">
+            <StatBox
+              label="해결한 문제"
+              value={myRanking.solvedCount}
+              tier={myRanking.currentTier}
+            />
+            <StatBox
+              label="총 점수"
+              value={myRanking.totalScore}
+              tier={myRanking.currentTier}
+              highlight
+            />
+            <StatBox
+              label="제출한 질문"
+              value={myRanking.questionCount}
+              tier={myRanking.currentTier}
+            />
           </div>
-        )}
+
+          {/* 다음 티어 진행률 - 더 화려한 프로그레스바 */}
+          {myRanking.nextTier && myRanking.scoreToNextTier > 0 ? (
+            <>
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span className="font-semibold">다음 티어까지</span>
+                <span className="font-bold text-gray-600">
+                  {myRanking.scoreToNextTier}점 남음
+                </span>
+              </div>
+
+              {/* 그라데이션 프로그레스바 */}
+              <div className="relative w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
+                <div
+                  className={`h-4 transition-all duration-500 ease-out ${
+                    tierOf(myRanking.currentTier).gradient
+                  } ${tierOf(myRanking.currentTier).shadow} relative`}
+                  style={{
+                    width: `${
+                      100 -
+                      (myRanking.scoreToNextTier /
+                        (myRanking.totalScore + myRanking.scoreToNextTier)) *
+                        100
+                    }%`,
+                  }}
+                >
+                  {/* 반짝이는 효과 */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-sm mt-2">
+                <div className="flex items-center gap-1">
+                  <span className="text-xl">
+                    {tierOf(myRanking.currentTier).icon}
+                  </span>
+                  <span className="font-semibold">{myRanking.currentTier}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xl">
+                    {tierOf(myRanking.nextTier).icon}
+                  </span>
+                  <span className="font-semibold">{myRanking.nextTier}</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+              <span className="text-3xl mb-2">🎉</span>
+              <p className="text-blue-600 font-bold text-lg">
+                최고 티어 달성 완료!
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 티어 안내문 */}
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-300 mb-10">
+      {/* 티어 안내문 - 카드 스타일 개선 */}
+      <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-gray-200 mb-10 hover:shadow-xl transition-shadow duration-300">
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">🏆</span>
-          <h3 className="text-xl font-semibold">티어 시스템</h3>
+          <span className="text-2xl">🏆</span>
+          <h3 className="text-xl font-bold">티어 시스템</h3>
         </div>
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-gray-600 mb-6">
           점수에 따라 티어가 결정되며, 300점 단위로 상승합니다.
         </p>
 
@@ -176,33 +221,41 @@ export default function RankingPage() {
           {Object.entries(tierStyles).map(([tier, style]) => (
             <div
               key={tier}
-              className="text-center border border-gray-300 rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition"
+              className="group relative text-center border-2 border-gray-200 rounded-xl p-4 bg-gradient-to-br from-white to-gray-50 hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden"
             >
+              {/* 호버 시 배경 효과 */}
               <div
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-semibold ${style.bgColor} ${style.color}`}
-              >
-                <span>{style.icon}</span>
-                <span>{tier}</span>
+                className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 ${style.gradient}`}
+              ></div>
+
+              <div className="relative z-10">
+                <div className="text-4xl mb-2">{style.icon}</div>
+                <div
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${style.gradient} text-gray-800 shadow-md`}
+                >
+                  {tier}
+                </div>
+                <p className="text-xs text-gray-500 mt-2 font-medium">
+                  {TIER_SCORE_RANGES[tier]}
+                </p>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {TIER_SCORE_RANGES[tier]}
-              </p>
             </div>
           ))}
         </div>
       </div>
 
       {/* 전체 랭킹 */}
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-300">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold">전체 랭킹</h3>
+      {/* 전체 랭킹 */}
+      <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-gray-200">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold">전체 랭킹</h3>
 
-          <div className="flex border border-gray-200 rounded-md overflow-hidden">
+          <div className="flex border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm">
             <button
               onClick={() => setSortBy("score")}
-              className={`px-4 py-2 text-sm transition ${
+              className={`px-5 py-2 text-sm font-semibold transition-all duration-200 ${
                 sortBy === "score"
-                  ? "bg-blue-500 text-white"
+                  ? "bg-blue-500 text-white shadow-md"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
@@ -210,9 +263,9 @@ export default function RankingPage() {
             </button>
             <button
               onClick={() => setSortBy("problems")}
-              className={`px-4 py-2 text-sm transition ${
+              className={`px-5 py-2 text-sm font-semibold transition-all duration-200 ${
                 sortBy === "problems"
-                  ? "bg-blue-500 text-white"
+                  ? "bg-blue-500 text-white shadow-md"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
@@ -221,34 +274,46 @@ export default function RankingPage() {
           </div>
         </div>
 
+        {/* 전체 랭킹 */}
         <div className="space-y-3">
-          {sortedRankings.map((user) => (
+          {sortedRankings.map((user, index) => (
             <div
               key={user.userId}
-              className="flex items-center gap-4 p-4 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 transition"
+              className="flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300"
             >
-              <div className="w-8 flex justify-center text-lg font-bold">
+              <div className="w-10 flex justify-center text-2xl font-bold">
                 {getRankEmoji(user.rankValue)}
               </div>
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
+
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-md ${
+                  index < 3
+                    ? "bg-white text-gray-800"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
                 {user.nickName[0]}
               </div>
+
               <div className="flex-1">
-                <p className="font-semibold">{user.nickName}</p>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <span>해결한 문제 : {user.solvedCount}문제</span>
-                  <span>•</span>
-                  <span>{user.totalScore}점</span>
-                  <span>•</span>
-                  <span>제출한 질문 : {user.questionCount}개</span>
+                <p className="font-bold text-lg text-gray-800">
+                  {user.nickName}
+                </p>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span>문제 {user.solvedCount}개</span>
+                  <span> / </span>
+                  <span className="font-semibold">{user.totalScore}점</span>
+                  <span> / </span>
+                  <span>질문 {user.questionCount}개</span>
                 </div>
               </div>
+
               <div
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-semibold ${
-                  tierOf(user.currentTier).bgColor
-                } ${tierOf(user.currentTier).color}`}
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold shadow-lg transition-transform hover:scale-110 ${
+                  tierOf(user.currentTier).gradient
+                } text-black`}
               >
-                <span>{tierOf(user.currentTier).icon}</span>
+                <span className="text-lg">{tierOf(user.currentTier).icon}</span>
                 <span>{user.currentTier}</span>
               </div>
             </div>
@@ -259,11 +324,42 @@ export default function RankingPage() {
   );
 }
 
-function StatBox({ label, value }: { label: string; value: number }) {
+// StatBox 컴포넌트
+function StatBox({
+  label,
+  value,
+  tier,
+  highlight = false,
+}: {
+  label: string;
+  value: number;
+  tier?: string;
+  highlight?: boolean;
+}) {
+  const tierStyle = tier ? tierStyles[tier] : tierStyles.UNRATED;
+
   return (
-    <div className="bg-gray-50 rounded-lg p-4 text-center border border-gray-300">
-      <p className="text-gray-500 text-sm">{label}</p>
-      <p className="text-3xl font-bold mt-1">{value}</p>
+    <div
+      className={`rounded-xl p-5 text-center border-2 transition-all duration-300 hover:scale-105 ${
+        highlight
+          ? `${tierStyle.gradient} border-transparent text-black ${tierStyle.shadow}`
+          : "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 hover:border-gray-300"
+      }`}
+    >
+      <p
+        className={`text-sm font-semibold mb-1 ${
+          highlight ? "text-black/90" : "text-gray-600"
+        }`}
+      >
+        {label}
+      </p>
+      <p
+        className={`text-4xl font-bold ${
+          highlight ? "drop-shadow-md" : "text-gray-800"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }

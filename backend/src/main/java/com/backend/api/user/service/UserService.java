@@ -100,7 +100,7 @@ public class UserService {
                 .build();
 
         user.assignSubscription(basicSubscription);
-        user.assignRanking(ranking);
+        //user.assignRanking(ranking);
 
         eventPublisher.publishEvent(new UserSignupEvent(user));
 

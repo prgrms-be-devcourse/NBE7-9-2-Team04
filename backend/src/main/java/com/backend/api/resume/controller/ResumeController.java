@@ -3,6 +3,7 @@ package com.backend.api.resume.controller;
 import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.api.resume.dto.response.ResumeCreateResponse;
+import com.backend.api.resume.dto.response.ResumeExistResponse;
 import com.backend.api.resume.dto.response.ResumeReadResponse;
 import com.backend.api.resume.dto.response.ResumeUpdateResponse;
 import com.backend.api.resume.service.ResumeService;
@@ -61,4 +62,14 @@ public class ResumeController {
         ResumeReadResponse response = resumeService.readResume(userId);
         return ApiResponse.ok("이력서를 조회했습니다.", response);
     }
+
+    @GetMapping("/check")
+    @Operation(summary = "이력서 존재 여부 확인", description = "사용자가 이력서를 등록했는지 확인합니다.")
+    public ApiResponse<ResumeExistResponse> checkResumeExists() {
+        Long userId = rq.getUser().getId();
+        ResumeExistResponse response = resumeService.checkResumeExists(userId);
+        return ApiResponse.ok("이력서 존재 여부 확인 성공", response);
+    }
+
+
 }

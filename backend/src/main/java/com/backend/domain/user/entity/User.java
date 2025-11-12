@@ -1,7 +1,5 @@
 package com.backend.domain.user.entity;
 
-import com.backend.domain.ranking.entity.Ranking;
-import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.subscription.entity.Subscription;
 import com.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -51,26 +49,14 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private int aiQuestionUsedCount = 0; // AI 질문 사용 횟수
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Resume resume;
-
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Subscription subscription;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Ranking ranking;
 
 
     public void assignSubscription(Subscription subscription) {
         this.subscription = subscription;
     }
-
-    public void assignRanking(Ranking ranking) {
-        this.ranking = ranking;
-    }
-
-
 
 
     public void updateUser(String email, String password, String name,
