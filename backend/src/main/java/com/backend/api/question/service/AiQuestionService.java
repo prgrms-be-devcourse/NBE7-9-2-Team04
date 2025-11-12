@@ -1,5 +1,6 @@
 package com.backend.api.question.service;
 
+import com.backend.global.ai.handler.AiRequestHandler;
 import com.backend.api.question.dto.request.AiQuestionRequest;
 import com.backend.api.question.dto.response.*;
 
@@ -16,10 +17,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,18 +28,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AiQuestionService {
 
-    @Value("${openai.url}")
-    private String apiUrl;
-
-    @Value("${spring.ai.openai.api-key}")
-    private String apiKey;
-
-    private final RestClient restClient;
     private final QuestionService questionService;
     private final UserService userService;
     private final ResumeService resumeService;
     private final ObjectMapper objectMapper;
-
+    private final AiRequestHandler aiRequestHandler;
 
     public AIQuestionCreateResponse createAiQuestion(Long userId) throws JsonProcessingException {
 
@@ -51,7 +43,7 @@ public class AiQuestionService {
         Resume resume = resumeService.getResumeByUser(user);
         AiQuestionRequest request = AiQuestionRequest.of(resume.getSkill(), resume.getPortfolioUrl(), user.getAiQuestionLimit());
 
-        String connectionAi = connectionAi(request);
+        String connectionAi = aiRequestHandler.connectionAi(request);
 
         List<AiQuestionResponse> responses = parseChatGptResponse(connectionAi);
 
@@ -64,7 +56,7 @@ public class AiQuestionService {
 
     @Transactional(readOnly = true)
     public String getAiReviewContent(AiReviewbackRequest request) throws JsonProcessingException {
-        String rawApiResponse = connectionAi(request);
+        String rawApiResponse = aiRequestHandler.connectionAi(request);
         return parseSingleContentFromResponse(rawApiResponse);
     }
 
@@ -98,14 +90,6 @@ public class AiQuestionService {
         return responseDto.choiceResponses().getFirst().message().content();
     }
 
-    private <T> String connectionAi(T request){
-        return restClient.post()
-                .uri(apiUrl)
-                .header("Authorization", "Bearer " + apiKey)
-                .body(request)
-                .retrieve()
-                .body(String.class);
-    }
 
     public List<Question> listDtoToEntity(List<AiQuestionResponse> responses, User user, Resume resume){
         UUID groupId = UUID.randomUUID();
