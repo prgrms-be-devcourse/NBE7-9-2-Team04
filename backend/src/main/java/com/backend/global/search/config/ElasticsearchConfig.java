@@ -1,4 +1,4 @@
-package com.backend.global.config;
+package com.backend.global.search.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
