@@ -94,7 +94,7 @@ public class UserService {
                 .build();
 
         user.assignSubscription(basicSubscription);
-        user.assignRanking(ranking);
+        //user.assignRanking(ranking);
 
         rankingRepository.save(ranking);
 
