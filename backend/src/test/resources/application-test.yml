@@ -9,6 +9,12 @@ spring:
     properties:
       hibernate:
         ddl-auto: create-drop
+  data:
+    redis:
+      host: localhost
+      port: 0 #포트 랜덤 설정
+
+
 
 custom:
   jwt:

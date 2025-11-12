@@ -47,8 +47,12 @@ public class UserController {
     @Operation(summary = "사용자 로그아웃")
     public ApiResponse<Void> logout() {
 
+        User user = rq.getUser();
+        userService.logout(user.getId());
+
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
+
         return ApiResponse.ok("로그아웃이 되었습니다.", null);
     }
 
