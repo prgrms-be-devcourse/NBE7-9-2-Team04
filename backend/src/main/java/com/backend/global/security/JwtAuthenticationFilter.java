@@ -33,7 +33,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (List.of("/api/v1/users/signup",
                 "/api/v1/users/login",
                 "/api/v1/users/sendEmail",
-                "/api/v1/users/verifyCode").contains(request.getRequestURI())) {
+                "/api/v1/users/verifyCode",
+                "/api/v1/users/refresh"
+        ).contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -64,7 +66,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);
-
 
         }
         return null;

@@ -49,7 +49,7 @@ public class AnswerControllerTest extends JwtTest {
     private Long baseUserId;
 
     // 테스트 데이터 셋업
-    @BeforeAll
+    @BeforeEach
     @Transactional
     void setUp() {
 

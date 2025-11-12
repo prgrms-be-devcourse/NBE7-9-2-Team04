@@ -51,6 +51,10 @@ dependencies {
 	//querydsl
 	annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.1:jpa")
 	implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
+
+    //redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    testImplementation("com.github.codemonstur:embedded-redis:1.4.3")
 }
 extra["springAiVersion"] = "1.1.0-M1"
 
