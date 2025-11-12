@@ -268,6 +268,7 @@ export default function RecruitmentDetailPage() {
               <span>작성일: {post.createDate}</span>
               <span>마감: {post.deadline}</span>
               <span>모집 인원: {post.recruitCount}</span>
+              <span>작성자: {post.nickName}</span>
             </div>
           </div>
 
