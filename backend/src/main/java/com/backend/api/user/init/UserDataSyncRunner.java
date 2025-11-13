@@ -22,10 +22,6 @@ public class UserDataSyncRunner implements CommandLineRunner {
     @Override
     public void run(String... args) {
         List<User> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            log.info("DB에 유저 데이터가 없습니다. 인덱싱 생략.");
-            return;
-        }
 
         List<UserDocument> docs = users.stream()
                 .map(u -> UserDocument.builder()
