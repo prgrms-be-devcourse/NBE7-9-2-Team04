@@ -180,4 +180,27 @@ public class EmailService {
                     user.getId(), user.getEmail(), e.getMessage(), e);
         }
     }
+
+    public void sendNewPassword(String email, String newPassword) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("[Dev-Station] 임시 비밀번호 안내");
+            message.setText("""
+                안녕하세요. Dev-Station 입니다.
+
+                비밀번호 재설정 요청에 따라 임시 비밀번호를 발급해드렸습니다.
+                아래의 비밀번호로 로그인 후, 반드시 새 비밀번호로 변경해주세요.
+
+                임시 비밀번호: %s
+                """.formatted(newPassword));
+
+            mailSender.send(message);
+            log.info("[비밀번호 재설정] 임시 비밀번호 전송 완료: {}", email);
+
+        } catch (Exception e) {
+            log.error("임시 비밀번호 전송 실패: {}", e.getMessage(), e);
+            throw new ErrorException(ErrorCode.EMAIL_SEND_FAILED);
+        }
+    }
 }

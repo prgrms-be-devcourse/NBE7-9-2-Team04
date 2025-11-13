@@ -157,4 +157,32 @@ public class UserService {
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
 
+    @Transactional(readOnly = true)
+    public String findUserIdByNameAndEmail(String name, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        if (!user.getName().equals(name)) {
+            throw new ErrorException(ErrorCode.NOT_FOUND_USER);
+        }
+
+        return user.getEmail();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean verifyUserInfo(String userId, String name, String email) {
+        return userRepository.findByEmail(userId)
+                .filter(user -> user.getName().equals(name) && user.getEmail().equals(email))
+                .isPresent();
+    }
+
+    @Transactional
+    public void updatePassword(String userId, String newPassword) {
+        User user = userRepository.findByEmail(userId)
+                .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
+
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.changePassword(encodedPassword); // 비밀번호 변경
+        userRepository.save(user);
+    }
 }
