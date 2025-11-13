@@ -103,4 +103,8 @@ public class User extends BaseEntity {
         this.subscription = subscription;
         subscription.setUser(this);
     }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

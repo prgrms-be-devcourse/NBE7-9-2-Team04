@@ -16,6 +16,7 @@ import com.backend.global.security.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -104,5 +105,30 @@ public class UserController {
     public ApiResponse<UserLoginResponse> getCurrentUser() {
         User user = rq.getUser();
         return ApiResponse.ok("현재 로그인된 사용자 정보입니다.", UserLoginResponse.from(user));
+    }
+
+    @PostMapping("/findId")
+    @Operation(summary = "아이디 찾기", description = "사용자 아이디를 찾습니다.")
+    public ApiResponse<String> findUserId(@RequestParam String name, @RequestParam String email) {
+        String userId = userService.findUserIdByNameAndEmail(name, email);
+        return ApiResponse.ok("아이디를 찾았습니다.", userId);
+    }
+
+    @PostMapping("/findPassword")
+    @Operation(summary = "비밀번호 찾기", description = "비밀번호를 재설정합니다.")
+    public ApiResponse<Void> findPassword(@RequestParam String userId,
+                                          @RequestParam String name,
+                                          @RequestParam String email) {
+        boolean isValid = userService.verifyUserInfo(userId, name, email);
+
+        if (!isValid) {
+            throw new ErrorException(ErrorCode.NOT_FOUND_USER);
+        }
+
+        String newPassword = RandomStringUtils.randomAlphanumeric(10);
+        userService.updatePassword(userId, newPassword);
+        emailService.sendNewPassword(email, newPassword);
+
+        return ApiResponse.ok("새 비밀번호가 이메일로 전송되었습니다.", null);
     }
 }
