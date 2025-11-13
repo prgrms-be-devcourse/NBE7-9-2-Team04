@@ -73,6 +73,14 @@ public class PostController {
         return ApiResponse.ok("게시글 삭제가 완료되었습니다.", null);
     }
 
+    @PostMapping("/{postId}/close")
+    @Operation(summary = "모집글 즉시 마감", description = "작성자가 자신의 모집글을 즉시 마감 처리합니다.")
+    public ApiResponse<PostResponse> closePost(@PathVariable Long postId) {
+        User user = getCurrentUser();
+        PostResponse response = postService.closePost(postId, user);
+        return ApiResponse.ok("모집글이 마감 처리되었습니다.", response);
+    }
+
     @GetMapping("/category/{categoryType}")
     @Operation(
             summary = "카테고리별 게시글 조회",
@@ -114,7 +122,7 @@ public class PostController {
     @GetMapping
     @Operation(summary = "게시글 다건 조회")
     public ApiResponse<PostPageResponse<PostResponse>> getAllPosts(
-            @RequestParam(defaultValue = "1") int page
+            @RequestParam(defaultValue = "1.0") int page
     ) {
         PostPageResponse<PostResponse> postsPage = postService.getAllPosts(page);
 

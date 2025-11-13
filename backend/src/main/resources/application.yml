@@ -29,6 +29,14 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
+    vertex:
+      ai:
+        gemini:
+          project-id: ${GOOGLE_API_KEY}
+          location : asia-northeast3
+          chat:
+            options:
+              model: "vertex--pro-vision"
 
   mail:
     host: smtp.gmail.com
@@ -57,6 +65,9 @@ spring:
     uris: http://localhost:9200  # Elastic 노드 주소
     # username: elastic           # 보안 해제 시 불필요
     # password: changeme          # 보안 해제 시 불필요
+    redis:
+      host: localhost
+      port: 6379
 
 logging:
   level:
@@ -87,3 +98,24 @@ toss:
   payments:
     base-url: "https://api.tosspayments.com"
     secret-key: ${PAYMENT_SECRET_KEY}
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      aiExternal:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 5
+        waitDurationInOpenState: 10s
+    circuitbreakerAspectOrder: -4
+  retry:
+    configs:
+      aiRetry:
+        maxAttempts: 3
+        waitDuration: 2s
+        enableExponentialBackoff: true
+        exponential-backoff-multiplier: 2.0
+    retryAspectOrder: -3

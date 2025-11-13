@@ -9,10 +9,7 @@ import { UserResponse } from "@/types/user";
 import { PostResponse, PostPageResponse } from "@/types/post";
 import { CommentMypageResponse, CommentPageResponse } from "@/types/comment";
 import { QuestionResponse, QuestionPageResponse } from "@/types/question";
-import {
-  AnswerMypageResponse,
-  AnswerPage2Response,
-} from "@/types/answer";
+import { AnswerMypageResponse, AnswerPage2Response } from "@/types/answer";
 
 export default function MyActivityPage() {
   const router = useRouter();
@@ -167,9 +164,14 @@ export default function MyActivityPage() {
                     className="flex justify-between items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition cursor-pointer"
                   >
                     <div>
-                      <p className="font-medium">{post.title}</p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(post.createDate).toLocaleDateString()}
+                      {post.title.length > 35
+                        ? `${post.title.slice(0, 35)}...`
+                        : post.title}
+
+                      <p className="text-xs font-bold text-gray-500">
+                        {new Date(post.createDate)
+                          .toLocaleDateString()
+                          .replace(/\.$/, "")}
                       </p>
                     </div>
                     <span
@@ -212,10 +214,15 @@ export default function MyActivityPage() {
                     }
                     className="p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition cursor-pointer"
                   >
-                    <p className="font-medium">{comment.content}</p>
-                    <p className="text-xs text-gray-500">
-                      {comment.postTitle} •{" "}
-                      {new Date(comment.createDate).toLocaleDateString()}
+                    {comment.content.length > 35
+                      ? `${comment.content.slice(0, 35)}...`
+                      : comment.content}
+
+                    <p className="text-xs font-bold text-gray-500">
+                      {comment.postTitle} /{" "}
+                      {new Date(comment.createDate)
+                        .toLocaleDateString()
+                        .replace(/\.$/, "")}
                     </p>
                   </div>
                 ))
@@ -248,10 +255,14 @@ export default function MyActivityPage() {
                     }
                     className="p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition cursor-pointer"
                   >
-                    <p className="font-medium line-clamp-2">{answer.content}</p>
-                    <p className="text-xs text-gray-500">
-                      {answer.title} •{" "}
-                      {new Date(answer.createDate).toLocaleDateString()}
+                    {answer.content.length > 35
+                      ? `${answer.content.slice(0, 35)}...`
+                      : answer.content}
+                    <p className="text-xs font-bold text-gray-500">
+                      {answer.title} /{" "}
+                      {new Date(answer.createDate)
+                        .toLocaleDateString()
+                        .replace(/\.$/, "")}
                     </p>
                   </div>
                 ))
@@ -279,14 +290,25 @@ export default function MyActivityPage() {
                 userQuestions.map((question) => (
                   <div
                     key={question.questionId}
-                    onClick={() =>
-                      router.replace(`/interview/cs/${question.questionId}`)
-                    }
+                    onClick={() => {
+                      if (question.isApproved) {
+                        // 승인된 질문 → 상세 페이지로 이동
+                        router.replace(`/interview/cs/${question.questionId}`);
+                      } else {
+                        // 아직 승인 안 됨 → 수정 페이지로 이동
+                        router.replace(
+                          `/interview/cs/edit/${question.questionId}`
+                        );
+                      }
+                    }}
                     className="flex justify-between items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition cursor-pointer"
                   >
                     <div>
-                      <p className="font-medium">{question.title}</p>
-                      <p className="text-sm text-gray-500">
+                      {question.title.length > 35
+                        ? `${question.title.slice(0, 35)}...`
+                        : question.title}
+
+                      <p className="text-xs font-bold text-gray-500">
                         {question.categoryType}
                       </p>
                     </div>

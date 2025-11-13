@@ -17,6 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -150,8 +154,12 @@ public class AdminUserControllerTest {
 
         @Test
         @DisplayName("사용자 상태 변경 성공 - ACTIVE → BANNED")
-        void success() throws Exception {
-            AdminUserStatusUpdateRequest request = new AdminUserStatusUpdateRequest(AccountStatus.BANNED);
+        void success_banned() throws Exception {
+            AdminUserStatusUpdateRequest request = new AdminUserStatusUpdateRequest(
+                    AccountStatus.BANNED,
+                    "심각한 약관 위반",
+                    null
+            );
 
             mockMvc.perform(patch("/api/v1/admin/users/{userId}/status", user.getId())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -164,16 +172,76 @@ public class AdminUserControllerTest {
         }
 
         @Test
-        @DisplayName("실패 - 잘못된 요청 바디(예: status 누락)")
-        void fail1() throws Exception {
-            String invalidBody = "{}";
+        @DisplayName("사용자 상태 변경 성공 - ACTIVE → SUSPENDED")
+        void success_suspended() throws Exception {
+            AdminUserStatusUpdateRequest request = new AdminUserStatusUpdateRequest(
+                    AccountStatus.SUSPENDED,
+                    "신고 누적",
+                    LocalDate.now().plusDays(7)
+            );
 
             mockMvc.perform(patch("/api/v1/admin/users/{userId}/status", user.getId())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(invalidBody))
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.data.accountStatus").value("SUSPENDED"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("사용자 상태 변경 성공 - SUSPENDED → ACTIVE (정지 해제)")
+        void success_reactivate() throws Exception {
+            // 먼저 정지 상태로 설정
+            user.changeStatus(AccountStatus.SUSPENDED);
+            userRepository.save(user);
+
+            AdminUserStatusUpdateRequest request = new AdminUserStatusUpdateRequest(
+                    AccountStatus.ACTIVE,
+                    null,
+                    null
+            );
+
+            mockMvc.perform(patch("/api/v1/admin/users/{userId}/status", user.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("OK"))
+                    .andExpect(jsonPath("$.data.accountStatus").value("ACTIVE"))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("실패 - 일시정지인데 사유 누락")
+        void fail_missing_reason() throws Exception {
+            AdminUserStatusUpdateRequest request = new AdminUserStatusUpdateRequest(
+                    AccountStatus.SUSPENDED,
+                    null,
+                    LocalDate.now().plusDays(3)
+            );
+
+            mockMvc.perform(patch("/api/v1/admin/users/{userId}/status", user.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("계정 상태는 필수입니다."))
+                    .andExpect(jsonPath("$.message").value("정지 사유가 필요합니다."))
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("실패 - 영구정지인데 종료일 지정")
+        void fail_banned_with_endDate() throws Exception {
+            AdminUserStatusUpdateRequest request = new AdminUserStatusUpdateRequest(
+                    AccountStatus.BANNED,
+                    "영구정지 테스트",
+                    LocalDate.now().plusDays(30)
+            );
+
+            mockMvc.perform(patch("/api/v1/admin/users/{userId}/status", user.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("영구 정지 상태에서는 종료일을 지정할 수 없습니다."))
                     .andDo(print());
         }
     }

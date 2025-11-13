@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { fetchApi } from "@/lib/client";
 
-import {Question, Feedback} from "@/types/aiquestion";
+import { Question, Feedback } from "@/types/aiquestion";
 
 export default function PortfolioQuestionDetailPage() {
   const router = useRouter();
@@ -30,18 +30,24 @@ export default function PortfolioQuestionDetailPage() {
   // -------------------------------
   // 피드백 재조회 함수
   // -------------------------------
-  const fetchFeedbackWithRetry = async (questionId: number, attempt = 1, maxAttempts = 10) => {
+  const fetchFeedbackWithRetry = async (
+    questionId: number,
+    attempt = 1,
+    maxAttempts = 10
+  ) => {
     try {
-      const fbRes = await fetchApi(`/api/v1/feedback/${questionId}`, { method: "GET" });
+      const fbRes = await fetchApi(`/api/v1/feedback/${questionId}`, {
+        method: "GET",
+      });
       if (fbRes?.data) {
-        setFeedback(prev => ({
+        setFeedback((prev) => ({
           ...prev,
           [questionId]: {
             score: fbRes.data.score ?? 0,
             comment: fbRes.data.comment ?? fbRes.data.content ?? "",
           },
         }));
-        setAnswers(prev => ({ ...prev, [questionId]: input }));
+        setAnswers((prev) => ({ ...prev, [questionId]: input }));
         setShowFeedback(true);
         setFeedbackLoading(false);
         return true; // 성공
@@ -49,7 +55,10 @@ export default function PortfolioQuestionDetailPage() {
       throw new Error("피드백 데이터 없음");
     } catch {
       if (attempt < maxAttempts) {
-        setTimeout(() => fetchFeedbackWithRetry(questionId, attempt + 1, maxAttempts), 3000);
+        setTimeout(
+          () => fetchFeedbackWithRetry(questionId, attempt + 1, maxAttempts),
+          3000
+        );
       } else {
         setAlertMsg("❌ 피드백 조회 실패");
         setShowFeedback(true);
@@ -65,7 +74,9 @@ export default function PortfolioQuestionDetailPage() {
     const fetchQuestions = async () => {
       if (!groupId) return;
       try {
-        const res = await fetchApi(`/api/v1/ai/questions/${groupId}`, { method: "GET" });
+        const res = await fetchApi(`/api/v1/ai/questions/${groupId}`, {
+          method: "GET",
+        });
         if (res?.data) {
           const mapped = res.data.questions
             .map((q: any) => ({ id: q.id, content: q.content }))
@@ -79,10 +90,16 @@ export default function PortfolioQuestionDetailPage() {
 
           for (const q of mapped) {
             try {
-              const ansRes = await fetchApi(`/api/v1/questions/${q.id}/answers/mine`, { method: "GET" });
-              if (ansRes?.data?.content) tempAnswers[q.id] = ansRes.data.content;
+              const ansRes = await fetchApi(
+                `/api/v1/questions/${q.id}/answers/mine`,
+                { method: "GET" }
+              );
+              if (ansRes?.data?.content)
+                tempAnswers[q.id] = ansRes.data.content;
 
-              const fbRes = await fetchApi(`/api/v1/feedback/${q.id}`, { method: "GET" });
+              const fbRes = await fetchApi(`/api/v1/feedback/${q.id}`, {
+                method: "GET",
+              });
               if (fbRes?.data) {
                 tempFeedback[q.id] = {
                   score: fbRes.data.score ?? 0,
@@ -120,10 +137,13 @@ export default function PortfolioQuestionDetailPage() {
     setFeedbackLoading(true);
     try {
       // 답변 생성
-      const answerRes = await fetchApi(`/api/v1/questions/${current.id}/answers`, {
-        method: "POST",
-        body: JSON.stringify({ content: input, isPublic: true }),
-      });
+      const answerRes = await fetchApi(
+        `/api/v1/questions/${current.id}/answers`,
+        {
+          method: "POST",
+          body: JSON.stringify({ content: input, isPublic: true }),
+        }
+      );
 
       if (!answerRes?.data) throw new Error("답변 생성 실패");
 
@@ -144,14 +164,15 @@ export default function PortfolioQuestionDetailPage() {
   // -------------------------------
   const handleNext = () => {
     if (!isLastQuestion) {
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex((prev) => prev + 1);
       setInput("");
       setShowFeedback(false);
       setAlertMsg(null);
     }
   };
 
-  if (!questions.length) return <p className="text-center mt-10">질문이 없습니다.</p>;
+  if (!questions.length)
+    return <p className="text-center mt-10">질문이 없습니다.</p>;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
@@ -182,7 +203,9 @@ export default function PortfolioQuestionDetailPage() {
           <div className="text-blue-600 text-lg mt-1">✨</div>
           <div>
             <h3 className="text-lg font-semibold mb-1">{current.content}</h3>
-            <p className="text-sm text-gray-500">AI가 생성한 예상 면접 질문입니다.</p>
+            <p className="text-sm text-gray-500">
+              AI가 생성한 예상 면접 질문입니다.
+            </p>
           </div>
         </div>
       </div>
@@ -190,7 +213,7 @@ export default function PortfolioQuestionDetailPage() {
       {/* 답변 입력 */}
       <div className="space-y-4">
         <textarea
-          className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          className="w-full border border-gray-200 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
           rows={6}
           placeholder="이 질문에 대한 답변을 작성하세요"
           value={hasFeedback ? answers[current.id] ?? "" : input}
@@ -212,21 +235,35 @@ export default function PortfolioQuestionDetailPage() {
 
       {/* 피드백 */}
       {(hasFeedback || feedbackLoading) && (
-        <div className="space-y-6 mt-4">
+        <div className="space-y-6 mt-6">
           <div>
             <h4 className="font-semibold mb-2">💡 AI 피드백</h4>
-            <div className="p-4 border border-blue-200 bg-blue-50 rounded-md min-h-[80px] flex items-center justify-center">
+
+            <div className="p-4 border border-blue-200 bg-blue-50 rounded-md min-h-[100px]">
               {feedbackLoading ? (
-                <span className="text-gray-500">AI 분석 중...</span>
+                // ✅ AI 피드백 생성 애니메이션
+                <div className="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
+                  <div className="animate-spin text-blue-500 text-5xl mb-3">
+                    ⏳
+                  </div>
+                  <p className="text-gray-700 font-medium animate-pulse">
+                    AI가 당신의 답변을 분석 중이에요...
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    잠시만 기다려주세요 🤖
+                  </p>
+                </div>
               ) : (
-                <>
-                  <div className="flex items-center justify-between w-full mb-2">
-                    <span className="px-2 py-1 bg-blue-500 text-white text-sm rounded-md">
-                      {feedback[current.id]?.score ?? "-"}점
+                <div className="flex flex-col gap-3">
+                  <p className="text-gray-800 text-sm whitespace-pre-wrap leading-relaxed">
+                    {feedback[current.id]?.comment}
+                  </p>
+                  <div className="flex justify-end">
+                    <span className="text-sm bg-blue-500 text-white px-3 py-1 rounded-md shadow-sm">
+                      AI 점수: {feedback[current.id]?.score ?? "-"}점
                     </span>
                   </div>
-                  <p className="text-gray-700 text-sm">{feedback[current.id]?.comment}</p>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -254,7 +291,9 @@ export default function PortfolioQuestionDetailPage() {
 
       {/* 경고 메시지 */}
       {alertMsg && (
-        <div className="mt-4 text-red-500 font-medium text-center">{alertMsg}</div>
+        <div className="mt-4 text-red-500 font-medium text-center">
+          {alertMsg}
+        </div>
       )}
     </div>
   );

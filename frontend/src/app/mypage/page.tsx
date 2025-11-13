@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client";
 import { RankingResponse } from "@/types/ranking";
 import { Subscription } from "@/types/subscription";
+import { tierStyles, tierAvatarStyles } from "@/components/ui/tierStyle";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -43,21 +44,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
-  const tierStyles: Record<
-    string,
-    { color: string; bgColor: string; icon: string }
-  > = {
-    UNRATED: { color: "text-gray-600", bgColor: "bg-gray-100", icon: "⚪" },
-    BRONZE: { color: "text-amber-700", bgColor: "bg-amber-100", icon: "🥉" },
-    SILVER: { color: "text-gray-500", bgColor: "bg-gray-200", icon: "🥈" },
-    GOLD: { color: "text-yellow-700", bgColor: "bg-yellow-100", icon: "🥇" },
-    PLATINUM: { color: "text-cyan-700", bgColor: "bg-cyan-100", icon: "💠" },
-    DIAMOND: { color: "text-blue-700", bgColor: "bg-blue-100", icon: "💎" },
-    RUBY: { color: "text-red-700", bgColor: "bg-red-100", icon: "🔴" },
-    MASTER: { color: "text-purple-700", bgColor: "bg-purple-100", icon: "👑" },
-  };
-
   const tierOf = (tier: string) => tierStyles[tier] || tierStyles.UNRATED;
 
   return (
@@ -66,30 +52,48 @@ export default function ProfilePage() {
         <div className="bg-white rounded-lg p-6 shadow-md">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-3xl font-bold">
-                {myRanking.nickName[0]}
+              {/* 아바타 */}
+              <div
+                className={`relative w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold transition-all duration-300 ${
+                  tierAvatarStyles[myRanking.currentTier] ||
+                  tierAvatarStyles.UNRATED
+                }`}
+              >
+                <span className="relative z-10">{myRanking.nickName[0]}</span>
+                <div className="absolute -bottom-1 -right-1 text-3xl">
+                  {tierOf(myRanking.currentTier).icon}
+                </div>
               </div>
+
+              {/* 닉네임 & 티어 */}
               <div>
-                <h2 className="text-2xl font-bold">{myRanking.nickName}</h2>
-                <p className="text-gray-500">{myRanking.email}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <p
-                    className={`font-semibold ${
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {myRanking.nickName}
+                </h2>
+                <p className="text-gray-500 text-sm">{myRanking.email}</p>
+
+                <div className="flex items-center gap-3 mt-3">
+                  <span
+                    className={`text-sm font-semibold px-3 py-1 rounded-full ${
                       subscription.subscriptionType === "PREMIUM"
-                        ? "text-blue-600"
-                        : "text-gray-500"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-gray-100 text-gray-600"
                     }`}
                   >
                     {subscription.subscriptionType === "PREMIUM"
                       ? "프리미엄 회원"
                       : "일반 회원"}
-                  </p>
+                  </span>
+
+                  {/* 티어 배지 */}
                   <div
-                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold border ${
-                      tierOf(myRanking.currentTier).bgColor
-                    } ${tierOf(myRanking.currentTier).color}`}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-base font-bold shadow-md transition-transform hover:scale-110 ${
+                      tierOf(myRanking.currentTier).gradient
+                    } text-gray-700`}
                   >
-                    <span>{tierOf(myRanking.currentTier).icon}</span>
+                    <span className="text-xl">
+                      {tierOf(myRanking.currentTier).icon}
+                    </span>
                     <span>{myRanking.currentTier}</span>
                   </div>
                 </div>
@@ -99,15 +103,30 @@ export default function ProfilePage() {
             {/* 순위 */}
             <div className="text-right">
               <p className="text-gray-500 text-sm mb-1">랭킹</p>
-              <p className="text-3xl font-bold">{myRanking.rankValue}위</p>
+              <p className="text-3xl font-extrabold text-gray-800">
+                {myRanking.rankValue}위
+              </p>
             </div>
           </div>
 
           {/* 통계 */}
           <div className="grid md:grid-cols-3 gap-6 mt-8">
-            <Stat label="해결한 문제" value={myRanking.solvedCount} />
-            <Stat label="총 점수" value={myRanking.totalScore} />
-            <Stat label="제출한 질문" value={myRanking.questionCount} />
+            <StatBox
+              label="해결한 문제"
+              value={myRanking.solvedCount}
+              tier={myRanking.currentTier}
+            />
+            <StatBox
+              label="총 점수"
+              value={myRanking.totalScore}
+              tier={myRanking.currentTier}
+              highlight
+            />
+            <StatBox
+              label="제출한 질문"
+              value={myRanking.questionCount}
+              tier={myRanking.currentTier}
+            />
           </div>
         </div>
       </div>
@@ -115,11 +134,41 @@ export default function ProfilePage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function StatBox({
+  label,
+  value,
+  tier,
+  highlight = false,
+}: {
+  label: string;
+  value: number;
+  tier?: string;
+  highlight?: boolean;
+}) {
+  const tierStyle = tier ? tierStyles[tier] : tierStyles.UNRATED;
+
   return (
-    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
-      <p className="text-gray-500 text-sm">{label}</p>
-      <p className="text-2xl font-bold mt-1">{value}</p>
+    <div
+      className={`rounded-lg p-5 text-center border transition-all duration-300 hover:scale-105 ${
+        highlight
+          ? `${tierStyle.gradient} border-transparent text-black ${tierStyle.shadow}`
+          : "bg-gray-50 border-gray-200 hover:border-gray-300"
+      }`}
+    >
+      <p
+        className={`text-sm font-semibold mb-1 ${
+          highlight ? "text-black/90" : "text-gray-600"
+        }`}
+      >
+        {label}
+      </p>
+      <p
+        className={`text-3xl font-bold ${
+          highlight ? "drop-shadow-md" : "text-gray-800"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }

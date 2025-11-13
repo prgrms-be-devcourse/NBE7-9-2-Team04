@@ -4,6 +4,7 @@ import com.backend.domain.ranking.entity.Ranking;
 import com.backend.domain.ranking.entity.Tier;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+
 public record RankingResponse (
         @Schema(description = "사용자 ID", example = "12")
         Long userId,
@@ -36,7 +37,7 @@ public record RankingResponse (
         int questionCount
 )
 {
-    public static RankingResponse from(Ranking ranking, int solvedCount, int questionCount) {
+    public static RankingResponse from(Ranking ranking, int rankValue, int solvedCount, int questionCount) {
         int totalScore = ranking.getTotalScore();
         Tier currentTier = ranking.getTier();
         Tier nextTier = currentTier.nextTier();
@@ -54,7 +55,7 @@ public record RankingResponse (
                 ranking.getUser().getEmail(),
                 totalScore,
                 currentTier,
-                ranking.getRankValue(),
+                rankValue,
                 nextTier,
                 scoreToNextTier,
                 solvedCount,
