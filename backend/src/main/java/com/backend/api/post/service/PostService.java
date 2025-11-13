@@ -130,6 +130,15 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    @Transactional
+    public PostResponse closePost(Long postId, User user) {
+        Post post = findPostByIdOrThrow(postId);
+        validatePostOwner(post, user);
+
+        post.updateStatus(PostStatus.CLOSED);
+
+        return PostResponse.from(post, true);
+    }
 
     public Post findPostByIdOrThrow(Long postId) { // 중복 로직 헬퍼 메서드1
         return postRepository.findById(postId)

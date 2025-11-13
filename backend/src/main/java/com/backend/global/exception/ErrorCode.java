@@ -27,6 +27,10 @@ public enum ErrorCode {
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다."),
     EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다."),
     USER_QUESTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 유저-문제 관계입니다."),
+    INVALID_SUSPEND_REASON(HttpStatus.BAD_REQUEST,  "정지 사유가 필요합니다."),
+    INVALID_SUSPEND_PERIOD(HttpStatus.BAD_REQUEST, "유효한 정지 종료일을 입력해주세요."),
+    INVALID_BAN_PERIOD(HttpStatus.BAD_REQUEST, "영구 정지 상태에서는 종료일을 지정할 수 없습니다."),
+    INVALID_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 상태 값입니다."),
 
     //token
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Refresh Token입니다."),
@@ -106,8 +110,9 @@ public enum ErrorCode {
     RANKING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 랭킹입니다."),
     RANKING_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자의 랭킹 정보를 찾을 수 없습니다."),
     INVALID_SCORE(HttpStatus.BAD_REQUEST, "유효하지 않은 점수 값입니다."),
-    RANKING_NOT_AVAILABLE(HttpStatus.NO_CONTENT, "현재 랭킹 데이터가 없습니다."),
+    RANKING_NOT_AVAILABLE(HttpStatus.NOT_FOUND, "랭킹 정보를 사용할 수 없습니다."),
 
+    REDIS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Redis 처리 중 오류가 발생했습니다."),
 
     ;
     private final HttpStatus httpStatus;

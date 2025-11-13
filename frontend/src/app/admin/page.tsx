@@ -97,43 +97,6 @@ function UserRow({
 
       <TableCell>{user.role === "ADMIN" ? "관리자" : "사용자"}</TableCell>
       <TableCell>{getStatusBadge(user.accountStatus)}</TableCell>
-
-      <TableCell className="text-right">
-        <div ref={ref} className="relative inline-block">
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); //드롭다운 클릭 시 행 클릭 방지
-              setOpen(!open);
-            }}
-            className="p-2 rounded hover:bg-gray-100 text-gray-600"
-            aria-label="더보기"
-          >
-            ⋮
-          </button>
-
-          <DropdownMenuContent open={open} align="end">
-            {nextStatusOptions.map((status) => (
-              <DropdownMenuItem
-                key={status}
-                onClick={() => {
-                  onStatusChange(user.id, status);
-                  setOpen(false);
-                }}
-                className={`text-sm px-3 py-1.5 ${status === "BANNED"
-                    ? "text-red-600"
-                    : status === "SUSPENDED"
-                      ? "text-yellow-700"
-                      : "text-green-700"
-                  }`}
-              >
-                {status === "ACTIVE"
-                  ? "활성화 (복구)"
-                  : `${ACCOUNT_STATUS_LABELS[status]}로 변경`}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </div>
-      </TableCell>
     </TableRow>
   );
 }
@@ -176,7 +139,7 @@ export default function AdminUsersPage() {
   //상태 변경
   const handleStatusChange = async (userId: number, newStatus: AccountStatus) => {
     try {
-      const body: AdminUserStatusUpdateRequest = { status: newStatus };
+      const body: AdminUserStatusUpdateRequest = { status: newStatus, reason: "", suspendEndDate: null };
       const res = await fetchApi(`/api/v1/admin/users/${userId}/status`, {
         method: "PATCH",
         body: JSON.stringify(body),
@@ -227,7 +190,6 @@ export default function AdminUsersPage() {
               <TableHead>GitHub</TableHead>
               <TableHead>역할</TableHead>
               <TableHead>계정 상태</TableHead>
-              <TableHead>작업</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -256,7 +218,7 @@ export default function AdminUsersPage() {
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50"
         >
           이전
         </button>
@@ -268,7 +230,7 @@ export default function AdminUsersPage() {
         <button
           onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           disabled={page === totalPages}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50"
         >
           다음
         </button>

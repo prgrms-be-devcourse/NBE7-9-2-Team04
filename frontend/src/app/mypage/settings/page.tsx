@@ -69,11 +69,14 @@ export default function MySettingsPage() {
   //수정
   const handleSave = async () => {
     try {
+
       const res = await fetchApi(`/api/v1/users/me`, {
         method: "PUT",
         body: JSON.stringify(formData),
       });
       alert(res.message || "개인정보가 수정되었습니다.");
+      window.dispatchEvent(new Event("profileUpdated"));
+      
     } catch (err: any) {
       console.error(err);
       alert(err.message || "정보 수정 중 오류가 발생했습니다.");
@@ -172,7 +175,7 @@ export default function MySettingsPage() {
                 type="password"
                 className="w-full border border-gray-300 rounded-md p-2"
                 placeholder="새 비밀번호 입력 (선택)"
-                value={""}
+                value={formData.password || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
@@ -236,14 +239,18 @@ export default function MySettingsPage() {
               <button
                 type="submit"
                 className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+                onClick={() => router.replace("/mypage")}
               >
+                
                 저장
+                
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setCanEdit(false);
                   setShowPasswordModal(true);
+                  
                 }}
                 className="flex-1 border border-gray-300 py-2 rounded-md hover:bg-gray-100"
               >

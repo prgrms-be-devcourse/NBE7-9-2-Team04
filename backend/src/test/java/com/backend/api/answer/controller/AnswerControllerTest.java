@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,18 +45,14 @@ public class AnswerControllerTest extends JwtTest {
     @Autowired
     private AnswerRepository answerRepository;
 
-    private Long baseQuestionId;
-    private Long baseAnswerId;
-    private Long baseUserId;
+    private Long questionId;
+    private List<Long> answerIdList;
+    private List<Long> userIdList;
 
     // 테스트 데이터 셋업
-    @BeforeAll
+    @BeforeEach
     @Transactional
     void setUp() {
-
-        baseQuestionId = (long) questionRepository.findAll().size();
-        baseAnswerId = (long) answerRepository.findAll().size();
-        baseUserId = mockUser.getId() - 1;
 
         User generalUser = User.builder()
                 .email("general@user.com")
@@ -81,6 +78,7 @@ public class AnswerControllerTest extends JwtTest {
 
         userRepository.save(generalUser);
         userRepository.save(generalUser2);
+        userIdList = Arrays.asList(generalUser.getId(), generalUser2.getId());
 
         Question question1 = Question.builder()
                 .title("첫 번째 질문 제목")
@@ -88,6 +86,7 @@ public class AnswerControllerTest extends JwtTest {
                 .author(mockUser)
                 .build();
         questionRepository.save(question1);
+        questionId = question1.getId();
 
         Answer answer1 = Answer.builder()
                 .content("첫 번째 답변 내용")
@@ -99,14 +98,14 @@ public class AnswerControllerTest extends JwtTest {
         Answer answer2 = Answer.builder()
                 .content("두 번째 답변 내용")
                 .isPublic(false)
-                .author(userRepository.findById(baseUserId+2).orElseThrow())
+                .author(userRepository.findById(userIdList.get(0)).orElseThrow())
                 .question(question1)
                 .build();
 
         Answer answer3 = Answer.builder()
                 .content("세 번째 답변 내용")
                 .isPublic(true)
-                .author(userRepository.findById(baseUserId+2).orElseThrow())
+                .author(userRepository.findById(userIdList.get(0)).orElseThrow())
                 .question(question1)
                 .build();
 
@@ -175,7 +174,7 @@ public class AnswerControllerTest extends JwtTest {
         Answer answer13 = Answer.builder()
                 .content("열세 번째 답변 내용")
                 .isPublic(true)
-                .author(userRepository.findById(baseUserId+2).orElseThrow())
+                .author(userRepository.findById(userIdList.get(0)).orElseThrow())
                 .question(question1)
                 .build();
 
@@ -192,6 +191,11 @@ public class AnswerControllerTest extends JwtTest {
         answerRepository.save(answer11);
         answerRepository.save(answer12);
         answerRepository.save(answer13);
+        answerIdList = Arrays.asList(
+                answer1.getId(), answer2.getId(), answer3.getId(), answer4.getId(), answer5.getId(),
+                answer6.getId(), answer7.getId(), answer8.getId(), answer9.getId(), answer10.getId(),
+                answer11.getId(), answer12.getId(), answer13.getId()
+        );
     }
 
     @Nested
@@ -201,7 +205,7 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("1번 질문에 생성 성공")
         void success() throws Exception {
-            long targetQuestionId = baseQuestionId + 1;
+            long targetQuestionId = questionId;
             String answer = "새로운 답변 내용입니다.";
 
             // DB에 답변 생성 전 개수
@@ -253,7 +257,7 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("필수 필드 누락")
         void fail1() throws Exception {
-            long targetQuestionId = baseQuestionId + 1;
+            long targetQuestionId = questionId;
 
             ResultActions resultActions = mvc
                     .perform(
@@ -278,7 +282,7 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("필수 필드 누락 2")
         void fail1_2() throws Exception {
-            long targetQuestionId = baseQuestionId + 1;
+            long targetQuestionId = questionId;
             String answer = "새로운 답변 내용입니다.";
 
             ResultActions resultActions = mvc
@@ -331,7 +335,7 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("작성자 정보 저장 확인")
         void success2() throws Exception {
-            long targetQuestionId = baseQuestionId + 1;
+            long targetQuestionId = questionId;
             String answer = "새로운 답변 내용입니다.";
 
             ResultActions resultActions = mvc
@@ -372,8 +376,8 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("1번 답변 수정 성공")
         void success() throws Exception {
-            long targetQuestionId = baseQuestionId + 1; // 동적으로 생성된 질문 ID 사용
-            long targetAnswerId = baseAnswerId + 1; // 동적으로 생성된 답변 ID 사용
+            long targetQuestionId = questionId; // 동적으로 생성된 질문 ID 사용
+            long targetAnswerId = answerIdList.get(0); // 동적으로 생성된 답변 ID 사용
             String content = "수정된 답변 내용입니다."; // 수정할 내용
             long expectedAuthorId = mockUser.getId(); // 예상 작성자 ID
             String expectedAuthorNickname = mockUser.getNickname(); // 예상 작성자 닉네임
@@ -433,8 +437,8 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("답변 수정 - 다른 작성자의 답변 수정 시도")
         void fail1() throws Exception {
-            long targetQuestionId = baseQuestionId + 1;
-            long targetAnswerId = baseAnswerId + 3;
+            long targetQuestionId = questionId;
+            long targetAnswerId = answerIdList.get(2);
             String content = "수정된 답변 내용입니다.";
 
             ResultActions resultActions = mvc
@@ -461,7 +465,7 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("답변 수정 - 없는 답변에 대한 수정 요청 ")
         void fail2() throws Exception {
-            long targetQuestionId = baseQuestionId + 1;
+            long targetQuestionId = questionId;
             long targetAnswerId = 9999;
             String content = "수정된 답변 내용입니다.";
 
@@ -495,8 +499,8 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("답변 삭제 - 1번 질문의 1번 답변 삭제")
         void success() throws Exception {
-            long targetQuestionId = baseQuestionId + 1;
-            long targetAnswerId = baseAnswerId + 1;
+            long targetQuestionId = questionId;
+            long targetAnswerId = answerIdList.get(0);
 
             ResultActions resultActions = mvc
                     .perform(
@@ -520,8 +524,8 @@ public class AnswerControllerTest extends JwtTest {
         @Test
         @DisplayName("답변 삭제 - 다른 사용자의 답변 삭제 시도")
         void fail1() throws Exception {
-            long targetQuestionId = baseQuestionId + 1;
-            long targetAnswerId = baseAnswerId + 3;
+            long targetQuestionId = questionId;
+            long targetAnswerId = answerIdList.get(2);
 
             ResultActions resultActions = mvc
                     .perform(
@@ -549,10 +553,10 @@ public class AnswerControllerTest extends JwtTest {
     class t4 {
 
         @Test
-        @DisplayName("답변 목록 조회, aiScore, feedback 포함")
+        @DisplayName("답변 목록 조회")
         void success() throws Exception {
 
-            long targetQuestionId = baseQuestionId + 1;
+            long targetQuestionId = questionId;
 
             ResultActions resultActions = mvc
                     .perform(
@@ -569,17 +573,17 @@ public class AnswerControllerTest extends JwtTest {
 
             resultActions
                     .andExpect(jsonPath("$.length()").value(3))
-                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(29, 20)))
-                    .andExpect(jsonPath("$.data.answers[0].id").value(29))
+                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(answerIdList.getLast().intValue(), answerIdList.getLast().intValue() - 9)))
+                    .andExpect(jsonPath("$.data.answers[0].id").value(answerIdList.getLast()))
                     .andExpect(jsonPath("$.data.answers[0].createDate").exists())
                     .andExpect(jsonPath("$.data.answers[0].modifyDate").exists())
                     .andExpect(jsonPath("$.data.answers[0].content").value("열세 번째 답변 내용"))
 //                    .andExpect(jsonPath("$.data.answers[0].score").value(10))
                     .andExpect(jsonPath("$.data.answers[0].isPublic").value(true))
 //                    .andExpect(jsonPath("$.data.answers[0].feedback").value("좋은 답변입니다."))
-                    .andExpect(jsonPath("$.data.answers[0].authorId").value(baseUserId+2))
+                    .andExpect(jsonPath("$.data.answers[0].authorId").value(userIdList.get(0)))
                     .andExpect(jsonPath("$.data.answers[0].authorNickName").value("gildong"))
-                    .andExpect(jsonPath("$.data.answers[0].questionId").value(baseQuestionId+1))
+                    .andExpect(jsonPath("$.data.answers[0].questionId").value(targetQuestionId))
                     .andExpect(jsonPath("$.data.answers[*].isPublic").value(Matchers.not(Matchers.hasItem(false))))
                     .andExpect(jsonPath("$.data.answers[*].id").value(Matchers.not(Matchers.hasItem(2))));
         }
@@ -588,7 +592,7 @@ public class AnswerControllerTest extends JwtTest {
         @DisplayName("답변 목록 조회, 2페이지")
         void success2() throws Exception {
 
-            long targetQuestionId = baseQuestionId + 1;
+            long targetQuestionId = questionId;
 
             ResultActions resultActions = mvc
                     .perform(
@@ -605,17 +609,17 @@ public class AnswerControllerTest extends JwtTest {
 
             resultActions
                     .andExpect(jsonPath("$.length()").value(3))
-                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(19, 17)))
-                    .andExpect(jsonPath("$.data.answers[0].id").value(19))
+                    .andExpect(jsonPath("$.data.answers[*].id", containsInRelativeOrder(answerIdList.getFirst().intValue() + 2, answerIdList.getFirst().intValue())))
+                    .andExpect(jsonPath("$.data.answers[0].id").value(answerIdList.getFirst().intValue() + 2))
                     .andExpect(jsonPath("$.data.answers[0].createDate").exists())
                     .andExpect(jsonPath("$.data.answers[0].modifyDate").exists())
                     .andExpect(jsonPath("$.data.answers[0].content").value("세 번째 답변 내용"))
 //                    .andExpect(jsonPath("$.data.answers[0].score").value(10))
                     .andExpect(jsonPath("$.data.answers[0].isPublic").value(true))
 //                    .andExpect(jsonPath("$.data.answers[0].feedback").value("좋은 답변입니다."))
-                    .andExpect(jsonPath("$.data.answers[0].authorId").value(baseUserId + 2))
+                    .andExpect(jsonPath("$.data.answers[0].authorId").value(userIdList.get(0)))
                     .andExpect(jsonPath("$.data.answers[0].authorNickName").value("gildong"))
-                    .andExpect(jsonPath("$.data.answers[0].questionId").value(baseQuestionId + 1))
+                    .andExpect(jsonPath("$.data.answers[0].questionId").value(targetQuestionId))
                     .andExpect(jsonPath("$.data.answers[*].isPublic").value(Matchers.not(Matchers.hasItem(false))))
                     .andExpect(jsonPath("$.data.answers[*].id").value(Matchers.not(Matchers.hasItem(2))));
         }
@@ -648,7 +652,7 @@ public class AnswerControllerTest extends JwtTest {
         @DisplayName("내 답변 조회")
         void success() throws Exception {
 
-            long targetQuestionId = baseQuestionId + 1;
+            long targetQuestionId = questionId;
 
             ResultActions resultActions = mvc
                     .perform(
@@ -664,7 +668,7 @@ public class AnswerControllerTest extends JwtTest {
                     .andExpect(jsonPath("$.message").value("%d번 질문의 내 답변 조회 성공".formatted(targetQuestionId)));
 
             resultActions
-                    .andExpect(jsonPath("$.data.id").value(baseAnswerId+1))
+                    .andExpect(jsonPath("$.data.id").value(answerIdList.get(0)))
                     .andExpect(jsonPath("$.data.createDate").exists())
                     .andExpect(jsonPath("$.data.modifyDate").exists())
                     .andExpect(jsonPath("$.data.content").value("첫 번째 답변 내용"))
@@ -672,7 +676,7 @@ public class AnswerControllerTest extends JwtTest {
 //                    .andExpect(jsonPath("$.data.feedback").value(Matchers.nullValue()))
                     .andExpect(jsonPath("$.data.authorId").value(mockUser.getId()))
                     .andExpect(jsonPath("$.data.authorNickName").value(mockUser.getNickname()))
-                    .andExpect(jsonPath("$.data.questionId").value(baseQuestionId + 1));
+                    .andExpect(jsonPath("$.data.questionId").value(targetQuestionId));
         }
 
         @Test

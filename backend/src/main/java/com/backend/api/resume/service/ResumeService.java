@@ -3,16 +3,15 @@ package com.backend.api.resume.service;
 import com.backend.api.resume.dto.request.ResumeCreateRequest;
 import com.backend.api.resume.dto.request.ResumeUpdateRequest;
 import com.backend.api.resume.dto.response.ResumeCreateResponse;
+import com.backend.api.resume.dto.response.ResumeExistResponse;
 import com.backend.api.resume.dto.response.ResumeReadResponse;
 import com.backend.api.resume.dto.response.ResumeUpdateResponse;
 import com.backend.api.user.service.UserService;
 import com.backend.domain.resume.entity.Resume;
 import com.backend.domain.resume.repository.ResumeRepository;
 import com.backend.domain.user.entity.User;
-import com.backend.domain.user.repository.UserRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,5 +97,10 @@ public class ResumeService {
     public Resume getResumeByUser(User user) {
         return resumeRepository.findByUser(user)
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_RESUME));
+    }
+
+    public ResumeExistResponse checkResumeExists(Long userId) {
+        boolean hasResume = hasResume(userId);
+        return ResumeExistResponse.from(hasResume);
     }
 }

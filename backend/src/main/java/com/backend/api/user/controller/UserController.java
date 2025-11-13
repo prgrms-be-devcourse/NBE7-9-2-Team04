@@ -48,8 +48,12 @@ public class UserController {
     @Operation(summary = "사용자 로그아웃")
     public ApiResponse<Void> logout() {
 
+        User user = rq.getUser();
+        userService.logout(user.getId());
+
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
+
         return ApiResponse.ok("로그아웃이 되었습니다.", null);
     }
 
@@ -67,14 +71,14 @@ public class UserController {
     @PostMapping("/sendEmail")
     @Operation(summary = "이메일 인증 코드 전송", description = "회원가입 시 이메일 인증 코드를 전송합니다.")
     public ApiResponse<Void> sendEmailVerificationCode(@RequestParam String email) {
-        emailService.sendVerificationCode(email);
+        userService.sendEmailVerification(email);
         return ApiResponse.ok("이메일 인증 코드가 전송되었습니다.", null);
     }
 
     @PostMapping("/verifyCode")
     @Operation(summary = "이메일 인증 코드 검증", description = "회원가입 시 이메일 인증 코드를 검증합니다.")
     public ApiResponse<Void> verifyEmailCode(@RequestParam String email, @RequestParam String code) {
-        emailService.verifyCode(email, code);
+        userService.verifyEmailCode(email, code);
         return ApiResponse.ok("이메일 인증 코드가 검증되었습니다.", null);
     }
 
