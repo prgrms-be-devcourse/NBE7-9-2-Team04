@@ -59,15 +59,16 @@ spring:
   data:
     elasticsearch:
       repositories:
-        enabled: true   # ElasticsearchRepository 사용 허용
+        enabled: true
 
-  elasticsearch:
-    uris: http://localhost:9200  # Elastic 노드 주소
-    # username: elastic           # 보안 해제 시 불필요
-    # password: changeme          # 보안 해제 시 불필요
     redis:
       host: localhost
       port: 6379
+
+  elasticsearch:
+    uris: http://localhost:9200 # Elastic 노드 주소
+    # username: elastic # 보안 해제 시 불필요 
+    # password: changeme # 보안 해제 시 불필요
 
 logging:
   level:
@@ -86,9 +87,9 @@ springdoc:
 custom:
   jwt:
     access-token:
-      expire-time: "#{24 * 60 * 60 * 1000}"  # 24시간 (1일)
+      expire-time: "#{24 * 60 * 60 * 1000}"
     refresh-token:
-      expire-time: "#{72 * 60 * 60 * 1000}"  # 72시간 (3일)
+      expire-time: "#{72 * 60 * 60 * 1000}"
     secretPattern: ${SECRET_PATTERN}
 
 openai:
