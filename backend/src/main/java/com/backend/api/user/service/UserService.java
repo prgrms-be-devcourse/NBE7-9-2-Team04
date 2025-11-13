@@ -228,7 +228,7 @@ public class UserService {
                 .orElseThrow(() -> new ErrorException(ErrorCode.NOT_FOUND_USER));
 
         String encodedPassword = passwordEncoder.encode(newPassword);
-        user.changePassword(encodedPassword); // 비밀번호 변경
+        user.changePassword(encodedPassword);
         userRepository.save(user);
     }
 }
