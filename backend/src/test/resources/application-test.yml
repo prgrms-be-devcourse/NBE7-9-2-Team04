@@ -1,4 +1,9 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchAutoConfiguration
+
   datasource:
     username: sa
     password:
@@ -9,12 +14,11 @@ spring:
     properties:
       hibernate:
         ddl-auto: create-drop
+
   data:
     redis:
       host: localhost
-      port: 0 #포트 랜덤 설정
-
-
+      port: 0 # 포트 랜덤 설정
 
 custom:
   jwt:
