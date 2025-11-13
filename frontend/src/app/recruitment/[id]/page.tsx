@@ -256,6 +256,30 @@ export default function RecruitmentDetailPage() {
                     >
                       삭제
                     </button>
+
+                              <button
+                      onClick={async () => {
+                        if (!confirm("해당 모집글을 마감 처리 하겠습니까?")) return;
+                        try {
+                          const res = (await fetchApi(
+                            `/api/v1/posts/${post.postId}/close`,
+                            { method: "POST" }
+                          )) as { status: string; message?: string };
+
+                          if (res.status === "OK") {
+                            alert("모집글이 마감되었습니다.");
+                            window.location.reload();
+                          } else {
+                            alert(res.message || "모집글 마감 실패");
+                          }
+                        } catch (err: any) {
+                          alert(err.message);
+                        }
+                      }}
+                      className="px-3 py-1 rounded-md bg-red-600 text-white text-sm hover:bg-red-700 cursor-pointer"
+                    >
+                      마감
+                    </button>
                   </>
                 )}
               </div>
@@ -268,6 +292,7 @@ export default function RecruitmentDetailPage() {
               <span>작성일: {post.createDate}</span>
               <span>마감: {post.deadline}</span>
               <span>모집 인원: {post.recruitCount}</span>
+              <span>작성자: {post.nickName}</span>
             </div>
           </div>
 
