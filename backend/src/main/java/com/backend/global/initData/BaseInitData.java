@@ -726,7 +726,7 @@ public class BaseInitData {
             return;
         }
         User user1 = userRepository.findById(1L).orElseThrow(() -> new RuntimeException("User 1L not found for Answer Init"));
-
+        User user2 = userRepository.findById(2L).orElseThrow(() -> new RuntimeException("User 2L not found for Answer Init"));
         User user3 = userRepository.findById(3L).orElseThrow(() -> new RuntimeException("User 3L not found for Answer Init"));
         User user4 = userRepository.findById(4L).orElseThrow(() -> new RuntimeException("User 4L not found for Answer Init"));
         User user5 = userRepository.findById(5L).orElseThrow(() -> new RuntimeException("User 5L not found for Answer Init"));
@@ -750,7 +750,9 @@ public class BaseInitData {
         answerService.writeAnswer(user1, 3L, new AnswerCreateRequest("""
         TCP는 연결 지향 프로토콜로 데이터 순서 보장과 오류 검출, 재전송 기능을 제공하여 신뢰성을 보장하지만, 속도가 느릴 수 있습니다. UDP는 비연결형으로 송수신 속도가 빠르지만 데이터 손실과 순서 보장이 없습니다. TCP는 웹, 이메일, 파일 전송 등에 적합하며, UDP는 스트리밍, 온라인 게임, VoIP 등 실시간성이 중요한 서비스에 주로 사용됩니다.
         """, true));
-
+        answerService.writeAnswer(user2, 3L, new AnswerCreateRequest("""
+        TCP는 연결 지향 프로토콜로 데이터 순서 보장과 오류 검출, 재전송 기능을 제공하여 신뢰성을 보장하지만, 속도가 느릴 수 있습니다. UDP는 비연결형으로 송수신 속도가 빠르지만 데이터 손실과 순서 보장이 없습니다. TCP는 웹, 이메일, 파일 전송 등에 적합하며, UDP는 스트리밍, 온라인 게임, VoIP 등 실시간성이 중요한 서비스에 주로 사용됩니다.
+        """, true));
         answerService.writeAnswer(user3, 10L, new AnswerCreateRequest("""
         멀티스레드 환경에서는 여러 스레드가 동시에 자원에 접근하면 데이터 불일치가 발생할 수 있습니다. synchronized나 Lock을 이용해 임계 구역을 설정하면 한 번에 하나의 스레드만 접근하게 되어 데이터의 일관성을 유지할 수 있습니다.
         """, true));

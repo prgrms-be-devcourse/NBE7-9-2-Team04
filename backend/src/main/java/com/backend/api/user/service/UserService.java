@@ -15,8 +15,10 @@ import com.backend.domain.subscription.repository.SubscriptionRepository;
 import com.backend.domain.user.entity.AccountStatus;
 import com.backend.domain.user.entity.Role;
 import com.backend.domain.user.entity.User;
+import com.backend.domain.user.entity.search.UserDocument;
 import com.backend.domain.user.repository.UserRepository;
 import com.backend.domain.user.repository.VerificationCodeRepository;
+import com.backend.domain.user.repository.search.UserSearchRepository;
 import com.backend.global.exception.ErrorCode;
 import com.backend.global.exception.ErrorException;
 import com.backend.global.security.JwtTokenProvider;
@@ -40,6 +42,7 @@ public class UserService {
     private final EmailService emailService;
     private final VerificationCodeRepository verificationCodeRepository;
     private final RankingRepository rankingRepository;
+    private final UserSearchRepository userSearchRepository;
     private final RefreshRedisService refreshRedisService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -74,6 +77,13 @@ public class UserService {
         .ifPresent(verificationCodeRepository::delete);
       
         userRepository.save(user);
+
+        userSearchRepository.save(UserDocument.builder()
+                .id(user.getId().toString())
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .build());
 
         Subscription basicSubscription = Subscription.builder()
                 .user(user)
